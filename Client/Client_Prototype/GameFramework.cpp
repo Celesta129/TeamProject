@@ -360,7 +360,7 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present(0, 0);
 	MoveToNextFrame();
 
-	m_pGameTimer->GetFrameRate(m_pszFrameRate + 10, 37);
+	m_pGameTimer->GetFrameRate(m_pszFrameRate + 8, 50);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 

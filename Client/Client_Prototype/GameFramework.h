@@ -14,7 +14,7 @@ private:
 private:
 	CTimer* m_pGameTimer;
 
-	_TCHAR m_pszFrameRate[50];
+	_TCHAR m_pszFrameRate[100];
 private:
 	CScene* m_pScene;
 private:
