@@ -1,0 +1,14 @@
+/Client/.vs
+/Client/x64
+*.exe
+*.ilk
+*pdb
+*.obj
+*.log
+*.pch
+*.idb
+*.tlog
+*.lastbuildstate
+*.suo
+*.db
+/Client/Client_Prototype/x64
