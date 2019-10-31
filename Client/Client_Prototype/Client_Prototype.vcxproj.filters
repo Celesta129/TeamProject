@@ -26,6 +26,9 @@
     <Filter Include="02.Utility\03.Scene">
       <UniqueIdentifier>{84042148-b4d0-45be-8c55-b841a69bca5e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01.FrameWork\D3DApp">
+      <UniqueIdentifier>{527c0112-d3e7-49a5-8d2e-ce8007239843}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Prototype.h">
@@ -52,6 +55,15 @@
     <ClInclude Include="Scene.h">
       <Filter>02.Utility\03.Scene</Filter>
     </ClInclude>
+    <ClInclude Include="D3DApp.h">
+      <Filter>01.FrameWork\D3DApp</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h" />
+    <ClInclude Include="Struct.h" />
+    <ClInclude Include="Typedef.h" />
+    <ClInclude Include="Function.h" />
+    <ClInclude Include="Functor.h" />
+    <ClInclude Include="Macros.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Prototype.cpp">
@@ -71,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>02.Utility\03.Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp.cpp">
+      <Filter>01.FrameWork\D3DApp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

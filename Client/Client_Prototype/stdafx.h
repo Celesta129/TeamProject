@@ -66,3 +66,9 @@ namespace Vector4
 {
 
 }
+
+#include "Typedef.h"
+#include "Struct.h"
+#include "Enum.h"
+#include "Macros.h"
+#include "Function.h"

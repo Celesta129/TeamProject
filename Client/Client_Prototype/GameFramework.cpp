@@ -39,6 +39,10 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
+	if (m_pd3dDevice != nullptr)
+	{
+		FlushCommandQueue();
+	}
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
@@ -259,6 +263,22 @@ void CGameFramework::CreateDepthStencilView()
 
 }
 
+void CGameFramework::FlushCommandQueue(void)
+{
+	//Throwiffail
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+
+	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
+	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
+
+	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
+	{
+		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
+		::WaitForSingleObject(m_hFenceEvent, INFINITE);
+	}
+	
+}
+
 void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -299,10 +319,10 @@ void CGameFramework::ProcessInput()
 {
 }
 
-void CGameFramework::AnimateObjects()
-{
-	if (m_pScene) m_pScene->AnimateObjects(m_pGameTimer->GetTimeElapsed());
-}
+//void CGameFramework::AnimateObjects()
+//{
+	//if (m_pScene) m_pScene->AnimateObjects(m_pGameTimer->GetTimeElapsed());
+//}
 
 void CGameFramework::FrameAdvance()
 {
@@ -310,7 +330,7 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 
-	AnimateObjects();
+	//AnimateObjects();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -358,7 +378,8 @@ void CGameFramework::FrameAdvance()
 
 	WaitForGpuComplete();
 	m_pdxgiSwapChain->Present(0, 0);
-	MoveToNextFrame();
+	FlushCommandQueue();
+	
 
 	m_pGameTimer->GetFrameRate(m_pszFrameRate + 8, 50);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
@@ -368,6 +389,17 @@ void CGameFramework::WaitForGpuComplete()
 {
 	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
+	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
+	{
+		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
+		::WaitForSingleObject(m_hFenceEvent, INFINITE);
+	}
+	//
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+
+	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
+	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
+
 	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
 	{
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
@@ -422,14 +454,5 @@ void CGameFramework::ChangeSwapChainState()
 
 void CGameFramework::MoveToNextFrame()
 {
-	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-
-	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
-	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
-
-	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
-	{
-		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
-		::WaitForSingleObject(m_hFenceEvent, INFINITE);
-	}
+	
 }

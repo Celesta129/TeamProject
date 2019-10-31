@@ -1,4 +1,5 @@
 #pragma once
+#include "D3DApp.h"
 
 class CScene;
 class CCamera;
@@ -8,8 +9,6 @@ class CPlayer;
 class CGameFramework
 {
 private:
-	CPlayer* m_pPlayer;
-	//마지막으로 마우스 버튼을 클릭할 때의 마우스 커서의 위치이다. 
 	POINT m_ptOldCursorPos;
 private:
 	CTimer* m_pGameTimer;
@@ -17,6 +16,8 @@ private:
 	_TCHAR m_pszFrameRate[100];
 private:
 	CScene* m_pScene;
+	CCamera* m_pCamera = NULL;
+
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
@@ -55,7 +56,7 @@ private:
 #if defined(_DEBUG)
 	ID3D12Debug *m_pd3dDebugController;
 #endif
-	CCamera* m_pCamera = NULL;
+	
 
 public:
 	CGameFramework();
@@ -64,6 +65,7 @@ public:
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
 
+private:
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
 	void CreateSwapChain();
@@ -71,6 +73,7 @@ public:
 	void CreateRenderTargetView();
 	void CreateDepthStencilView();
 
+	void FlushCommandQueue(void);
 
 	// 게임 객체의 생성/ 소멸
 	void BuildObjects();
@@ -78,7 +81,7 @@ public:
 
 	// 사용자 입력/애니메이션/렌더링
 	void ProcessInput();
-	void AnimateObjects();
+	//void AnimateObjects();
 	void FrameAdvance();
 
 	// CPU-GPU 동기화 대기
@@ -88,9 +91,14 @@ public:
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	void OnResize(void);
 
 	// 전체화면 전환
 	void ChangeSwapChainState();
+
+private:
+	void Update(const float fTimeElapsed = 0);
+	void Render(const float fTimeElapsed = 0);
 
 public:
 	void MoveToNextFrame();
