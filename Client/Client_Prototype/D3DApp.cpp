@@ -94,6 +94,7 @@ bool CD3DApp::Initialize()
 		return false;
 
 	// Do the initial resize code.
+	// 여기서 렌더타겟 뷰, 뎁스/스텐실 뷰를 생성
 	OnResize();
 
 	return true;
@@ -252,6 +253,15 @@ bool CD3DApp::InitMainWindow()
 
 bool CD3DApp::InitDirect3D()
 {
+	// 1. CreateDevice
+	// 2. Fence객체를 생성하고 서술자 크기를 얻는다
+	// 3. 4xMsaa 품질 수준 지원 여부 점검
+	// 4. 명령 대기열, 명령 목록 할당자, 주 명령 목록 생성
+	// 5. 교환사슬 생성
+	// 6. 응용프로그램에 필요한 서술자 힙 생성
+	// 7. 후면 버퍼 크기를 설정, 후면버퍼에 대한 렌더대상 뷰를 생성
+	// 8. 깊이/스텐실 버퍼를 생성하고 깊이/스텐실 뷰를 생성
+	// 9. 뷰포트와 씨저렉트 설정
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{
@@ -260,50 +270,66 @@ bool CD3DApp::InitDirect3D()
 		debugController->EnableDebugLayer();
 	}
 #endif
+	//ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
+	ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&m_dxgiFactory)));
 
-	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&mdxgiFactory)));
+	HRESULT hardwareResult = E_FAIL;
+	IDXGIAdapter1 *pd3dAdapter = NULL;
+	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_dxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
+	{
+		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
+		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
+		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
+		
+		hardwareResult = D3D12CreateDevice(
+			pd3dAdapter,
+			D3D_FEATURE_LEVEL_12_0,
+			IID_PPV_ARGS(&m_d3dDevice));
 
-	// Try to create hardware device.
-	HRESULT hardwareResult = D3D12CreateDevice(
-		nullptr,             // default adapter
-		D3D_FEATURE_LEVEL_11_0,
-		IID_PPV_ARGS(&md3dDevice));
+		if (SUCCEEDED(hardwareResult))  break;
+		// 모든 하드웨어 어댑터에 대하여 특성레벨 12를 지원하는 하드웨어 디바이스 생성
+	}
+	//// Try to create hardware device.
+	// HRESULT hardwareResult = D3D12CreateDevice(
+	//	nullptr,             // default adapter
+	//	D3D_FEATURE_LEVEL_12_0,
+	//	IID_PPV_ARGS(&m_d3dDevice));
 
 	// Fallback to WARP device.
 	if (FAILED(hardwareResult))
 	{
 		ComPtr<IDXGIAdapter> pWarpAdapter;
-		ThrowIfFailed(mdxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWarpAdapter)));
+		ThrowIfFailed(m_dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWarpAdapter)));
 
 		ThrowIfFailed(D3D12CreateDevice(
 			pWarpAdapter.Get(),
 			D3D_FEATURE_LEVEL_11_0,
-			IID_PPV_ARGS(&md3dDevice)));
+			IID_PPV_ARGS(&m_d3dDevice)));
 	}
 
-	ThrowIfFailed(md3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE,
-		IID_PPV_ARGS(&mFence)));
+	ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE,
+		IID_PPV_ARGS(&m_Fence)));
 
-	mRtvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	mDsvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	mCbvSrvUavDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_RtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	m_DsvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	m_CbvSrvUavDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// Check 4X MSAA quality support for our back buffer format.
 	// All Direct3D 11 capable devices support 4X MSAA for all render 
 	// target formats, so we only need to check quality support.
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels;
-	msQualityLevels.Format = mBackBufferFormat;
+	msQualityLevels.Format = m_BackBufferFormat;
 	msQualityLevels.SampleCount = 4;
 	msQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	msQualityLevels.NumQualityLevels = 0;
-	ThrowIfFailed(md3dDevice->CheckFeatureSupport(
+	ThrowIfFailed(m_d3dDevice->CheckFeatureSupport(
 		D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
 		&msQualityLevels,
 		sizeof(msQualityLevels)));
 
-	m4xMsaaQuality = msQualityLevels.NumQualityLevels;
-	assert(m4xMsaaQuality > 0 && "Unexpected MSAA quality level.");
+	m_n4xMsaaQuality = msQualityLevels.NumQualityLevels;
+	assert(m_n4xMsaaQuality > 0 && "Unexpected MSAA quality level.");
 
 #ifdef _DEBUG
 	LogAdapters();
@@ -314,4 +340,84 @@ bool CD3DApp::InitDirect3D()
 	CreateRtvAndDsvDescriptorHeaps();
 
 	return true;
+}
+
+void CD3DApp::CreateCommandObjects()
+{
+	// 명령 대기열 서술자 정의
+	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	// 명령 대기열 생성
+	ThrowIfFailed(m_d3dDevice->CreateCommandQueue(
+		&queueDesc, IID_PPV_ARGS(&m_CommandQueue)
+	));
+
+	// 명령 할당자 생성
+	ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(m_CommandAllocator.GetAddressOf())
+	));
+
+	// 명령리스트 생성
+	ThrowIfFailed(m_d3dDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		m_CommandAllocator.Get(),		// 연관된 명령 할당자
+		nullptr,				// 초기 파이프라인 상태 객체
+		IID_PPV_ARGS(m_GraphicsCommandList.GetAddressOf())
+	));
+
+	//닫힌상태로 시작해서 이후 명령 목록을 처음 참조할때 Reset을 호출한다.
+	// Reset을 호출하려면 명령목록이 닫혀있어야한다.
+	m_GraphicsCommandList->Close();
+}
+
+void CD3DApp::CreateSwapChain()
+{
+	// 기존 스왑체인 해제
+	m_dxgiSwapChain.Reset();
+
+	DXGI_SWAP_CHAIN_DESC sd;
+	sd.BufferDesc.Width = m_ClientWidth;
+	sd.BufferDesc.Height = m_ClientHeight;
+	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferDesc.Format = m_BackBufferFormat;
+	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	sd.SampleDesc.Count = m_b4xMsaaState ? 4 : 1;
+	sd.SampleDesc.Quality = m_b4xMsaaState ? (m_n4xMsaaQuality - 1) : 0;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.BufferCount = m_iSwapChainBufferCount;
+	sd.OutputWindow = m_hMainWnd;
+	sd.Windowed = true;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	// 교환사슬은 명령대기열을  이용해서 flush를 수행한다.
+
+	ThrowIfFailed(m_dxgiFactory->CreateSwapChain(
+		m_CommandQueue.Get(),
+		&sd,
+		m_dxgiSwapChain.GetAddressOf())
+	);
+}
+
+void CD3DApp::FlushCommandQueue()
+{
+	m_nFenceValue++;
+	ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), m_nFenceValue));
+
+	// Wait until the GPU has completed commands up to this fence point.
+	if (m_Fence->GetCompletedValue() < m_nFenceValue)
+	{
+		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+
+		// Fire event when GPU hits current fence.  
+		ThrowIfFailed(m_Fence->SetEventOnCompletion(m_nFenceValue, eventHandle));
+
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
 }

@@ -29,8 +29,8 @@
     <Filter Include="01.FrameWork\D3DApp">
       <UniqueIdentifier>{527c0112-d3e7-49a5-8d2e-ce8007239843}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\00.D3D">
-      <UniqueIdentifier>{52e2db25-b3f5-4853-9c05-6b66978c5afd}</UniqueIdentifier>
+    <Filter Include="Common">
+      <UniqueIdentifier>{7aaba1fe-b49d-4adb-bdb6-4874952b7f11}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -67,12 +67,6 @@
     <ClInclude Include="Function.h" />
     <ClInclude Include="Functor.h" />
     <ClInclude Include="Macros.h" />
-    <ClInclude Include="d3dUtil.h">
-      <Filter>02.Utility\00.D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>02.Utility\00.D3D</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Prototype.cpp">
@@ -95,9 +89,6 @@
     </ClCompile>
     <ClCompile Include="D3DApp.cpp">
       <Filter>01.FrameWork\D3DApp</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dUtil.cpp">
-      <Filter>02.Utility\00.D3D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

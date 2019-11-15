@@ -104,7 +104,7 @@ protected:
 
 	UINT m_RtvDescriptorSize = 0;
 	UINT m_DsvDescriptorSize = 0;
-	UINT m_CbvSrvDescriptorSize = 0;
+	UINT m_CbvSrvUavDescriptorSize = 0;
 
 	// 파생클래스는 자신의 생성자에서 이 멤버 변수들을 자신의 목적에 맞는 초기값들로 설정할 것
 	std::wstring m_MainWndCaption = L"Prototype";

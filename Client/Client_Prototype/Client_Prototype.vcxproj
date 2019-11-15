@@ -72,12 +72,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\Common\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\Common\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -150,8 +152,6 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
     <ClInclude Include="D3DApp.h" />
-    <ClInclude Include="d3dUtil.h" />
-    <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Functor.h" />
@@ -169,7 +169,6 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
     <ClCompile Include="D3DApp.cpp" />
-    <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="GameFramework.cpp" />
