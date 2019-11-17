@@ -1,15 +1,23 @@
 #include "stdafx.h"
 #include "D3DApp.h"
 
+#include <WindowsX.h>
+
 CD3DApp::CD3DApp(HINSTANCE hInstance)
 {
+	if(m_pInstance == nullptr)
+		m_pInstance = this;
 
+	m_pTimer = new CTimer();
 }
 
 CD3DApp::~CD3DApp()
 {
 	if(m_d3dDevice != nullptr)
 		FlushCommandQueue();
+
+	if(m_pTimer != nullptr)
+		delete m_pTimer;
 }
 
 CD3DApp* CD3DApp::m_pInstance = nullptr;
@@ -30,15 +38,15 @@ HWND CD3DApp::MainWnd() const
 
 float CD3DApp::AspectRatio() const
 {
-	return m_ClientWidth / m_ClientHeight;
+	return float(m_ClientWidth) / float(m_ClientHeight);
 }
 
-bool CD3DApp::Get4XMsaaState() const
+bool CD3DApp::Get4xMsaaState() const
 {
 	return m_b4xMsaaState;
 }
 
-void CD3DApp::Set4XMsaaState(bool value)
+void CD3DApp::Set4xMsaaState(bool value)
 {
 	if (m_b4xMsaaState != value)
 	{
@@ -98,6 +106,143 @@ bool CD3DApp::Initialize()
 	OnResize();
 
 	return true;
+}
+
+LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+		// WM_ACTIVATE is sent when the window is activated or deactivated.  
+		// We pause the game when the window is deactivated and unpause it 
+		// when it becomes active.  
+	case WM_ACTIVATE:
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			m_bAppPaused = true;
+			m_pTimer->Stop();
+		}
+		else
+		{
+			m_bAppPaused = false;
+			m_pTimer->Start();
+		}
+		return 0;
+
+		// WM_SIZE is sent when the user resizes the window.  
+	case WM_SIZE:
+		// Save the new client area dimensions.
+		m_ClientWidth = LOWORD(lParam);
+		m_ClientHeight = HIWORD(lParam);
+		if (m_d3dDevice)
+		{
+			if (wParam == SIZE_MINIMIZED)
+			{
+				m_bAppPaused = true;
+				m_bMinimized = true;
+				m_bMaximized = false;
+			}
+			else if (wParam == SIZE_MAXIMIZED)
+			{
+				m_bAppPaused = false;
+				m_bMinimized = false;
+				m_bMaximized = true;
+				OnResize();
+			}
+			else if (wParam == SIZE_RESTORED)
+			{
+
+				// Restoring from minimized state?
+				if (m_bMinimized)
+				{
+					m_bAppPaused = false;
+					m_bMinimized = false;
+					OnResize();
+				}
+
+				// Restoring from maximized state?
+				else if (m_bMaximized)
+				{
+					m_bAppPaused = false;
+					m_bMaximized = false;
+					OnResize();
+				}
+				else if (m_bResizing)
+				{
+					// If user is dragging the resize bars, we do not resize 
+					// the buffers here because as the user continuously 
+					// drags the resize bars, a stream of WM_SIZE messages are
+					// sent to the window, and it would be pointless (and slow)
+					// to resize for each WM_SIZE message received from dragging
+					// the resize bars.  So instead, we reset after the user is 
+					// done resizing the window and releases the resize bars, which 
+					// sends a WM_EXITSIZEMOVE message.
+				}
+				else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+				{
+					OnResize();
+				}
+			}
+		}
+		return 0;
+
+		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
+	case WM_ENTERSIZEMOVE:
+		m_bAppPaused = true;
+		m_bResizing = true;
+		m_pTimer->Stop();
+		return 0;
+
+		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
+		// Here we reset everything based on the new window dimensions.
+	case WM_EXITSIZEMOVE:
+		m_bAppPaused = false;
+		m_bResizing = false;
+		m_pTimer->Start();
+		OnResize();
+		return 0;
+
+		// WM_DESTROY is sent when the window is being destroyed.
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+		// The WM_MENUCHAR message is sent when a menu is active and the user presses 
+		// a key that does not correspond to any mnemonic or accelerator key. 
+	case WM_MENUCHAR:
+		// Don't beep when we alt-enter.
+		return MAKELRESULT(0, MNC_CLOSE);
+
+		// Catch this message so to prevent the window from becoming too small.
+	case WM_GETMINMAXINFO:
+		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
+		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
+		return 0;
+
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_MOUSEMOVE:
+		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_KEYUP:
+		if (wParam == VK_ESCAPE)
+		{
+			PostQuitMessage(0);
+		}
+		else if ((int)wParam == VK_F2)
+			Set4xMsaaState(!m_b4xMsaaState);
+
+		return 0;
+	}
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 void CD3DApp::CreateRtvAndDsvDescriptorHeaps()
@@ -420,4 +565,20 @@ void CD3DApp::FlushCommandQueue()
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}
+}
+
+void CD3DApp::CalculateFrameStats()
+{
+}
+
+void CD3DApp::LogAdapters()
+{
+}
+
+void CD3DApp::LogAdapterOutputs(IDXGIAdapter * adapter)
+{
+}
+
+void CD3DApp::LogOutputDisplayModes(IDXGIOutput * output, DXGI_FORMAT format)
+{
 }

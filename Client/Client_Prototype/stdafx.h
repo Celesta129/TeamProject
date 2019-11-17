@@ -38,7 +38,7 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
-
+#include "../Common/d3dUtil.h"
 using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;

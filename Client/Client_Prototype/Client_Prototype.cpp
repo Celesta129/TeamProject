@@ -3,170 +3,116 @@
 
 #include "stdafx.h"
 #include "Client_Prototype.h"
-#include "GameFramework.h"
+#include "D3DApp.h"
+
+class CGameFramework_Client : public CD3DApp
+{
+public:
+	CGameFramework_Client(HINSTANCE hInstance);
+	~CGameFramework_Client();
+
+	virtual bool Initialize() override;
+
+private:
+	virtual void OnResize() override;
+	virtual void Update(CTimer* const gt)override;
+	virtual void Draw(CTimer* const gt)override;
+};
 
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
-HINSTANCE hInst;                                // 현재 인스턴스입니다.
-WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
-WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
-CGameFramework gGameFramework;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: 여기에 코드를 입력합니다.
-
-    // 전역 문자열을 초기화합니다.
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_CLIENTPROTOTYPE, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
-
-    // 응용 프로그램 초기화를 수행합니다:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
-
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTPROTOTYPE));
-
-    MSG msg;
-
-    // 기본 메시지 루프입니다:
-	while (1)
-	{
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT) break;
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-		}
-		else
-		{
-			gGameFramework.FrameAdvance();
-		}
-	}
-	gGameFramework.OnDestroy();
-    return (int) msg.wParam;
-}
-
-
-
-//
-//  함수: MyRegisterClass()
-//
-//  용도: 창 클래스를 등록합니다.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CLIENTPROTOTYPE));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= NULL;// MAKEINTRESOURCEW(IDC_CLIENTPROTOTYPE);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-
-//
-//   함수: InitInstance(HINSTANCE, int)
-//
-//   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
-//
-//   주석:
-//
-//        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
-//        주 프로그램 창을 만든 다음 표시합니다.
-//
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
-	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-	AdjustWindowRect(&rc, dwStyle, FALSE);
-
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, dwStyle,
-		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
-
-	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
-
-
-	if (!hWnd)      return FALSE;
-
-	gGameFramework.OnCreate(hInstance, hWnd);
-
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
-#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
-	gGameFramework.ChangeSwapChainState();
+#if defined(DEBUG) | defined(_DEBUG)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	return TRUE;
+
+	try {
+		CGameFramework_Client GameFramework(hInstance);
+		if (!GameFramework.Initialize())
+			return 0;
+
+		GameFramework.Run();
+	}
+	catch(DxException& e){
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
+	}
+
+	return 0;
 }
 
-//
-//  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  용도: 주 창의 메시지를 처리합니다.
-//
-//  WM_COMMAND  - 응용 프로그램 메뉴를 처리합니다.
-//  WM_PAINT    - 주 창을 그립니다.
-//  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
-//
-//
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
+	:CD3DApp(hInstance)
 {
-    switch (message)
-    {
-    //case WM_COMMAND:
-    //    {
-    //        int wmId = LOWORD(wParam);
-    //        // 메뉴 선택을 구문 분석합니다:
-    //        switch (wmId)
-    //        {
-    //        case IDM_EXIT:
-    //            DestroyWindow(hWnd);
-    //            break;
-    //        default:
-    //            return DefWindowProc(hWnd, message, wParam, lParam);
-    //        }
-    //    }
-    //    break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            EndPaint(hWnd, &ps);
-        }
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
+}
+
+CGameFramework_Client::~CGameFramework_Client()
+{
+}
+
+bool CGameFramework_Client::Initialize()
+{
+	return CD3DApp::Initialize();
+}
+
+void CGameFramework_Client::OnResize()
+{
+	CD3DApp::OnResize();
+}
+
+void CGameFramework_Client::Update(CTimer * const gt)
+{
+}
+
+void CGameFramework_Client::Draw(CTimer * const gt)
+{
+	// 커맨드리스트 리셋
+	ThrowIfFailed(m_CommandAllocator->Reset());
+	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+
+	//  리소스 사용에 대한 상태전이 지정
+	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
+	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
+	m_GraphicsCommandList->RSSetScissorRects(1, &m_ScissorRect);
+
+	// 백버퍼와 뎁스/스텐실버퍼 클리어
+	m_GraphicsCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
+	m_GraphicsCommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// 렌더하기 위한 백버퍼를 지정
+	m_GraphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+
+	// 리소스 사용에 대한 상태전이 지정
+	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+
+	// 명령리스트 작성 끝
+	ThrowIfFailed(m_GraphicsCommandList->Close());
+
+	// 커맨드큐에 내가 내린 명령리스트를 집어넣고 실행
+	ID3D12CommandList* cmdsLists[] = { m_GraphicsCommandList.Get() };
+	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+	// 백/프론트 버퍼 교체
+	ThrowIfFailed(m_dxgiSwapChain->Present(0, 0));
+	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_iSwapChainBufferCount;
+
+	// Wait until frame commands are complete.  This waiting is inefficient and is
+	// done for simplicity.  Later we will show how to organize our rendering code
+	// so we do not have to wait per frame.
+	
+	// cpu-gpu 동기화를 위한 펜스. 프레임마다 펜스를 기다린다.
+	// 요약 -> 이방식은 비효율적임. 추후 수정할거같음
+	FlushCommandQueue();
 }

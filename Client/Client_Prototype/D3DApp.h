@@ -1,5 +1,4 @@
 #pragma once
-#include "d3dUtil.h"
 #include "Timer.h"
 
 class CD3DApp
@@ -18,8 +17,8 @@ public:
 	HWND MainWnd() const;
 	float AspectRatio() const;
 
-	bool Get4XMsaaState() const;
-	void Set4XMsaaState(bool value);
+	bool Get4xMsaaState() const;
+	void Set4xMsaaState(bool value);
 
 	int Run();
 

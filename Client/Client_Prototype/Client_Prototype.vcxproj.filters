@@ -46,9 +46,6 @@
     <ClInclude Include="stdafx.h">
       <Filter>00.stdafx</Filter>
     </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>01.FrameWork</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>02.Utility\01.Timer</Filter>
     </ClInclude>
@@ -67,6 +64,18 @@
     <ClInclude Include="Function.h" />
     <ClInclude Include="Functor.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="..\Common\d3dUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\d3dx12.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\DDSTextureLoader.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\MathHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Prototype.cpp">
@@ -74,9 +83,6 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>00.stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>01.FrameWork</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>02.Utility\01.Timer</Filter>
@@ -89,6 +95,15 @@
     </ClCompile>
     <ClCompile Include="D3DApp.cpp">
       <Filter>01.FrameWork\D3DApp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\d3dUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\DDSTextureLoader.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\MathHelper.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

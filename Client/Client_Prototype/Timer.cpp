@@ -5,23 +5,9 @@
 
 CTimer::CTimer()
 {
-	if (QueryPerformanceFrequency((LARGE_INTEGER*)&m_nPerformanceFrequency))
-	{
-		m_bHardwareHasPerformanceCounter = TRUE;
-		QueryPerformanceCounter((LARGE_INTEGER*)&m_nLastTime);
-		m_fTimeScale = 1.0f / m_nPerformanceFrequency;
-
-	}
-	else
-	{
-		m_bHardwareHasPerformanceCounter = FALSE;
-		m_nLastTime = timeGetTime();
-		m_fTimeScale = 0.001f;
-	}
-	m_nSampleCount = 0;
-	m_nCurrentFrameRate = 0;
-	m_nFramePerSecond = 0;
-	m_fFPSTimeElapsed = 0.0f;
+	__int64 countsPerSec;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+	m_SecondsPerCount = 1.0 / (double)countsPerSec;
 }
 
 
@@ -31,54 +17,49 @@ CTimer::~CTimer()
 
 void CTimer::Tick(float fLockFPS)
 {
-	if (m_bHardwareHasPerformanceCounter)
+	if (m_bStopped)
 	{
-		::QueryPerformanceCounter((LARGE_INTEGER *)&m_nCurrentTime);
-	}
-	else
-	{
-		m_nCurrentTime = ::timeGetTime();
+		m_DeltaTime = 0.0;
+		return;
 	}
 
-	float fTimeElapsed = (m_nCurrentTime - m_nLastTime) * m_fTimeScale;
-	if (fLockFPS > 0.0f)
-	{
+	__int64 currTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+	m_CurrTime = currTime;
 
-		while (fTimeElapsed < (1.0f / fLockFPS))
-		{
-			if (m_bHardwareHasPerformanceCounter)
-			{
-				::QueryPerformanceCounter((LARGE_INTEGER *)&m_nCurrentTime);
-			}
-			else
-			{
-				m_nCurrentTime = ::timeGetTime();
-			}
+	// Time difference between this frame and the previous.
+	m_DeltaTime = (m_CurrTime - m_PrevTime)*m_SecondsPerCount;
 
-			fTimeElapsed = (m_nCurrentTime - m_nLastTime) * m_fTimeScale;
-		}
-	}
-	m_nLastTime = m_nCurrentTime;
-	if (fabsf(fTimeElapsed - m_fTimeElapsed) < 1.0f)
+	// Prepare for next frame.
+	m_PrevTime = m_CurrTime;
+
+	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
+	// processor goes into a power save mode or we get shuffled to another
+	// processor, then mDeltaTime can be negative.
+	if (m_DeltaTime < 0.0)
 	{
-		::memmove(&m_fFrameTime[1], m_fFrameTime, (MAX_SAMPLE_COUNT - 1) *
-			sizeof(float));
-		m_fFrameTime[0] = fTimeElapsed;
-		if (m_nSampleCount < MAX_SAMPLE_COUNT) m_nSampleCount++;
+		m_DeltaTime = 0.0;
 	}
-	//초당 프레임 수를 1 증가시키고 현재 프레임 처리 시간을 누적하여 저장한다. 
-	m_nFramePerSecond++;
-	m_fFPSTimeElapsed += fTimeElapsed;
-	if (m_fFPSTimeElapsed > 1.0f)
+}
+
+void CTimer::Start(void)
+{
+	__int64 startTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
+
+	if (m_bStopped)
 	{
-		m_nCurrentFrameRate = m_nFramePerSecond;
-		m_nFramePerSecond = 0;
-		m_fFPSTimeElapsed = 0.0f;
+		m_PausedTime += (startTime - m_StopTime);
+
+		m_PrevTime = startTime;
+		m_StopTime = 0;
+		m_bStopped = false;
 	}
-	//누적된 프레임 처리 시간의 평균을 구하여 프레임 처리 시간을 구한다. 
-	m_fTimeElapsed = 0.0f;
-	for (ULONG i = 0; i < m_nSampleCount; i++) m_fTimeElapsed += m_fFrameTime[i];
-	if (m_nSampleCount > 0) m_fTimeElapsed /= m_nSampleCount;
+}
+
+void CTimer::Stop(void)
+{
+	m_bStopped = true;
 }
 
 unsigned long CTimer::GetFrameRate(LPTSTR lpszString, int nCharacters)
@@ -91,15 +72,19 @@ unsigned long CTimer::GetFrameRate(LPTSTR lpszString, int nCharacters)
 	return(m_nCurrentFrameRate);
 }
 
-float CTimer::GetTimeElapsed()
+float CTimer::GetTimeElapsed() const
 {
-	return(m_fTimeElapsed);
+	return (float)m_DeltaTime;;
 }
+
 
 void CTimer::Reset()
 {
-	m_nCurrentFrameRate = 0;
-	m_nFramePerSecond = 0;
-	m_fFPSTimeElapsed = 0.0f;
-	m_fTimeElapsed = 0.f;
+	__int64 currTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+
+	m_BaseTime = currTime;
+	m_PrevTime = currTime;
+	m_StopTime = 0;
+	m_bStopped = false;
 }
