@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "Client_Prototype.h"
-
+#include "Scene.h"
 
 #define MAX_LOADSTRING 100
 
@@ -32,6 +32,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 		return 0;
 	}
 
+
 	return 0;
 }
 
@@ -42,11 +43,23 @@ CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 
 CGameFramework_Client::~CGameFramework_Client()
 {
+	if (m_pScene)
+		delete m_pScene;
 }
 
 bool CGameFramework_Client::Initialize()
 {
-	return CD3DApp::Initialize();
+	if (!CD3DApp::Initialize())
+		return false;
+	m_pScene = new CScene(m_d3dDevice);
+	if (!m_pScene->Initialize())
+	{
+		delete m_pScene;
+		return false;
+	}	
+
+
+	return true;
 }
 
 void CGameFramework_Client::OnResize()
@@ -82,6 +95,9 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+
+	// 씬 렌더링
+	m_pScene->Render(m_GraphicsCommandList.Get());
 
 	// 명령리스트 작성 끝
 	ThrowIfFailed(m_GraphicsCommandList->Close());

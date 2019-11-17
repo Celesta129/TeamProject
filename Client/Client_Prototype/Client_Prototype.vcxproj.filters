@@ -32,11 +32,14 @@
     <Filter Include="Common">
       <UniqueIdentifier>{7aaba1fe-b49d-4adb-bdb6-4874952b7f11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03.Shaders">
+      <UniqueIdentifier>{e0c69fbe-ee0b-4382-849c-34c65e081047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.CustumVertex">
+      <UniqueIdentifier>{27602baf-1504-41bb-a91e-f30843eda3a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Client_Prototype.h">
-      <Filter>99.Default</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>99.Default</Filter>
     </ClInclude>
@@ -76,11 +79,11 @@
     <ClInclude Include="..\Common\MathHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Client_Prototype.h">
+      <Filter>01.FrameWork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client_Prototype.cpp">
-      <Filter>99.Default</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>00.stdafx</Filter>
     </ClCompile>
@@ -104,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="..\Common\MathHelper.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Client_Prototype.cpp">
+      <Filter>01.FrameWork</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

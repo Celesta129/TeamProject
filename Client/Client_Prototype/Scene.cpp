@@ -2,13 +2,26 @@
 #include "Scene.h"
 
 
-CScene::CScene()
+CScene::CScene(ComPtr<ID3D12Device> pDevice)
+	:m_d3dDevice(pDevice)
 {
 }
 
 
 CScene::~CScene()
 {
+}
+
+bool CScene::Initialize()
+{
+	BuildDescriptorHeaps();
+	BuildConstantBuffers();
+	BuildRootSignature();
+	BuildShadersAndInputLayout();
+	BuildBoxGeometry();
+	BuildPSO();
+
+	return true;
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -27,30 +40,26 @@ void CScene::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList *
 
 void CScene::ReleaseObjects()
 {
-	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_d3dGraphicsRootSignature) m_d3dGraphicsRootSignature->Release();
 
 
 	
-}
-
-bool CScene::ProcessInput(UCHAR * pKeysBuffer)
-{
-	return false;
 }
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
 }
 
-void CScene::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+void CScene::Render(ID3D12GraphicsCommandList * pd3dCommandList)
 {
+	
 }
 
 void CScene::ReleaseUploadBuffers()
 {
 }
 
-ID3D12RootSignature * CScene::CreateGraphicsRootSignature(ID3D12Device * pd3dDevice)
+ComPtr<ID3D12RootSignature> CScene::CreateGraphicsRootSignature(ID3D12Device * pd3dDevice)
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
@@ -102,7 +111,41 @@ ID3D12RootSignature * CScene::CreateGraphicsRootSignature(ID3D12Device * pd3dDev
 	return(pd3dGraphicsRootSignature);
 }
 
-ID3D12RootSignature * CScene::GetGraphicsRootSignature()
+ComPtr<ID3D12RootSignature> CScene::GetGraphicsRootSignature()
 {
-	return(m_pd3dGraphicsRootSignature);
+	return(m_d3dGraphicsRootSignature);
+}
+
+void CScene::BuildDescriptorHeaps()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.NodeMask = 0;
+
+	ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
+		IID_PPV_ARGS(&m_cbvHeap)))
+
+}
+
+void CScene::BuildConstantBuffers(void)
+{
+
+}
+
+void CScene::BuildRootSignature(void)
+{
+}
+
+void CScene::BuildShadersAndInputLayout(void)
+{
+}
+
+void CScene::BuildBoxGeometry(void)
+{
+}
+
+void CScene::BuildPSO(void)
+{
 }
