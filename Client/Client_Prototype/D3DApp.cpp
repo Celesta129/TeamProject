@@ -84,10 +84,10 @@ int CD3DApp::Run()
 				Update(m_pTimer);
 				Draw(m_pTimer);
 			}
-			else
+			/*else
 			{
 				Sleep(100);
-			}
+			}*/
 		}
 	}
 
