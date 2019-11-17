@@ -21,13 +21,15 @@ public:
 	CTimer();
 	virtual ~CTimer();
 
+	void Reset();
 	void Tick(float fLockFPS = 0.0f);		// 타이머 시간 갱신
 	void Start(void);
 	void Stop(void);
 
+	float TotalTime()const; // in seconds
+
 	unsigned long GetFrameRate(wstring* pString = NULL);	// 프레임레이트 반환
 	float GetTimeElapsed() const;			// 프레임의 평균 경과시간 반환
 
-	void Reset();
 };
 

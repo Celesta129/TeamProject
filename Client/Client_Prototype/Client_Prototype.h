@@ -9,10 +9,10 @@ class CScene;
 class CGameFramework_Client : public CD3DApp
 {
 public:
-	CGameFramework_Client(HINSTANCE hInstance);
+	CGameFramework_Client();
 	~CGameFramework_Client();
 
-	virtual bool Initialize() override;
+	virtual bool Initialize(HINSTANCE hInstance) override;
 
 private:
 	virtual void OnResize() override;

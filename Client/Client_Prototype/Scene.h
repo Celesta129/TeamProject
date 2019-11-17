@@ -1,11 +1,12 @@
 #pragma once
+#include "../Common/UploadBuffer.h"
 class CGameObject;
 class CCamera;
 
 class CScene
 {
 public:
-	CScene(ComPtr<ID3D12Device> pDevice);
+	CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList);
 	virtual ~CScene();
 
 	bool Initialize();
@@ -18,13 +19,17 @@ public:
 	void ReleaseObjects();
 
 	void AnimateObjects(float fTimeElapsed);
-	void Render(ID3D12GraphicsCommandList *pd3dCommandList);
+
+	void Update(float fTimeElapsed);
+	void Render();
 
 	void ReleaseUploadBuffers();
 
-	//그래픽 루트 시그너쳐를 생성한다. 
-	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
-	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
+	void OnResize(float fAspectRatio);
+
+	ComPtr<ID3D12PipelineState> GetPipelineStates(void) {
+		return m_PSO;
+	}
 protected:
 	void BuildDescriptorHeaps(void);
 	void BuildConstantBuffers(void);
@@ -33,19 +38,30 @@ protected:
 	void BuildBoxGeometry(void);
 	void BuildPSO(void);
 protected:
-	ComPtr<ID3D12Device> m_d3dDevice;
+	XMFLOAT4X4 mWorld = MathHelper::Identity4x4();
+	XMFLOAT4X4 mView = MathHelper::Identity4x4();
+	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
+	float mTheta = 1.5f*XM_PI;
+	float mPhi = XM_PIDIV4;
+	float mRadius = 5.0f;
+
+
+	unique_ptr<UploadBuffer<ObjectConstants>> m_ObjectCB = nullptr; // Object Constant Buffer
+	unique_ptr<MeshGeometry> m_BoxGeo = nullptr;
+
+protected:
+	ComPtr<ID3D12Device> m_d3dDevice;
+	ComPtr<ID3D12GraphicsCommandList> m_GraphicsCommandList;
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
 	//CObjectShader *m_pShaders = NULL;
-	int m_nShaders = 0;
+	//int m_nShaders = 0;
 
 	ComPtr<ID3D12RootSignature> m_d3dGraphicsRootSignature = nullptr;
-	ComPtr<ID3D12DescriptorHeap> m_cbvHeap = nullptr;		// ConstantBufferViewHeap
+	ComPtr<ID3D12DescriptorHeap> m_CbvHeap = nullptr;		// ConstantBufferViewHeap
 	
-
-
-	ComPtr<ID3DBlob> mvsByteCode = nullptr;		// Vertex Shader
-	ComPtr<ID3DBlob> mpsByteCode = nullptr;		// Pixel Shader
+	ComPtr<ID3DBlob> m_vsByteCode = nullptr;		// Vertex Shader
+	ComPtr<ID3DBlob> m_psByteCode = nullptr;		// Pixel Shader
 
 	vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayout;
 

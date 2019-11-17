@@ -3,13 +3,9 @@
 
 #include <WindowsX.h>
 
-CD3DApp::CD3DApp(HINSTANCE hInstance)
+CD3DApp::CD3DApp()
 {
-	if(m_pInstance == nullptr)
-		m_pInstance = this;
-
-	m_pTimer = new CTimer();
-
+	
 }
 
 CD3DApp::~CD3DApp()
@@ -84,18 +80,24 @@ int CD3DApp::Run()
 				Update(m_pTimer);
 				Draw(m_pTimer);
 			}
-			/*else
+			else
 			{
 				Sleep(100);
-			}*/
+			}
 		}
 	}
 
 	return (int)msg.wParam;
 }
 
-bool CD3DApp::Initialize()
+bool CD3DApp::Initialize(HINSTANCE hInstance)
 {
+	if (m_pInstance == nullptr)
+		m_pInstance = this;
+
+	m_pTimer = new CTimer();
+
+
 	if (!InitMainWindow())
 		return false;
 
@@ -570,9 +572,34 @@ void CD3DApp::FlushCommandQueue()
 
 void CD3DApp::CalculateFrameStats()
 {
-	wstring caption = m_MainWndCaption;
+	/*wstring caption = m_MainWndCaption;
 	m_pTimer->GetFrameRate(&caption);
-	::SetWindowText(m_hMainWnd, caption.c_str());
+	::SetWindowText(m_hMainWnd, caption.c_str());*/
+
+	static int frameCnt = 0;
+	static float timeElapsed = 0.0f;
+
+	frameCnt++;
+
+	// Compute averages over one second period.
+	if ((m_pTimer->TotalTime() - timeElapsed) >= 1.0f)
+	{
+		float fps = (float)frameCnt; // fps = frameCnt / 1
+		float mspf = 1000.0f / fps;
+
+		wstring fpsStr = to_wstring(fps);
+		wstring mspfStr = to_wstring(mspf);
+
+		wstring windowText = m_MainWndCaption +
+			L"    fps: " + fpsStr;// +
+			//L"   mspf: " + mspfStr;
+
+		SetWindowText(m_hMainWnd, windowText.c_str());
+
+		// Reset for next average.
+		frameCnt = 0;
+		timeElapsed += 1.0f;
+	}
 }
 
 void CD3DApp::LogAdapters()

@@ -75,6 +75,18 @@ void CTimer::Stop(void)
 	m_bStopped = true;
 }
 
+float CTimer::TotalTime() const
+{
+	if (m_bStopped)
+	{
+		return (float)(((m_StopTime - m_PausedTime) - m_BaseTime)*m_SecondsPerCount);
+	}
+	else
+	{
+		return (float)(((m_CurrTime - m_PausedTime) - m_BaseTime)*m_SecondsPerCount);
+	}
+}
+
 unsigned long CTimer::GetFrameRate(wstring* pString)
 {
 	if (pString)

@@ -5,7 +5,7 @@ class CD3DApp
 {
 	static CD3DApp* m_pInstance;
 protected:
-	CD3DApp(HINSTANCE hInstance);
+	CD3DApp();
 	CD3DApp(const CD3DApp& rhs) = delete;
 	CD3DApp& operator=(const CD3DApp& rhs) = delete;
 	virtual ~CD3DApp();
@@ -20,9 +20,19 @@ public:
 	bool Get4xMsaaState() const;
 	void Set4xMsaaState(bool value);
 
+	UINT Get4xMsaaQuality(void) {
+		return m_n4xMsaaQuality;
+	}
+
+	DXGI_FORMAT GetBackBufferFormat(void) {
+		return m_BackBufferFormat;
+	}
+	DXGI_FORMAT GetDepthStencilFormat(void) {
+		return m_DepthStencilFormat;
+	}
 	int Run();
 
-	virtual bool Initialize();
+	virtual bool Initialize(HINSTANCE hInstance);
 	// 여기서부터
 	virtual LRESULT MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

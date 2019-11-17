@@ -125,4 +125,9 @@
       <Filter>99.Default\리소스 파일</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\color.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

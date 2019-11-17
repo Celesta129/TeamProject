@@ -21,8 +21,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #endif
 
 	try {
-		CGameFramework_Client GameFramework(hInstance);
-		if (!GameFramework.Initialize())
+		CGameFramework_Client GameFramework;
+		if (!GameFramework.Initialize(hInstance))
 			return 0;
 
 		GameFramework.Run();
@@ -36,8 +36,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	return 0;
 }
 
-CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
-	:CD3DApp(hInstance)
+CGameFramework_Client::CGameFramework_Client()
 {
 }
 
@@ -47,17 +46,24 @@ CGameFramework_Client::~CGameFramework_Client()
 		delete m_pScene;
 }
 
-bool CGameFramework_Client::Initialize()
+bool CGameFramework_Client::Initialize(HINSTANCE hInstance)
 {
-	if (!CD3DApp::Initialize())
+	if (!CD3DApp::Initialize(hInstance))
 		return false;
-	m_pScene = new CScene(m_d3dDevice);
+	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+
+	m_pScene = new CScene(m_d3dDevice, m_GraphicsCommandList);
 	if (!m_pScene->Initialize())
 	{
 		delete m_pScene;
 		return false;
 	}	
+	m_pScene->OnResize(AspectRatio());
+	ThrowIfFailed(m_GraphicsCommandList->Close());
 
+	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
+	m_CommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
+	FlushCommandQueue();
 
 	return true;
 }
@@ -65,25 +71,40 @@ bool CGameFramework_Client::Initialize()
 void CGameFramework_Client::OnResize()
 {
 	CD3DApp::OnResize();
+
+	if (m_pScene)
+		m_pScene->OnResize(AspectRatio());
 }
 
 void CGameFramework_Client::Update(CTimer * const gt)
 {
+	float fTimeElapsed = gt->GetTimeElapsed();
+
+	if(m_pScene)
+		m_pScene->Update(fTimeElapsed);
 }
 
 void CGameFramework_Client::Draw(CTimer * const gt)
 {
 	// 커맨드리스트 리셋
 	ThrowIfFailed(m_CommandAllocator->Reset());
-	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+	if (m_pScene) {
+		ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), m_pScene->GetPipelineStates().Get()));
+	}
+	else {
+		ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+	}
+
+
+
+	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
+	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
+	m_GraphicsCommandList->RSSetScissorRects(1, &m_ScissorRect);
 
 	//  리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
-	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
-	m_GraphicsCommandList->RSSetScissorRects(1, &m_ScissorRect);
 
 	// 백버퍼와 뎁스/스텐실버퍼 클리어
 	m_GraphicsCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
@@ -91,13 +112,16 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 
 	// 렌더하기 위한 백버퍼를 지정
 	m_GraphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+	
+	// 씬 렌더링
+	if(m_pScene)
+		m_pScene->Render();
 
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-	// 씬 렌더링
-	m_pScene->Render(m_GraphicsCommandList.Get());
+
 
 	// 명령리스트 작성 끝
 	ThrowIfFailed(m_GraphicsCommandList->Close());
