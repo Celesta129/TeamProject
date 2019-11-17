@@ -1,9 +1,6 @@
 #pragma once
 class CGameObject;
 class CCamera;
-class CInstancingShader;
-class CObjectShader;
-class CHeightMapTerrain;
 
 class CScene
 {
@@ -24,20 +21,18 @@ public:
 	void ReleaseUploadBuffers();
 
 	//그래픽 루트 시그너쳐를 생성한다. 
-	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
-	ID3D12RootSignature *GetGraphicsRootSignature();
+	ComPtr<ID3D12RootSignature> CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
+	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature();
 
 protected:
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
-	CObjectShader *m_pShaders = NULL;
+	//CObjectShader *m_pShaders = NULL;
 	int m_nShaders = 0;
 
 	ID3D12RootSignature *m_pd3dGraphicsRootSignature = NULL;
 
 protected:
-	CHeightMapTerrain *m_pTerrain = NULL;
 
 public:
-	CHeightMapTerrain *GetTerrain() { return(m_pTerrain); }
 };
 

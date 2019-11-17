@@ -3,6 +3,9 @@
 #include "resource.h"
 
 #include "D3DApp.h"
+
+class CScene;
+
 class CGameFramework_Client : public CD3DApp
 {
 public:
@@ -19,5 +22,8 @@ private:
 private:
 
 	LPTSTR WindowCaption;
+
+private:
+	CScene* m_pScene = nullptr;
 };
 
