@@ -75,7 +75,7 @@ void CTimer::Stop(void)
 	m_bStopped = true;
 }
 
-unsigned long CTimer::GetFrameRate(wstring* pString, int nCharacters)
+unsigned long CTimer::GetFrameRate(wstring* pString)
 {
 	if (pString)
 	{

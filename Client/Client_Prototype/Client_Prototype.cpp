@@ -102,7 +102,4 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	// 요약 -> 이방식은 비효율적임. 추후 수정할거같음
 	FlushCommandQueue();
 	
-	wstring caption = m_MainWndCaption;
-	m_pTimer->GetFrameRate(&caption, 10);
-	::SetWindowText(m_hMainWnd, caption.c_str());
 }
