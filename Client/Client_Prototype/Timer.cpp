@@ -4,6 +4,9 @@
 #pragma comment (lib, "winmm.lib")
 
 CTimer::CTimer()
+	:m_SecondsPerCount(0.0), m_DeltaTime(-1.0), m_BaseTime(0),
+	m_PausedTime(0), m_PrevTime(0), m_CurrTime(0), m_bStopped(false),
+	m_nCurrentFrameRate(0), m_FPSTimeElapsed(0), m_nFramePerSecond(0)
 {
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
@@ -32,6 +35,16 @@ void CTimer::Tick(float fLockFPS)
 
 	// Prepare for next frame.
 	m_PrevTime = m_CurrTime;
+
+
+	m_nFramePerSecond++;
+	m_FPSTimeElapsed += m_DeltaTime;
+	if (m_FPSTimeElapsed >= 1.0f)
+	{
+		m_nCurrentFrameRate = m_nFramePerSecond;
+		m_nFramePerSecond = 0;
+		m_FPSTimeElapsed = 0.0f;
+	}
 
 	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 	// processor goes into a power save mode or we get shuffled to another
@@ -62,12 +75,20 @@ void CTimer::Stop(void)
 	m_bStopped = true;
 }
 
-unsigned long CTimer::GetFrameRate(LPTSTR lpszString, int nCharacters)
+unsigned long CTimer::GetFrameRate(wstring* pString, int nCharacters)
 {
-	if (lpszString)
+	if (pString)
 	{
-		_itow_s(m_nCurrentFrameRate, lpszString, nCharacters, 10);
-		wcscat_s(lpszString, nCharacters, _T(" FPS)"));
+		wstring temp(*pString);
+		char FPSBuffer[10];
+	
+		_itoa_s(m_nCurrentFrameRate, FPSBuffer, 10);
+		wstring w_fps(FPSBuffer, &FPSBuffer[10]);
+
+		temp += L": ";
+		temp += w_fps.c_str();
+		temp += L" FPS";
+		*pString = temp;
 	}
 	return(m_nCurrentFrameRate);
 }

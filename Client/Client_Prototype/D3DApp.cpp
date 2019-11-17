@@ -9,6 +9,7 @@ CD3DApp::CD3DApp(HINSTANCE hInstance)
 		m_pInstance = this;
 
 	m_pTimer = new CTimer();
+
 }
 
 CD3DApp::~CD3DApp()

@@ -15,6 +15,8 @@ private:
 	bool m_bStopped;
 
 	unsigned long m_nCurrentFrameRate;
+	unsigned long m_nFramePerSecond;
+	float m_FPSTimeElapsed;
 public:
 	CTimer();
 	virtual ~CTimer();
@@ -23,7 +25,7 @@ public:
 	void Start(void);
 	void Stop(void);
 
-	unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters = 0);	// 프레임레이트 반환
+	unsigned long GetFrameRate(wstring* pString = NULL, int nCharacters = 0);	// 프레임레이트 반환
 	float GetTimeElapsed() const;			// 프레임의 평균 경과시간 반환
 
 	void Reset();

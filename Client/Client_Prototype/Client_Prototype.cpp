@@ -3,21 +3,7 @@
 
 #include "stdafx.h"
 #include "Client_Prototype.h"
-#include "D3DApp.h"
 
-class CGameFramework_Client : public CD3DApp
-{
-public:
-	CGameFramework_Client(HINSTANCE hInstance);
-	~CGameFramework_Client();
-
-	virtual bool Initialize() override;
-
-private:
-	virtual void OnResize() override;
-	virtual void Update(CTimer* const gt)override;
-	virtual void Draw(CTimer* const gt)override;
-};
 
 #define MAX_LOADSTRING 100
 
@@ -115,4 +101,8 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	// cpu-gpu 동기화를 위한 펜스. 프레임마다 펜스를 기다린다.
 	// 요약 -> 이방식은 비효율적임. 추후 수정할거같음
 	FlushCommandQueue();
+	
+	wstring caption = m_MainWndCaption;
+	m_pTimer->GetFrameRate(&caption, 10);
+	::SetWindowText(m_hMainWnd, caption.c_str());
 }

@@ -106,7 +106,7 @@ protected:
 	UINT m_CbvSrvUavDescriptorSize = 0;
 
 	// 파생클래스는 자신의 생성자에서 이 멤버 변수들을 자신의 목적에 맞는 초기값들로 설정할 것
-	std::wstring m_MainWndCaption = L"Prototype";
+	std::wstring m_MainWndCaption = L"Client_Prototype";
 	D3D_DRIVER_TYPE m_d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
