@@ -38,6 +38,12 @@
     <Filter Include="02.Utility\04.CustumVertex">
       <UniqueIdentifier>{27602baf-1504-41bb-a91e-f30843eda3a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\05.Object">
+      <UniqueIdentifier>{714b7b2d-b7d1-4eec-83f3-4b02552b75de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\05.Object\00.Test_Box">
+      <UniqueIdentifier>{703d5fc4-d4c8-4e48-8676-84940061871a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -82,6 +88,12 @@
     <ClInclude Include="Client_Prototype.h">
       <Filter>01.FrameWork</Filter>
     </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>02.Utility\05.Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Box.h">
+      <Filter>02.Utility\05.Object\00.Test_Box</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -110,6 +122,12 @@
     </ClCompile>
     <ClCompile Include="Client_Prototype.cpp">
       <Filter>01.FrameWork</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>02.Utility\05.Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>02.Utility\05.Object\00.Test_Box</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

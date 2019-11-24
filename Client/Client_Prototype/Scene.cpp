@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "D3DApp.h"
+#include "Box.h"
+#include "Camera.h"
+
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
@@ -10,6 +13,11 @@ CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> p
 
 CScene::~CScene()
 {
+	if (m_pCamera)
+		delete m_pCamera;
+	if (m_pBox)
+		delete m_pBox;
+
 }
 
 bool CScene::Initialize()
@@ -21,6 +29,7 @@ bool CScene::Initialize()
 	BuildBoxGeometry();
 	BuildPSO();
 
+	m_pBox = new CBox;
 	return true;
 }
 
@@ -51,13 +60,19 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Update(float fTimeElapsed)
 {
+	if (m_pCamera)
+		m_pCamera->Update(fTimeElapsed);
+
+	if (m_pBox)
+		m_pBox->Update(fTimeElapsed);
+
 	float x = mRadius * sinf(mPhi)*cosf(mTheta);
 	float z = mRadius * sinf(mPhi)*sinf(mTheta);
 	float y = mRadius * cosf(mPhi);
 
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
-	XMVECTOR target = XMVectorZero();
+	XMVECTOR target = m_pBox->GetPos();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
@@ -71,10 +86,13 @@ void CScene::Update(float fTimeElapsed)
 	ObjectConstants objConstants;
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 	m_ObjectCB->CopyData(0, objConstants);
+
 }
 
 void CScene::Render()
 {
+	
+
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
 	m_GraphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -90,7 +108,7 @@ void CScene::Render()
 		m_BoxGeo->DrawArgs["box"].IndexCount,
 		1, 0, 0, 0);
 
-	
+	m_pBox->Render();
 }
 
 void CScene::ReleaseUploadBuffers()

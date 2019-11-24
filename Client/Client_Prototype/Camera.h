@@ -47,6 +47,8 @@ public:
 	CCamera(CCamera* pCamera);
 	virtual ~CCamera();
 public:
+	virtual void Update(float fTimeElapsed);
+
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);

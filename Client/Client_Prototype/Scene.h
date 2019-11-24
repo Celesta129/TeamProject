@@ -2,6 +2,7 @@
 #include "../Common/UploadBuffer.h"
 class CGameObject;
 class CCamera;
+class CBox;
 
 class CScene
 {
@@ -46,7 +47,6 @@ protected:
 	float mPhi = XM_PIDIV4;
 	float mRadius = 5.0f;
 
-
 	unique_ptr<UploadBuffer<ObjectConstants>> m_ObjectCB = nullptr; // Object Constant Buffer
 	unique_ptr<MeshGeometry> m_BoxGeo = nullptr;
 
@@ -70,5 +70,6 @@ protected:
 
 protected:
 	CCamera* m_pCamera = nullptr;
+	CBox* m_pBox = nullptr;
 };
 
