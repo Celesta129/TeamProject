@@ -3,6 +3,7 @@
 class CGameObject;
 class CCamera;
 class CBox;
+class CBoxMesh;
 
 class CScene
 {
@@ -45,9 +46,11 @@ protected:
 
 	float mTheta = 1.5f*XM_PI;
 	float mPhi = XM_PIDIV4;
-	float mRadius = 5.0f;
+	float mRadius = 750.0f;
 
 	unique_ptr<UploadBuffer<ObjectConstants>> m_ObjectCB = nullptr; // Object Constant Buffer
+	unique_ptr<UploadBuffer<CameraConstants>> m_CamCB = nullptr;
+
 	unique_ptr<MeshGeometry> m_BoxGeo = nullptr;
 
 protected:
@@ -71,5 +74,6 @@ protected:
 protected:
 	CCamera* m_pCamera = nullptr;
 	CBox* m_pBox = nullptr;
+	CBoxMesh* m_pBoxMesh = nullptr;
 };
 

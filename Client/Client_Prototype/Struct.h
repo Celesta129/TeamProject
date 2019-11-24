@@ -7,3 +7,7 @@ struct Vertex
 struct ObjectConstants {
 	XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
 };
+
+struct CameraConstants {
+	XMFLOAT4X4 ViewProj = MathHelper::Identity4x4();
+};

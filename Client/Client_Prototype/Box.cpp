@@ -1,9 +1,10 @@
 #include "Box.h"
-
+#include "Mesh.h"
 
 
 CBox::CBox()
 {
+	
 }
 
 
@@ -13,23 +14,25 @@ CBox::~CBox()
 
 void CBox::Update(float fTimeElapsed)
 {
-	m_Pos.x += 1 * fTimeElapsed;
+	//m_Pos.x += 1 * fTimeElapsed;
 }
 
-void CBox::Render(void)
+void CBox::Render(ID3D12GraphicsCommandList* pCommandList)
 {
-	/*ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
-	m_GraphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	MeshGeometry* pMeshGeo = m_pMesh->GetMeshGeo();
 
-	m_GraphicsCommandList->SetGraphicsRootSignature(m_d3dGraphicsRootSignature.Get());
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
+	pCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	m_GraphicsCommandList->IASetVertexBuffers(0, 1, &m_BoxGeo->VertexBufferView());
-	m_GraphicsCommandList->IASetIndexBuffer(&m_BoxGeo->IndexBufferView());
-	m_GraphicsCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pCommandList->SetGraphicsRootSignature(m_d3dGraphicsRootSignature.Get());
 
-	m_GraphicsCommandList->SetGraphicsRootDescriptorTable(0, m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+	pCommandList->IASetVertexBuffers(0, 1, &pMeshGeo->VertexBufferView());
+	pCommandList->IASetIndexBuffer(&pMeshGeo->IndexBufferView());
+	pCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	m_GraphicsCommandList->DrawIndexedInstanced(
-		m_BoxGeo->DrawArgs["box"].IndexCount,
-		1, 0, 0, 0);*/
+	pCommandList->SetGraphicsRootDescriptorTable(0, m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+
+	pCommandList->DrawIndexedInstanced(
+		pMeshGeo->DrawArgs["box"].IndexCount,
+		1, 0, 0, 0);
 }

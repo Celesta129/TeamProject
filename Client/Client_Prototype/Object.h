@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "../Common/UploadBuffer.h"
 
+class CMesh;
+
 class CObject
 {
 protected:
@@ -10,24 +12,23 @@ protected:
 
 public:
 	virtual void Update(float fTimeElapsed);
-	virtual void Render(void);
+	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:
 	XMVECTOR GetPos(void);
-
+	XMVECTOR GetScale(void);
+public:
+	void SetMesh(CMesh* pMesh) {
+		m_pMesh = pMesh;
+	};
 protected:
 	
 	XMFLOAT3 m_Pos;
-
-
-	XMFLOAT4X4 mWorld = MathHelper::Identity4x4();
-	XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
-
-	float mTheta = 1.5f*XM_PI;
-	float mPhi = XM_PIDIV4;
-	float mRadius = 5.0f;
+	XMFLOAT3 m_Scale;
+	XMFLOAT3 m_Rotate;
 
 	UploadBuffer<ObjectConstants>* m_pConstantBuffer;
+
+	CMesh* m_pMesh = nullptr;
 };
 

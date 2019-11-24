@@ -44,6 +44,9 @@
     <Filter Include="02.Utility\05.Object\00.Test_Box">
       <UniqueIdentifier>{703d5fc4-d4c8-4e48-8676-84940061871a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\06.Mesh">
+      <UniqueIdentifier>{97f70443-6380-4a58-89c3-a7cbc367ae08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -94,6 +97,9 @@
     <ClInclude Include="Box.h">
       <Filter>02.Utility\05.Object\00.Test_Box</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>02.Utility\06.Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -128,6 +134,9 @@
     </ClCompile>
     <ClCompile Include="Box.cpp">
       <Filter>02.Utility\05.Object\00.Test_Box</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>02.Utility\06.Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 #include "D3DApp.h"
 #include "Box.h"
 #include "Camera.h"
-
+#include "Mesh.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
@@ -17,7 +17,8 @@ CScene::~CScene()
 		delete m_pCamera;
 	if (m_pBox)
 		delete m_pBox;
-
+	if (m_pBoxMesh)
+		delete m_pBoxMesh;
 }
 
 bool CScene::Initialize()
@@ -28,8 +29,12 @@ bool CScene::Initialize()
 	BuildShadersAndInputLayout();
 	BuildBoxGeometry();
 	BuildPSO();
-
+	
+	m_pBoxMesh = new CBoxMesh(m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pBox = new CBox;
+	m_pBox->SetMesh(m_pBoxMesh);
+	m_pCamera = new CCamera;
+
 	return true;
 }
 
@@ -60,8 +65,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Update(float fTimeElapsed)
 {
-	if (m_pCamera)
-		m_pCamera->Update(fTimeElapsed);
+	//if (m_pCamera)
+		//m_pCamera->Update(fTimeElapsed);
 
 	if (m_pBox)
 		m_pBox->Update(fTimeElapsed);
@@ -71,28 +76,38 @@ void CScene::Update(float fTimeElapsed)
 	float y = mRadius * cosf(mPhi);
 
 	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
-	XMVECTOR target = m_pBox->GetPos();
+	XMVECTOR boxPos = m_pBox->GetPos();
+
+	XMVECTOR pos = boxPos + XMVectorSet(x, y, z, 0.0f);
+	XMVECTOR target = boxPos; m_pBox->GetPos();//XMVectorZero();
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	
+	XMMATRIX scale = XMMatrixScaling(50.f, 100.f, 50.f);
 
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, view);
-
+	
 	XMMATRIX world = XMLoadFloat4x4(&mWorld);
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
-	XMMATRIX worldViewProj = world * view*proj;
+	
+	XMMATRIX ViewProj = view * proj;
+	XMMATRIX worldViewProj = scale * world * view*proj;
 
 	// Update the constant buffer with the latest worldViewProj matrix.
+
+	CameraConstants camConstants;
+	XMStoreFloat4x4(&camConstants.ViewProj, XMMatrixTranspose(ViewProj));
+
 	ObjectConstants objConstants;
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 	m_ObjectCB->CopyData(0, objConstants);
+
 
 }
 
 void CScene::Render()
 {
-	
-
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
 	m_GraphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -108,7 +123,7 @@ void CScene::Render()
 		m_BoxGeo->DrawArgs["box"].IndexCount,
 		1, 0, 0, 0);
 
-	m_pBox->Render();
+	m_pBox->Render(m_GraphicsCommandList.Get());
 }
 
 void CScene::ReleaseUploadBuffers()
@@ -117,6 +132,8 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::OnResize(float fAspectRatio)
 {
+	if (m_pCamera)
+		m_pCamera->GenerateProjectionMatrix(1.0f, 1000.f, fAspectRatio, 0.25 * MathHelper::Pi);
 	// The window resized, so update the aspect ratio and recompute the projection matrix.
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, fAspectRatio, 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
@@ -126,7 +143,7 @@ void CScene::OnResize(float fAspectRatio)
 void CScene::BuildDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.NumDescriptors = 1;		// 0번  : 카메라, 1번 : 오브젝트
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
@@ -137,6 +154,24 @@ void CScene::BuildDescriptorHeaps()
 
 void CScene::BuildConstantBuffers(void)
 {
+	/*m_CamCB = std::make_unique<UploadBuffer<CameraConstants>>(m_d3dDevice.Get(), 1, true);
+	
+	UINT camCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(CameraConstants));
+
+	D3D12_GPU_VIRTUAL_ADDRESS cbAddress = m_CamCB->Resource()->GetGPUVirtualAddress();
+
+	int camCBufIndex = 0;
+	cbAddress += camCBufIndex * camCBByteSize;
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+
+	cbvDesc.BufferLocation = cbAddress;
+	cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(CameraConstants));
+	m_d3dDevice->CreateConstantBufferView(
+		&cbvDesc,
+		m_CbvHeap->GetCPUDescriptorHandleForHeapStart());*/
+
+	////////////////////////////////////////////////////////////////////////////////////////
 	m_ObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(m_d3dDevice.Get(), 1, true);
 
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
@@ -207,14 +242,14 @@ void CScene::BuildBoxGeometry(void)
 {
 	std::array<Vertex, 8> vertices =
 	{
-		Vertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
-		Vertex({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
+		Vertex({ XMFLOAT3(-1.f, -1.f, -1.f), XMFLOAT4(Colors::White) }),
+		Vertex({ XMFLOAT3(-1.f, +1.f, -1.f), XMFLOAT4(Colors::Black) }),
+		Vertex({ XMFLOAT3(+1.f, +1.f, -1.f), XMFLOAT4(Colors::Red) }),
+		Vertex({ XMFLOAT3(+1.f, -1.f, -1.f), XMFLOAT4(Colors::Green) }),
+		Vertex({ XMFLOAT3(-1.f, -1.f, +1.f), XMFLOAT4(Colors::Blue) }),
+		Vertex({ XMFLOAT3(-1.f, +1.f, +1.f), XMFLOAT4(Colors::Yellow) }),
+		Vertex({ XMFLOAT3(+1.f, +1.f, +1.f), XMFLOAT4(Colors::Cyan) }),
+		Vertex({ XMFLOAT3(+1.f, -1.f, +1.f), XMFLOAT4(Colors::Magenta) })
 	};
 
 	std::array<std::uint16_t, 36> indices =

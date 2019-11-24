@@ -1,8 +1,12 @@
-cbuffer cbPerObject : register(b0)
+//cbuffer cbPerObject : register(b0)
+//{
+//	float4x4 gWorldViewProj;
+//};
+cbuffer cbCamera : register(b0)
 {
 	float4x4 gWorldViewProj;
-};
-
+	//float4x4 gProj;
+}
 struct VertexIn
 {
 	float3 PosL  : POSITION;
