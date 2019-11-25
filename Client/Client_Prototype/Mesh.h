@@ -18,6 +18,11 @@ protected:
 	ComPtr<ID3D12GraphicsCommandList> m_GraphicsCommandList;
 
 	unique_ptr<MeshGeometry> m_MeshGeo;
+
+	//DrawIndexedInstnaced 매개변수
+	UINT m_IndexCount = 0;
+	UINT StartIndexLocation = 0;
+	UINT BaseVertexLocation = 0;
 };
 
 class CBoxMesh : public CMesh 

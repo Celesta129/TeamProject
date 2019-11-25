@@ -15,19 +15,17 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:
-	XMVECTOR GetPos(void);
-	XMVECTOR GetScale(void);
+	XMFLOAT4X4 GetWorld(void);
+	XMFLOAT3 GetPos(void);
+	XMFLOAT3 GetScale(void);
 public:
 	void SetMesh(CMesh* pMesh) {
 		m_pMesh = pMesh;
 	};
 protected:
-	
-	XMFLOAT3 m_Pos;
-	XMFLOAT3 m_Scale;
-	XMFLOAT3 m_Rotate;
+	XMFLOAT4X4 m_World = MathHelper::Identity4x4();
 
-	UploadBuffer<ObjectConstants>* m_pConstantBuffer;
+	UINT m_ObjCBIndex = -1;		// 상수 버퍼 인덱스
 
 	CMesh* m_pMesh = nullptr;
 };

@@ -15,6 +15,9 @@ public:
 	virtual bool Initialize(HINSTANCE hInstance) override;
 
 private:
+	virtual void FlushCommandQueue(void);
+
+private:
 	virtual void OnResize() override;
 	virtual void Update(CTimer* const gt)override;
 	virtual void Draw(CTimer* const gt)override;

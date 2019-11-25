@@ -65,8 +65,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 void CScene::Update(float fTimeElapsed)
 {
-	//if (m_pCamera)
-		//m_pCamera->Update(fTimeElapsed);
+	if (m_pCamera)
+		m_pCamera->Update(fTimeElapsed);
 
 	if (m_pBox)
 		m_pBox->Update(fTimeElapsed);
@@ -76,31 +76,28 @@ void CScene::Update(float fTimeElapsed)
 	float y = mRadius * cosf(mPhi);
 
 	// Build the view matrix.
-	XMVECTOR boxPos = m_pBox->GetPos();
-
-	XMVECTOR pos = boxPos + XMVectorSet(x, y, z, 0.0f);
-	XMVECTOR target = boxPos; m_pBox->GetPos();//XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	
 	XMMATRIX scale = XMMatrixScaling(50.f, 100.f, 50.f);
 
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+	XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetViewMatrix());
 	XMStoreFloat4x4(&mView, view);
 	
-	XMMATRIX world = XMLoadFloat4x4(&mWorld);
-	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+	XMMATRIX world = XMLoadFloat4x4(&m_pBox->GetWorld());
+	XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetProjectionMatrix());
 	
 	XMMATRIX ViewProj = view * proj;
-	XMMATRIX worldViewProj = scale * world * view*proj;
+	XMMATRIX worldViewProj = world * view*proj;
 
 	// Update the constant buffer with the latest worldViewProj matrix.
 
 	CameraConstants camConstants;
-	XMStoreFloat4x4(&camConstants.ViewProj, XMMatrixTranspose(ViewProj));
+	XMStoreFloat4x4(&camConstants.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&camConstants.Proj, XMMatrixTranspose(proj));
+	m_CamCB->CopyData(0, camConstants);
 
 	ObjectConstants objConstants;
-	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+	XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
 	m_ObjectCB->CopyData(0, objConstants);
 
 
@@ -143,7 +140,7 @@ void CScene::OnResize(float fAspectRatio)
 void CScene::BuildDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-	cbvHeapDesc.NumDescriptors = 1;		// 0번  : 카메라, 1번 : 오브젝트
+	cbvHeapDesc.NumDescriptors = 2;		// 0번  : 카메라, 1번 : 오브젝트
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
@@ -154,22 +151,22 @@ void CScene::BuildDescriptorHeaps()
 
 void CScene::BuildConstantBuffers(void)
 {
-	/*m_CamCB = std::make_unique<UploadBuffer<CameraConstants>>(m_d3dDevice.Get(), 1, true);
+	m_CamCB = std::make_unique<UploadBuffer<CameraConstants>>(m_d3dDevice.Get(), 1, true);
 	
 	UINT camCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(CameraConstants));
 
-	D3D12_GPU_VIRTUAL_ADDRESS cbAddress = m_CamCB->Resource()->GetGPUVirtualAddress();
+	D3D12_GPU_VIRTUAL_ADDRESS cam_cbAddress = m_CamCB->Resource()->GetGPUVirtualAddress();
 
 	int camCBufIndex = 0;
-	cbAddress += camCBufIndex * camCBByteSize;
+	cam_cbAddress += camCBufIndex * camCBByteSize;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 
-	cbvDesc.BufferLocation = cbAddress;
+	cbvDesc.BufferLocation = cam_cbAddress;
 	cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(CameraConstants));
 	m_d3dDevice->CreateConstantBufferView(
 		&cbvDesc,
-		m_CbvHeap->GetCPUDescriptorHandleForHeapStart());*/
+		m_CbvHeap->GetCPUDescriptorHandleForHeapStart());
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	m_ObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(m_d3dDevice.Get(), 1, true);
@@ -180,8 +177,8 @@ void CScene::BuildConstantBuffers(void)
 	// Offset to the ith object constant buffer in the buffer.
 	int boxCBufIndex = 0;
 	cbAddress += boxCBufIndex * objCBByteSize;
-
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	
+	//D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = cbAddress;
 	cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
@@ -193,15 +190,20 @@ void CScene::BuildConstantBuffers(void)
 void CScene::BuildRootSignature(void)
 {
 	// 루트 매개변수는 서술자 테이블이거나 루트 서술자 또는 루트 상수이다
-	CD3DX12_ROOT_PARAMETER slotRootParameter[1];
+	CD3DX12_ROOT_PARAMETER slotRootParameter[2];
 
 	// CBV 하나를 담는 서술자 테이블을 생성한다.
 	CD3DX12_DESCRIPTOR_RANGE cbvTable;
+	CD3DX12_DESCRIPTOR_RANGE cbvTable2;
 	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	cbvTable2.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+
 	slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
+	slotRootParameter[1].InitAsDescriptorTable(1, &cbvTable2);
 
 	// 루트서명은 루트 매개변수들의 배열이다
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr,
+	int numCBV = 2;
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(numCBV, slotRootParameter, 0, nullptr,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	// 상수버퍼 하나로 구성된 서술자 구간을 가리키는

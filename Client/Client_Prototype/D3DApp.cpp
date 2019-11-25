@@ -2,6 +2,7 @@
 #include "D3DApp.h"
 
 #include <WindowsX.h>
+const int gNumFrameResources = 3;
 
 CD3DApp::CD3DApp()
 {
@@ -553,7 +554,7 @@ void CD3DApp::CreateSwapChain()
 
 void CD3DApp::FlushCommandQueue()
 {
-	m_nFenceValue++;
+	
 	ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), m_nFenceValue));
 
 	// Wait until the GPU has completed commands up to this fence point.

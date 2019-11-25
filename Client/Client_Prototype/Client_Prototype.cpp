@@ -68,6 +68,10 @@ bool CGameFramework_Client::Initialize(HINSTANCE hInstance)
 	return true;
 }
 
+void CGameFramework_Client::FlushCommandQueue(void)
+{
+}
+
 void CGameFramework_Client::OnResize()
 {
 	CD3DApp::OnResize();
@@ -81,7 +85,7 @@ void CGameFramework_Client::Update(CTimer * const gt)
 	float fTimeElapsed = gt->GetTimeElapsed();
 
 	if(m_pScene)
-		m_pScene->Update(fTimeElapsed);
+		m_pScene->Update(fTimeElapsed, m_Fence.Get());
 }
 
 void CGameFramework_Client::Draw(CTimer * const gt)
@@ -121,8 +125,6 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-
-
 	// 명령리스트 작성 끝
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
@@ -134,12 +136,8 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	ThrowIfFailed(m_dxgiSwapChain->Present(0, 0));
 	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_iSwapChainBufferCount;
 
-	// Wait until frame commands are complete.  This waiting is inefficient and is
-	// done for simplicity.  Later we will show how to organize our rendering code
-	// so we do not have to wait per frame.
-	
-	// cpu-gpu 동기화를 위한 펜스. 프레임마다 펜스를 기다린다.
-	// 요약 -> 이방식은 비효율적임. 추후 수정할거같음
-	FlushCommandQueue();
-	
+
+	m_pScene->GetCurrentFrameResource()->Fence = ++m_nFenceValue;
+	m_CommandQueue->Signal(m_Fence.Get(), m_nFenceValue);
+
 }

@@ -4,6 +4,8 @@
 
 CCamera::CCamera()
 {
+	//m_xmf3Position = XMFLOAT3(0.f, sqrtf(750.f), sqrtf(750.f));
+	m_xmf3Position = XMFLOAT3(0.f, sqrtf(5.f), sqrtf(5.f));
 }
 
 CCamera::CCamera(CCamera * pCamera)
@@ -50,7 +52,7 @@ void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMF
 
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
 {
-	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, fAspectRatio, 1.0f, 1000.0f);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(fFOVAngle, fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 	XMStoreFloat4x4(&m_xmf4x4Projection, P);
 }
 

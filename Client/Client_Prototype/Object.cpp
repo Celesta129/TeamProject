@@ -21,14 +21,17 @@ void CObject::Render(ID3D12GraphicsCommandList* pCommandList)
 
 }
 
-XMVECTOR CObject::GetPos(void)
+XMFLOAT4X4 CObject::GetWorld(void)
 {
-	XMVECTOR result = XMVectorSet(m_Pos.x, m_Pos.y, m_Pos.z, 0.f);
-	return result;
+	return m_World;
 }
 
-XMVECTOR CObject::GetScale(void)
+XMFLOAT3 CObject::GetPos(void)
 {
-	
-	return XMVECTOR();
+	return XMFLOAT3(m_World.m[3][0], m_World.m[3][1], m_World.m[3][2]);
+}
+
+XMFLOAT3 CObject::GetScale(void)
+{
+	return XMFLOAT3(m_World.m[3][0], m_World.m[3][1], m_World.m[3][2]);
 }
