@@ -19,20 +19,10 @@ void CBox::Update(float fTimeElapsed)
 
 void CBox::Render(ID3D12GraphicsCommandList* pCommandList)
 {
-	/*MeshGeometry* pMeshGeo = m_pMesh->GetMeshGeo();
-
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
-	pCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-	pCommandList->SetGraphicsRootSignature(m_d3dGraphicsRootSignature.Get());
+	MeshGeometry* pMeshGeo = m_RenderItem.Mesh->GetMeshGeo();
 
 	pCommandList->IASetVertexBuffers(0, 1, &pMeshGeo->VertexBufferView());
 	pCommandList->IASetIndexBuffer(&pMeshGeo->IndexBufferView());
-	pCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pCommandList->IASetPrimitiveTopology(m_RenderItem.PrimitiveType);
 
-	pCommandList->SetGraphicsRootDescriptorTable(0, m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
-
-	pCommandList->DrawIndexedInstanced(
-		pMeshGeo->DrawArgs["box"].IndexCount,
-		1, 0, 0, 0);*/
 }

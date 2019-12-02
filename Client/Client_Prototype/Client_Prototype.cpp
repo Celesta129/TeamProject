@@ -53,7 +53,7 @@ bool CGameFramework_Client::Initialize(HINSTANCE hInstance)
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
 	m_pScene = new CScene(m_d3dDevice, m_GraphicsCommandList);
-	if (!m_pScene->Initialize())
+	if (!m_pScene->Initialize(m_CbvSrvUavDescriptorSize))
 	{
 		delete m_pScene;
 		return false;
@@ -95,10 +95,11 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	if (m_pScene) {
 		ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), m_pScene->GetPipelineStates().Get()));
 	}
+	/*
 	else {
 		ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 	}
-
+	*/
 
 
 	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
@@ -119,7 +120,7 @@ void CGameFramework_Client::Draw(CTimer * const gt)
 	
 	// 씬 렌더링
 	if(m_pScene)
-		m_pScene->Render();
+		m_pScene->Render(m_CbvSrvUavDescriptorSize);
 
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),

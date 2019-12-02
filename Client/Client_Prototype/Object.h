@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "../Common/UploadBuffer.h"
 
+#include "RenderItem.h"
+
 class CMesh;
 
 class CObject
@@ -18,15 +20,15 @@ public:
 	XMFLOAT4X4 GetWorld(void);
 	XMFLOAT3 GetPos(void);
 	XMFLOAT3 GetScale(void);
+
+	RenderItem* GetRenderItem(void);
+	UINT GetObjCBIndex(void);
+	UINT GetStartIndexLocation(void);
+	UINT GetBaseVertexLocation(void);
 public:
-	void SetMesh(CMesh* pMesh) {
-		m_pMesh = pMesh;
-	};
+	void SetMesh(CMesh* pMesh);
+	
 protected:
-	XMFLOAT4X4 m_World = MathHelper::Identity4x4();
-
-	UINT m_ObjCBIndex = -1;		// 상수 버퍼 인덱스
-
-	CMesh* m_pMesh = nullptr;
+	RenderItem m_RenderItem;
 };
 

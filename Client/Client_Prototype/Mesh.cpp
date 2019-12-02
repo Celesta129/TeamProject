@@ -3,8 +3,7 @@
 
 
 
-CMesh::CMesh(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pCommandList)
-	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
+CMesh::CMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
 {
 }
 
@@ -13,22 +12,22 @@ CMesh::~CMesh()
 {
 }
 
-void CMesh::BuildMeshGeo(void)
+void CMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList * pCommandList)
 {
 	
 }
 
-CBoxMesh::CBoxMesh(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pCommandList)
+CBoxMesh::CBoxMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
 	:CMesh(pDevice, pCommandList)
 {
-	BuildMeshGeo();
+	BuildMeshGeo(pDevice, pCommandList);
 }
 
 CBoxMesh::~CBoxMesh()
 {
 }
 
-void CBoxMesh::BuildMeshGeo(void)
+void CBoxMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
 {
 	std::array<Vertex, 8> vertices =
 	{
@@ -81,11 +80,11 @@ void CBoxMesh::BuildMeshGeo(void)
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &m_MeshGeo->IndexBufferCPU));
 	CopyMemory(m_MeshGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-	m_MeshGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_d3dDevice.Get(),
-		m_GraphicsCommandList.Get(), vertices.data(), vbByteSize, m_MeshGeo->VertexBufferUploader);
+	m_MeshGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(pDevice,
+		pCommandList, vertices.data(), vbByteSize, m_MeshGeo->VertexBufferUploader);
 
-	m_MeshGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(m_d3dDevice.Get(),
-		m_GraphicsCommandList.Get(), indices.data(), ibByteSize, m_MeshGeo->IndexBufferUploader);
+	m_MeshGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(pDevice,
+		pCommandList, indices.data(), ibByteSize, m_MeshGeo->IndexBufferUploader);
 
 	m_MeshGeo->VertexByteStride = sizeof(Vertex);
 	m_MeshGeo->VertexBufferByteSize = vbByteSize;

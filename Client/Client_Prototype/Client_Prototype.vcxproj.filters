@@ -47,6 +47,9 @@
     <Filter Include="02.Utility\06.Mesh">
       <UniqueIdentifier>{97f70443-6380-4a58-89c3-a7cbc367ae08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\07.RenderItem">
+      <UniqueIdentifier>{8bdf9717-73ab-4ead-ae26-acc75659be10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -100,6 +103,12 @@
     <ClInclude Include="Mesh.h">
       <Filter>02.Utility\06.Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderItem.h">
+      <Filter>02.Utility\07.RenderItem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -137,6 +146,12 @@
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>02.Utility\06.Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderItem.cpp">
+      <Filter>02.Utility\07.RenderItem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
