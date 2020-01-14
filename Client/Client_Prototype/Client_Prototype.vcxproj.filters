@@ -17,15 +17,6 @@
     <Filter Include="02.Utility">
       <UniqueIdentifier>{98a4304a-e5a1-4bf8-b10f-d39790b1fc04}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\01.Timer">
-      <UniqueIdentifier>{19a28ae7-e205-4e89-86c4-b1efae2835dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\02.Camera">
-      <UniqueIdentifier>{cf2e6e46-d7d0-49a8-9ba4-d35b1338a03b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\03.Scene">
-      <UniqueIdentifier>{84042148-b4d0-45be-8c55-b841a69bca5e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.FrameWork\D3DApp">
       <UniqueIdentifier>{527c0112-d3e7-49a5-8d2e-ce8007239843}</UniqueIdentifier>
     </Filter>
@@ -35,20 +26,11 @@
     <Filter Include="03.Shaders">
       <UniqueIdentifier>{e0c69fbe-ee0b-4382-849c-34c65e081047}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.CustumVertex">
-      <UniqueIdentifier>{27602baf-1504-41bb-a91e-f30843eda3a5}</UniqueIdentifier>
+    <Filter Include="02.Utility\01.GameTimer">
+      <UniqueIdentifier>{77b9810d-6d86-4458-a689-3b195fbc77bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\05.Object">
-      <UniqueIdentifier>{714b7b2d-b7d1-4eec-83f3-4b02552b75de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\05.Object\00.Test_Box">
-      <UniqueIdentifier>{703d5fc4-d4c8-4e48-8676-84940061871a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\06.Mesh">
-      <UniqueIdentifier>{97f70443-6380-4a58-89c3-a7cbc367ae08}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\07.RenderItem">
-      <UniqueIdentifier>{8bdf9717-73ab-4ead-ae26-acc75659be10}</UniqueIdentifier>
+    <Filter Include="04.RenderItem">
+      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,15 +42,6 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>00.stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>02.Utility\01.Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>02.Utility\02.Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>02.Utility\03.Scene</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp.h">
       <Filter>01.FrameWork\D3DApp</Filter>
@@ -94,37 +67,22 @@
     <ClInclude Include="Client_Prototype.h">
       <Filter>01.FrameWork</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>02.Utility\05.Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Box.h">
-      <Filter>02.Utility\05.Object\00.Test_Box</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>02.Utility\06.Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="FrameResource.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="RenderItem.h">
-      <Filter>02.Utility\07.RenderItem</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\GeometryGenerator.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>02.Utility\01.GameTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderItem.h">
+      <Filter>04.RenderItem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>00.stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>02.Utility\01.Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>02.Utility\02.Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>02.Utility\03.Scene</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp.cpp">
       <Filter>01.FrameWork\D3DApp</Filter>
@@ -141,23 +99,17 @@
     <ClCompile Include="Client_Prototype.cpp">
       <Filter>01.FrameWork</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>02.Utility\05.Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>02.Utility\05.Object\00.Test_Box</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>02.Utility\06.Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="FrameResource.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="RenderItem.cpp">
-      <Filter>02.Utility\07.RenderItem</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\GeometryGenerator.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>02.Utility\01.GameTimer</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderItem.cpp">
+      <Filter>04.RenderItem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

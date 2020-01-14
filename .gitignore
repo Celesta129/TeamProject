@@ -13,3 +13,14 @@
 *.db
 /Client/Client_Prototype/x64
 *.res
+Client/Client_Prototype/Debug/timer.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/stdafx.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/renderitem.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/mathhelper.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/geometrygenerator.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/frameresource.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/ddstextureloader.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/d3dutil.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/d3dapp.nativecodeanalysis.xml
+Client/Client_Prototype/Debug/Client_Prototype.pch.codeanalysisast
+Client/Client_Prototype/Debug/Client_Prototype.pch.codeanalysis

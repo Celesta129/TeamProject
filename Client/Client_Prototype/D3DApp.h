@@ -3,15 +3,15 @@
 
 class CD3DApp
 {
-	static CD3DApp* m_pInstance;
+	static CD3DApp* m_pApp;
 protected:
-	CD3DApp();
+	CD3DApp(HINSTANCE hInstance);
 	CD3DApp(const CD3DApp& rhs) = delete;
 	CD3DApp& operator=(const CD3DApp& rhs) = delete;
 	virtual ~CD3DApp();
 
 public:
-	static CD3DApp* GetInstance(void);
+	static CD3DApp* GetApp(void);
 
 	HINSTANCE AppInst() const;
 	HWND MainWnd() const;
@@ -32,15 +32,15 @@ public:
 	}
 	int Run();
 
-	virtual bool Initialize(HINSTANCE hInstance);
+	virtual bool Initialize();
 	// 여기서부터
 	virtual LRESULT MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps();
 	virtual void OnResize();
-	virtual void Update(CTimer* const gt) = 0;
-	virtual void Draw(CTimer* const gt) = 0;
+	virtual void Update(CTimer& const gt) = 0;
+	virtual void Draw(CTimer& const gt) = 0;
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) {};
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) {};
@@ -87,7 +87,7 @@ protected:
 	bool m_b4xMsaaState = false;
 	UINT m_n4xMsaaQuality = 0;
 
-	CTimer* m_pTimer = nullptr;
+	CTimer m_Timer;
 
 	ComPtr<IDXGIFactory4> m_dxgiFactory = nullptr;
 	ComPtr<IDXGISwapChain> m_dxgiSwapChain = nullptr;

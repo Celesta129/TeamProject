@@ -4,24 +4,32 @@
 #include <WindowsX.h>
 const int gNumFrameResources = 3;
 
-CD3DApp::CD3DApp()
+LRESULT CALLBACK
+MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	
+	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
+	// before CreateWindow returns, and thus before mhMainWnd is valid.
+	return CD3DApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
+}
+
+CD3DApp::CD3DApp(HINSTANCE hInstance)
+	:m_hAppInst(hInstance)
+{
+	// Only one D3DApp can be constructed.
+	assert(m_pApp == nullptr);
+	m_pApp = this;
 }
 
 CD3DApp::~CD3DApp()
 {
 	if(m_d3dDevice != nullptr)
 		FlushCommandQueue();
-
-	if(m_pTimer != nullptr)
-		delete m_pTimer;
 }
 
-CD3DApp* CD3DApp::m_pInstance = nullptr;
-CD3DApp * CD3DApp::GetInstance(void)
+CD3DApp* CD3DApp::m_pApp = nullptr;
+CD3DApp * CD3DApp::GetApp(void)
 {
-	return m_pInstance;
+	return m_pApp;
 }
 
 HINSTANCE CD3DApp::AppInst() const
@@ -60,7 +68,7 @@ int CD3DApp::Run()
 {
 	MSG msg = { 0 };
 
-	m_pTimer->Reset();
+	m_Timer.Reset();
 
 	while (msg.message != WM_QUIT)
 	{
@@ -73,13 +81,13 @@ int CD3DApp::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-			m_pTimer->Tick();
+			m_Timer.Tick();
 
 			if (!m_bAppPaused)
 			{
 				CalculateFrameStats();
-				Update(m_pTimer);
-				Draw(m_pTimer);
+				Update(m_Timer);
+				Draw(m_Timer);
 			}
 			else
 			{
@@ -91,14 +99,8 @@ int CD3DApp::Run()
 	return (int)msg.wParam;
 }
 
-bool CD3DApp::Initialize(HINSTANCE hInstance)
+bool CD3DApp::Initialize()
 {
-	if (m_pInstance == nullptr)
-		m_pInstance = this;
-
-	m_pTimer = new CTimer();
-
-
 	if (!InitMainWindow())
 		return false;
 
@@ -106,7 +108,7 @@ bool CD3DApp::Initialize(HINSTANCE hInstance)
 		return false;
 
 	// Do the initial resize code.
-	// ¿©±â¼­ ·»´õÅ¸°Ù ºä, µª½º/½ºÅÙ½Ç ºä¸¦ »ý¼º
+	// ¿©±â¼­ ·»´õÅ¸°Ù ºä, µª½º/½ºÅÙ½Ç ºä¸¦ »ý¼º ÀÌ ÇÔ¼ö¸¦ Resize½Ã ´Ù½Ã È£ÃâÇÑ´Ù.
 	OnResize();
 
 	return true;
@@ -123,12 +125,12 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
 			m_bAppPaused = true;
-			m_pTimer->Stop();
+			m_Timer.Stop();
 		}
 		else
 		{
 			m_bAppPaused = false;
-			m_pTimer->Start();
+			m_Timer.Start();
 		}
 		return 0;
 
@@ -193,7 +195,7 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ENTERSIZEMOVE:
 		m_bAppPaused = true;
 		m_bResizing = true;
-		m_pTimer->Stop();
+		m_Timer.Stop();
 		return 0;
 
 		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
@@ -201,7 +203,7 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_EXITSIZEMOVE:
 		m_bAppPaused = false;
 		m_bResizing = false;
-		m_pTimer->Start();
+		m_Timer.Start();
 		OnResize();
 		return 0;
 
@@ -353,13 +355,7 @@ void CD3DApp::OnResize()
 
 	m_ScissorRect = { 0, 0, m_ClientWidth, m_ClientHeight };
 }
-LRESULT CALLBACK
-MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
-	// before CreateWindow returns, and thus before mhMainWnd is valid.
-	return CD3DApp::GetInstance()->MsgProc(hwnd, msg, wParam, lParam);
-}
+
 bool CD3DApp::InitMainWindow()
 {
 	WNDCLASS wc;
@@ -554,6 +550,8 @@ void CD3DApp::CreateSwapChain()
 
 void CD3DApp::FlushCommandQueue()
 {
+	// Advance the fence value to mark commands up to this fence point.
+	m_nFenceValue++;
 	
 	ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), m_nFenceValue));
 
@@ -583,7 +581,7 @@ void CD3DApp::CalculateFrameStats()
 	frameCnt++;
 
 	// Compute averages over one second period.
-	if ((m_pTimer->TotalTime() - timeElapsed) >= 1.0f)
+	if ((m_Timer.TotalTime() - timeElapsed) >= 1.0f)
 	{
 		float fps = (float)frameCnt; // fps = frameCnt / 1
 		float mspf = 1000.0f / fps;
@@ -605,13 +603,75 @@ void CD3DApp::CalculateFrameStats()
 
 void CD3DApp::LogAdapters()
 {
+	UINT i = 0;
+	IDXGIAdapter* adapter = nullptr;
+	std::vector<IDXGIAdapter*> adapterList;
+	while (m_dxgiFactory->EnumAdapters(i, &adapter) != DXGI_ERROR_NOT_FOUND)
+	{
+		DXGI_ADAPTER_DESC desc;
+		adapter->GetDesc(&desc);
+
+		std::wstring text = L"***Adapter: ";
+		text += desc.Description;
+		text += L"\n";
+
+		OutputDebugString(text.c_str());
+
+		adapterList.push_back(adapter);
+
+		++i;
+	}
+
+	for (size_t i = 0; i < adapterList.size(); ++i)
+	{
+		LogAdapterOutputs(adapterList[i]);
+		ReleaseCom(adapterList[i]);
+	}
 }
 
 void CD3DApp::LogAdapterOutputs(IDXGIAdapter * adapter)
 {
+	UINT i = 0;
+	IDXGIOutput* output = nullptr;
+	while (adapter->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
+	{
+		DXGI_OUTPUT_DESC desc;
+		output->GetDesc(&desc);
+
+		std::wstring text = L"***Output: ";
+		text += desc.DeviceName;
+		text += L"\n";
+		OutputDebugString(text.c_str());
+
+		LogOutputDisplayModes(output, m_BackBufferFormat);
+
+		ReleaseCom(output);
+
+		++i;
+	}
 }
 
 void CD3DApp::LogOutputDisplayModes(IDXGIOutput * output, DXGI_FORMAT format)
 {
-	
+	UINT count = 0;
+	UINT flags = 0;
+
+	// Call with nullptr to get list count.
+	output->GetDisplayModeList(format, flags, &count, nullptr);
+
+	std::vector<DXGI_MODE_DESC> modeList(count);
+	output->GetDisplayModeList(format, flags, &count, &modeList[0]);
+
+	for (auto& x : modeList)
+	{
+		UINT n = x.RefreshRate.Numerator;
+		UINT d = x.RefreshRate.Denominator;
+		std::wstring text =
+			L"Width = " + std::to_wstring(x.Width) + L" " +
+			L"Height = " + std::to_wstring(x.Height) + L" " +
+			L"Refresh = " + std::to_wstring(n) + L"/" + std::to_wstring(d) +
+			L"\n";
+
+		::OutputDebugString(text.c_str());
+	}
 }

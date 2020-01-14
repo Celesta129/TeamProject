@@ -2,12 +2,12 @@
 #include "stdafx.h"
 
 
-class CMesh;		//책에서는 MeshGeometry
-
 // Object가 그려지기 위해서 필요한 정보들을 모아놓는다.
 
 struct RenderItem
 {
+	RenderItem() = default;
+
 	XMFLOAT4X4 World = MathHelper::Identity4x4();
 
 	// 물체의 자료가 변해서 상수버퍼를 갱신해야하는지를 나타는 Dirty 플래그.
@@ -29,4 +29,3 @@ struct RenderItem
 	UINT StartIndexLocation = 0;
 	UINT BaseVertexLocation = 0;
 };
-
