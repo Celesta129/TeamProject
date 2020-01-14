@@ -9,7 +9,7 @@ public:
 	FrameResource& operator=(const FrameResource& rhs) = delete;
 	~FrameResource();
 
-	// 명령할당자는 GPU가 명령들을 다 처리한 후 재설정해야한므로 프레임마다 할당자가 필요함
+	// 명령할당자는 GPU가 명령들을 다 처리한 후 재설정해야하므로 프레임마다 할당자가 필요함
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CmdListAlloc;
 
 	// 상수버퍼는 참조하는 명령들을 GPU가 다 처리한 후에 갱신해야 함.

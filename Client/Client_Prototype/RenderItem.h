@@ -19,7 +19,7 @@ struct RenderItem
 
 	UINT ObjCBIndex = -1;		// 상수 버퍼 인덱스
 
-	CMesh* Mesh = nullptr;
+	MeshGeometry* Geo = nullptr;
 
 	// 위상구조
 	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

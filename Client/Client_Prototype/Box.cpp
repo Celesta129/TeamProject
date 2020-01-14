@@ -19,7 +19,7 @@ void CBox::Update(float fTimeElapsed)
 
 void CBox::Render(ID3D12GraphicsCommandList* pCommandList)
 {
-	MeshGeometry* pMeshGeo = m_RenderItem.Mesh->GetMeshGeo();
+	MeshGeometry* pMeshGeo = m_RenderItem.Geo;
 
 	pCommandList->IASetVertexBuffers(0, 1, &pMeshGeo->VertexBufferView());
 	pCommandList->IASetIndexBuffer(&pMeshGeo->IndexBufferView());

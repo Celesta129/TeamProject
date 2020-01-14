@@ -17,7 +17,7 @@ cbuffer cbPass : register(b1)
 	float gDeltaTime;
 };
 
-cbuffer cbPerObject : register(b1)
+cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;
 };

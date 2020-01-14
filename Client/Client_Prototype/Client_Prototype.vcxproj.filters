@@ -109,6 +109,9 @@
     <ClInclude Include="RenderItem.h">
       <Filter>02.Utility\07.RenderItem</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\GeometryGenerator.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -152,6 +155,9 @@
     </ClCompile>
     <ClCompile Include="RenderItem.cpp">
       <Filter>02.Utility\07.RenderItem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\GeometryGenerator.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

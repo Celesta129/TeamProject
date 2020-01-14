@@ -1,6 +1,7 @@
 #pragma once
 #include "../Common/UploadBuffer.h"
 #include "FrameResource.h"
+#include "Object.h"
 
 class CGameObject;
 class CCamera;
@@ -45,10 +46,13 @@ public:
 protected:
 	void BuildRootSignature(void);
 	void BuildDescriptorHeaps(void);
-	void BuildConstantBuffersViews(UINT CbvSrvUavDescriptorSize);
+	void BuildConstantBufferViews(UINT CbvSrvUavDescriptorSize);
 	void BuildShadersAndInputLayout(void);
-	void BuildPSO(void);
+	void BuildPSOs(void);
 	void BuildFrameResources(void);
+	void BuildShapeGeometry(void);
+	void BuildRenderItems(void);
+
 	void BuildMesh(void);
 	void BuildObject(void);
 
@@ -78,10 +82,12 @@ protected:
 
 	ComPtr<ID3D12PipelineState> m_PSO = nullptr;		// Pipeline State Object
 
-	vector<unique_ptr<CObject>> m_vAllObjects;	// 모든 오브젝트
 	vector<CObject*> m_vObjects;		// 같은 PSO를 사용하는 렌더링 오브젝트는 같은 목록에 둔다.
 protected:
 	CCamera* m_pCamera = nullptr;
 	CBoxMesh* m_pBoxMesh = nullptr;
+
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
+
 };
 

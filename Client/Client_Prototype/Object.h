@@ -8,7 +8,7 @@ class CMesh;
 
 class CObject
 {
-protected:
+public:
 	CObject();
 	virtual ~CObject();
 
@@ -17,7 +17,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:
-	XMFLOAT4X4 GetWorld(void);
+	XMFLOAT4X4* GetWorld(void);
 	XMFLOAT3 GetPos(void);
 	XMFLOAT3 GetScale(void);
 

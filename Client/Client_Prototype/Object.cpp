@@ -21,9 +21,9 @@ void CObject::Render(ID3D12GraphicsCommandList* pCommandList)
 
 }
 
-XMFLOAT4X4 CObject::GetWorld(void)
+XMFLOAT4X4* CObject::GetWorld(void)
 {
-	return m_RenderItem.World;
+	return &m_RenderItem.World;
 }
 
 XMFLOAT3 CObject::GetPos(void)
@@ -60,5 +60,5 @@ UINT CObject::GetBaseVertexLocation(void)
 
 void CObject::SetMesh(CMesh * pMesh)
 {
-	m_RenderItem.Mesh = pMesh;
+	//m_RenderItem.Mesh = pMesh;
 }
