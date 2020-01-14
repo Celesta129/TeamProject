@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "D3DApp.h"
+#include "RenderItem.h"
+#include "FrameResource.h"
 
 //class CScene;
 

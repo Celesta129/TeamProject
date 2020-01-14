@@ -3,8 +3,6 @@
 
 #include "Client_Prototype.h"
 #include "../Common/GeometryGenerator.h"
-#include "FrameResource.h"
-#include "RenderItem.h"
 
 #define MAX_LOADSTRING 100
 
