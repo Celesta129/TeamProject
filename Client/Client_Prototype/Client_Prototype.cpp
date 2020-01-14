@@ -358,6 +358,7 @@ void CGameFramework_Client::BuildConstantBufferViews()
 			// Offset to the object cbv in the descriptor heap.
 			int heapIndex = frameIndex * objCount + i;
 			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+			UINT Increase = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			handle.Offset(heapIndex, m_CbvSrvUavDescriptorSize);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
@@ -366,6 +367,8 @@ void CGameFramework_Client::BuildConstantBufferViews()
 
 			m_d3dDevice->CreateConstantBufferView(&cbvDesc, handle);
 			// 현재 문제 : 가능성 1.handle offset이 제대로 되지 않았다? -> DecriptorSize가 계산이 제대로 안된건가?
+			// 0번 버퍼뷰는 만들어놓고 1번부터 안됨.
+			// 확인결과 Descriptor HandleIncrementSize값이 128이 정상값이나 120으로 구해짐. 왜??
 			// 아니라면, ConstantBufferView를 만드는 과정을 알아보아야함.
 		}
 	}
