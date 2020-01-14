@@ -51,6 +51,14 @@ bool CGameFramework_Client::Initialize()
 		return false;
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
+	BuildRootSignature();
+	BuildShadersAndInputLayout();
+	BuildShapeGeometry();
+	BuildRenderItems();
+	BuildFrameResources();
+	BuildDescriptorHeaps();
+	BuildConstantBufferViews();
+	BuildPSOs();
 
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
