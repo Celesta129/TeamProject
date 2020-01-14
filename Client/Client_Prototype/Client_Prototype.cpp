@@ -365,6 +365,8 @@ void CGameFramework_Client::BuildConstantBufferViews()
 			cbvDesc.SizeInBytes = objCBByteSize;
 
 			m_d3dDevice->CreateConstantBufferView(&cbvDesc, handle);
+			// 현재 문제 : 가능성 1.handle offset이 제대로 되지 않았다? -> DecriptorSize가 계산이 제대로 안된건가?
+			// 아니라면, ConstantBufferView를 만드는 과정을 알아보아야함.
 		}
 	}
 
