@@ -358,7 +358,6 @@ void CGameFramework_Client::BuildConstantBufferViews()
 			// Offset to the object cbv in the descriptor heap.
 			int heapIndex = frameIndex * objCount + i;
 			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-			UINT Increase = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			handle.Offset(heapIndex, m_CbvSrvUavDescriptorSize);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;

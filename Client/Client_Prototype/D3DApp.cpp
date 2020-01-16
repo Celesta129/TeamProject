@@ -2,6 +2,7 @@
 #include "D3DApp.h"
 
 #include <WindowsX.h>
+
 const int gNumFrameResources = 3;
 
 LRESULT CALLBACK
