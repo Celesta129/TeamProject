@@ -108,9 +108,6 @@
     <ClCompile Include="Timer.cpp">
       <Filter>02.Utility\01.GameTimer</Filter>
     </ClCompile>
-    <ClCompile Include="RenderItem.cpp">
-      <Filter>04.RenderItem</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">
