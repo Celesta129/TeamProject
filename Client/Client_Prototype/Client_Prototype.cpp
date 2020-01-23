@@ -327,6 +327,7 @@ void CGameFramework_Client::BuildDescriptorHeaps()
 	UINT numDescriptors = (objCount + 1) * gNumFrameResources;
 
 	// Save an offset to the start of the pass CBVs.  These are the last 3 descriptors.
+	// 마지막 3개의 디스크립터(서술자)는 패스별 CBV를 위한것이다.
 	mPassCbvOffset = objCount * gNumFrameResources;
 
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
@@ -362,13 +363,9 @@ void CGameFramework_Client::BuildConstantBufferViews()
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 			cbvDesc.BufferLocation = cbAddress;
-			cbvDesc.SizeInBytes = objCBByteSize;
+			cbvDesc.SizeInBytes = objCBByteSize;	// 256바이트로 정렬되어야한다.
 
 			m_d3dDevice->CreateConstantBufferView(&cbvDesc, handle);
-			// 현재 문제 : 가능성 1.handle offset이 제대로 되지 않았다? -> DecriptorSize가 계산이 제대로 안된건가?
-			// 0번 버퍼뷰는 만들어놓고 1번부터 안됨.
-			// 확인결과 Descriptor HandleIncrementSize값이 128이 정상값이나 120으로 구해짐. 왜??
-			// 아니라면, ConstantBufferView를 만드는 과정을 알아보아야함.
 		}
 	}
 
@@ -625,41 +622,41 @@ void CGameFramework_Client::BuildRenderItems()
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	boxRitem->m_IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+	boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
 	boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(boxRitem));
 
-	auto gridRitem = std::make_unique<RenderItem>();
-	gridRitem->World = MathHelper::Identity4x4();
+    auto gridRitem = std::make_unique<RenderItem>();
+    gridRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(20.0f, 1.0f, 20.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 	gridRitem->ObjCBIndex = 1;
 	gridRitem->Geo = mGeometries["shapeGeo"].get();
 	gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	gridRitem->m_IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
-	gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
-	gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
+    gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
+    gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
+    gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(gridRitem));
 
 	UINT objCBIndex = 2;
-	for (int i = 0; i < 5; ++i)
+	for(int i = 0; i < 5; ++i)
 	{
 		auto leftCylRitem = std::make_unique<RenderItem>();
 		auto rightCylRitem = std::make_unique<RenderItem>();
 		auto leftSphereRitem = std::make_unique<RenderItem>();
 		auto rightSphereRitem = std::make_unique<RenderItem>();
 
-		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i * 5.0f);
-		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i * 5.0f);
+		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
+		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
 
-		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i * 5.0f);
-		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i * 5.0f);
+		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
+		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
 
 		XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
 		leftCylRitem->ObjCBIndex = objCBIndex++;
 		leftCylRitem->Geo = mGeometries["shapeGeo"].get();
 		leftCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftCylRitem->m_IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
+		leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
 		leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
 		leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
 
@@ -667,7 +664,7 @@ void CGameFramework_Client::BuildRenderItems()
 		rightCylRitem->ObjCBIndex = objCBIndex++;
 		rightCylRitem->Geo = mGeometries["shapeGeo"].get();
 		rightCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightCylRitem->m_IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
+		rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
 		rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
 		rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
 
@@ -675,7 +672,7 @@ void CGameFramework_Client::BuildRenderItems()
 		leftSphereRitem->ObjCBIndex = objCBIndex++;
 		leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
 		leftSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftSphereRitem->m_IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
+		leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
 		leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
 		leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
 
@@ -683,7 +680,7 @@ void CGameFramework_Client::BuildRenderItems()
 		rightSphereRitem->ObjCBIndex = objCBIndex++;
 		rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
 		rightSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightSphereRitem->m_IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
+		rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
 		rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
 		rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
 
@@ -694,7 +691,7 @@ void CGameFramework_Client::BuildRenderItems()
 	}
 
 	// All the render items are opaque.
-	for (auto& e : mAllRitems)
+	for(auto& e : mAllRitems)
 		mOpaqueRitems.push_back(e.get());
 }
 
@@ -720,6 +717,6 @@ void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, 
 
 		cmdList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
-		cmdList->DrawIndexedInstanced(ri->m_IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
+		cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
 	}
 }

@@ -1,3 +1,7 @@
+cbuffer cbPerObject : register(b0)
+{
+	float4x4 gWorld;
+};
 
 cbuffer cbPass : register(b1)
 {
@@ -17,10 +21,6 @@ cbuffer cbPass : register(b1)
 	float gDeltaTime;
 };
 
-cbuffer cbPerObject : register(b0)
-{
-	float4x4 gWorld;
-};
 struct VertexIn
 {
 	float3 PosL  : POSITION;

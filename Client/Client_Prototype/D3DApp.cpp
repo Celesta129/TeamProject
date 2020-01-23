@@ -416,30 +416,12 @@ bool CD3DApp::InitDirect3D()
 		debugController->EnableDebugLayer();
 	}
 #endif
-	//ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
-	ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&m_dxgiFactory)));
-
-	HRESULT hardwareResult = E_FAIL;
-	IDXGIAdapter1 *pd3dAdapter = NULL;
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_dxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
-	{
-		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
-		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
-		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		
-		hardwareResult = D3D12CreateDevice(
-			pd3dAdapter,
-			D3D_FEATURE_LEVEL_12_0,
-			IID_PPV_ARGS(&m_d3dDevice));
-
-		if (SUCCEEDED(hardwareResult))  break;
-		// 모든 하드웨어 어댑터에 대하여 특성레벨 12를 지원하는 하드웨어 디바이스 생성
-	}
-	//// Try to create hardware device.
-	// HRESULT hardwareResult = D3D12CreateDevice(
-	//	nullptr,             // default adapter
-	//	D3D_FEATURE_LEVEL_12_0,
-	//	IID_PPV_ARGS(&m_d3dDevice));
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
+	
+	HRESULT hardwareResult = D3D12CreateDevice(
+		nullptr,             // default adapter
+		D3D_FEATURE_LEVEL_11_0,
+		IID_PPV_ARGS(&m_d3dDevice));
 
 	// Fallback to WARP device.
 	if (FAILED(hardwareResult))
@@ -517,6 +499,8 @@ void CD3DApp::CreateCommandObjects()
 	//닫힌상태로 시작해서 이후 명령 목록을 처음 참조할때 Reset을 호출한다.
 	// Reset을 호출하려면 명령목록이 닫혀있어야한다.
 	m_GraphicsCommandList->Close();
+
+
 }
 
 void CD3DApp::CreateSwapChain()
