@@ -33,6 +33,10 @@ protected:
 	float m_fYaw;
 	float m_fRoll;
 
+	float m_fTheta = 1.5f*XM_PI;
+	float m_fPhi = 0.2f*XM_PI;
+	float m_fRadius = 15.0f;
+
 	// 플레이어가 바라볼 위치벡터. 3인칭에서 사용
 	XMFLOAT3 m_xmf3LookAtWorld;
 	// 플레이어와 카메라의 오프셋. 3인칭 사용
@@ -106,4 +110,3 @@ public:
 	//3인칭 카메라에서 카메라가 바라보는 지점을 설정한다. 일반적으로 플레이어를 바라보도록 설정한다. 
 	virtual void SetLookAt(const XMFLOAT3& xmf3LookAt) { }
 };
-

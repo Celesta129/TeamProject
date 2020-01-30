@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Client_Prototype.h"
 #include "../Common/GeometryGenerator.h"
+#include "Camera.h"
 
 #define MAX_LOADSTRING 100
 
@@ -85,6 +86,10 @@ void CGameFramework_Client::OnResize()
 void CGameFramework_Client::Update(CTimer & const gt)
 {
 	float fTimeElapsed = gt.DeltaTime();
+	
+	OnKeyboardInput(gt);
+	UpdateCamera(gt);
+	m_Camera.Update(fTimeElapsed);
 
 	// Cycle through the circular frame resource array.
 	mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;

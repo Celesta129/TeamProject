@@ -5,6 +5,7 @@
 #include "RenderItem.h"
 #include "FrameResource.h"
 
+#include "Camera.h"
 //class CScene;
 
 class CGameFramework_Client : public CD3DApp
@@ -72,6 +73,7 @@ private:
 
 	bool mIsWireframe = false;
 
+	CCamera m_Camera;
 	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT4X4 mView = MathHelper::Identity4x4();
 	XMFLOAT4X4 mProj = MathHelper::Identity4x4();

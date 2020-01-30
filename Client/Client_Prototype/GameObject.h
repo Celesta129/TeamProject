@@ -3,19 +3,21 @@
 #include "../Common/UploadBuffer.h"
 
 #include "RenderItem.h"
-
+#include "Component.h"
 class CMesh;
 
-class CObject
+class CGameObject
 {
 public:
-	CObject();
-	virtual ~CObject();
+	CGameObject();
+	virtual ~CGameObject();
 
 public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
+public:
+	CComponent* Get_Component(const wstring tag);
 public:
 	XMFLOAT4X4* GetWorld(void);
 	XMFLOAT3 GetPos(void);
@@ -29,6 +31,7 @@ public:
 	void SetMesh(CMesh* pMesh);
 	
 protected:
+	map<wstring, CComponent*> m_mapComponent;
 	RenderItem m_RenderItem;
 };
 

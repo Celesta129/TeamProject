@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Camera.h"
-
+#include "GameObject.h"
+#include "Transform.h"
 
 CCamera::CCamera()
 {
@@ -20,6 +21,30 @@ CCamera::~CCamera()
 
 void CCamera::Update(float fTimeElapsed)
 {
+	// Convert Spherical to Cartesian coordinates.
+	m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
+	m_xmf3Position.z = m_fRadius * sinf(m_fPhi)*sinf(m_fTheta);
+	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);
+
+	if (m_pObject)
+	{
+	
+		CTransform* pTransfrom = (CTransform*)m_pObject->Get_Component(L"Transform");
+
+		m_xmf3Position.x += pTransfrom->Get_World().m[3][0];
+		m_xmf3Position.z += pTransfrom->Get_World().m[3][2];
+		m_xmf3Position.y += pTransfrom->Get_World().m[3][1];
+	}
+
+	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
+	// Build the view matrix.
+	XMVECTOR pos = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z, 1.0f);
+	XMVECTOR target = XMVectorZero(); //targetPosVector
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+	XMStoreFloat4x4(&m_xmf4x4View, view);
+
 	GenerateViewMatrix();
 }
 
@@ -71,3 +96,4 @@ void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList * pd3dCommandList)
 {
 }
+

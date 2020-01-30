@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <list>
+#include <map>
 #include <algorithm>
 
 
@@ -76,3 +77,4 @@ namespace Vector4
 #include "Enum.h"
 #include "Macros.h"
 #include "Function.h"
+#include "Functor.h"
