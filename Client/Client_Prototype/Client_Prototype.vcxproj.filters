@@ -29,9 +29,6 @@
     <Filter Include="02.Utility\01.GameTimer">
       <UniqueIdentifier>{77b9810d-6d86-4458-a689-3b195fbc77bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04.RenderItem">
-      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\02.Camera">
       <UniqueIdentifier>{de12f160-56aa-423e-9b51-58453ff6aeee}</UniqueIdentifier>
     </Filter>
@@ -43,6 +40,9 @@
     </Filter>
     <Filter Include="02.Utility\04.Component\01.Transform">
       <UniqueIdentifier>{033e173a-f580-4cbd-b55a-b587f299d145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\02.RenderItem">
+      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -89,7 +89,7 @@
       <Filter>02.Utility\01.GameTimer</Filter>
     </ClInclude>
     <ClInclude Include="RenderItem.h">
-      <Filter>04.RenderItem</Filter>
+      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>02.Utility\02.Camera</Filter>

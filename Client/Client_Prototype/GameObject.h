@@ -18,12 +18,10 @@ public:
 
 public:
 	CComponent* Get_Component(const wstring tag);
-public:
-	XMFLOAT4X4* GetWorld(void);
-	XMFLOAT3 GetPos(void);
-	XMFLOAT3 GetScale(void);
 
+public:
 	RenderItem* GetRenderItem(void);
+
 	UINT GetObjCBIndex(void);
 	UINT GetStartIndexLocation(void);
 	UINT GetBaseVertexLocation(void);

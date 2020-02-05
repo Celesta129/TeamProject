@@ -29,26 +29,9 @@ CComponent * CGameObject::Get_Component(const wstring tag)
 	return iter->second;
 }
 
-XMFLOAT4X4* CGameObject::GetWorld(void)
-{
-	return &m_RenderItem.World;
-}
-
-XMFLOAT3 CGameObject::GetPos(void)
-{
-	return XMFLOAT3(m_RenderItem.World.m[3][0], m_RenderItem.World.m[3][1], m_RenderItem.World.m[3][2]);
-}
-
-XMFLOAT3 CGameObject::GetScale(void)
-{
-	// Scale은 완성 안됐다.
-	return XMFLOAT3(m_RenderItem.World.m[3][0], m_RenderItem.World.m[3][1], m_RenderItem.World.m[3][2]);
-}
-
-
 RenderItem* CGameObject::GetRenderItem(void)
 {
-	return &m_RenderItem;
+	return (RenderItem*)Get_Component(L"RenderItem");
 }
 
 UINT CGameObject::GetObjCBIndex(void)

@@ -28,12 +28,11 @@ void CCamera::Update(float fTimeElapsed)
 
 	if (m_pObject)
 	{
-	
-		CTransform* pTransfrom = (CTransform*)m_pObject->Get_Component(L"Transform");
+		CTransform* pTransfrom = &m_pObject->GetRenderItem()->m_Transform;
 
-		m_xmf3Position.x += pTransfrom->Get_World().m[3][0];
-		m_xmf3Position.z += pTransfrom->Get_World().m[3][2];
-		m_xmf3Position.y += pTransfrom->Get_World().m[3][1];
+		m_xmf3Position.x += pTransfrom->GetPos().x;
+		m_xmf3Position.z += pTransfrom->GetPos().z;
+		m_xmf3Position.y += pTransfrom->GetPos().y;
 	}
 
 	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
