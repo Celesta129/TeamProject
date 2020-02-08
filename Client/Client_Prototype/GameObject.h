@@ -3,7 +3,6 @@
 #include "../Common/UploadBuffer.h"
 
 #include "RenderItem.h"
-//#include "Component.h"
 
 class CComponent_Manager;
 class CMesh;
@@ -15,6 +14,8 @@ public:
 	virtual ~CGameObject();
 
 public:
+	HRESULT Initialize(void);
+
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
@@ -34,6 +35,6 @@ protected:
 	map<wstring, CComponent*> m_mapComponent;
 	RenderItem m_RenderItem;
 
-
+	CComponent_Manager* m_pComponent_Manager = nullptr;
 };
 

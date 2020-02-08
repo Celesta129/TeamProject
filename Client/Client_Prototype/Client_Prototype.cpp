@@ -4,6 +4,7 @@
 #include "Client_Prototype.h"
 #include "../Common/GeometryGenerator.h"
 #include "Camera.h"
+#include "Component_Manager.h"
 
 #define MAX_LOADSTRING 100
 
@@ -19,6 +20,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #if defined(DEBUG) | defined(_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
+	CComponent_Manager::GetInstance();
 
 	try {
 		CGameFramework_Client GameFramework(hInstance);
@@ -32,7 +34,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 		return 0;
 	}
 
-
+	
 	return 0;
 }
 
@@ -43,7 +45,7 @@ CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 
 CGameFramework_Client::~CGameFramework_Client()
 {
-	
+	CComponent_Manager::DestroyInstance();
 }
 
 bool CGameFramework_Client::Initialize()
@@ -51,7 +53,8 @@ bool CGameFramework_Client::Initialize()
 	if (!CD3DApp::Initialize())
 		return false;
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
-
+	BuildComponent();
+	
 	BuildRootSignature();
 	BuildShadersAndInputLayout();
 	BuildShapeGeometry();
@@ -152,7 +155,7 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	passCbvHandle.Offset(passCbvIndex, m_CbvSrvUavDescriptorSize);
 	m_GraphicsCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
 
-	DrawRenderItems(m_GraphicsCommandList.Get(), mOpaqueRitems);
+	DrawRenderItems(m_GraphicsCommandList.Get(), m_OpaqueObjects);
 
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -256,12 +259,18 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 void CGameFramework_Client::UpdateCamera(const CTimer & gt)
 {
-	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + mOpaqueRitems[0]->World.m[3][0];
-	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + mOpaqueRitems[0]->World.m[3][2];
-	mEyePos.y = mRadius * cosf(mPhi) + mOpaqueRitems[0]->World.m[3][1];
+	CGameObject* pTarget = m_OpaqueObjects[0];
+	if (pTarget == nullptr)
+		return;
+	RenderItem* pRenderItem = pTarget->GetRenderItem();
+	XMFLOAT4X4 TargetWorld = pRenderItem->World;
 
-	
+	// Convert Spherical to Cartesian coordinates.
+	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + TargetWorld.m[3][0];
+	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetWorld.m[3][2];
+	mEyePos.y = mRadius * cosf(mPhi) + TargetWorld.m[3][1];
+
+	//pRenderItem->m_Transform.Get_Pos()
 	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
@@ -276,20 +285,22 @@ void CGameFramework_Client::UpdateObjectCBs(const CTimer & gt)
 {
 	auto currObjectCB = mCurrFrameResource->ObjectCB.get();
 
-	for (auto& e : mAllRitems)
+	for (auto& e : m_vObjects)
 	{
+		RenderItem* pRenderItem = (RenderItem*)e->Get_Component(L"RenderItem");
+		
 		// Only update the cbuffer data if the constants have changed.  
 		// This needs to be tracked per frame resource.
-		if (e->NumFramesDirty > 0)
+		if (pRenderItem->NumFramesDirty > 0)
 		{
-			XMMATRIX world = XMLoadFloat4x4(&e->World);
+			XMMATRIX world = XMLoadFloat4x4(&pRenderItem->World);
 			ObjectConstants objConstants;
 			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
 
-			currObjectCB->CopyData(e->ObjCBIndex, objConstants);
+			currObjectCB->CopyData(pRenderItem->ObjCBIndex, objConstants);
 
 			// Next FrameResource need to be updated too.
-			e->NumFramesDirty--;
+			pRenderItem->NumFramesDirty--;
 		}
 	}
 }
@@ -324,7 +335,7 @@ void CGameFramework_Client::UpdateMainPassCB(const CTimer & gt)
 
 void CGameFramework_Client::BuildDescriptorHeaps()
 {
-	UINT objCount = (UINT)mOpaqueRitems.size();
+	UINT objCount = (UINT)m_OpaqueObjects.size();
 
 	// Need a CBV descriptor for each object for each frame resource,
 	// +1 for the perPass CBV for each frame resource.
@@ -347,7 +358,7 @@ void CGameFramework_Client::BuildConstantBufferViews()
 {
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
-	UINT objCount = (UINT)mOpaqueRitems.size();
+	UINT objCount = (UINT)m_OpaqueObjects.size();
 
 	// Need a CBV descriptor for each object for each frame resource.
 	for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
@@ -615,17 +626,16 @@ void CGameFramework_Client::BuildFrameResources()
 	for (int i = 0; i < gNumFrameResources; ++i)
 	{
 		mFrameResources.push_back(std::make_unique<FrameResource>(m_d3dDevice.Get(),
-			1, (UINT)mAllRitems.size()));
+			1, (UINT)m_vObjects.size()));
 	}
 }
 
 void CGameFramework_Client::BuildRenderItems()
 {
 	auto boxCItem = std::make_unique<CGameObject>();
-	boxCItem->GetRenderItem();
-	// 여기서부터 작업
+	boxCItem->Initialize();
 
-	auto boxRitem = std::make_unique<RenderItem>();
+	RenderItem* boxRitem = (RenderItem*)boxCItem->Get_Component(L"RenderItem");
 	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(0.5f, 1.0f, 0.5f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -633,9 +643,12 @@ void CGameFramework_Client::BuildRenderItems()
 	boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
 	boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(boxRitem));
+	m_vObjects.push_back(std::move(boxCItem));
 
-    auto gridRitem = std::make_unique<RenderItem>();
+	auto gridCItem = make_unique<CGameObject>();
+	gridCItem->Initialize();
+
+	RenderItem* gridRitem = (RenderItem*)gridCItem->Get_Component(L"RenderItem");
     gridRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(20.0f, 1.0f, 20.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 	gridRitem->ObjCBIndex = 1;
@@ -644,9 +657,9 @@ void CGameFramework_Client::BuildRenderItems()
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(gridRitem));
+	m_vObjects.push_back(std::move(gridCItem));
 
-	UINT objCBIndex = 2;
+	/*UINT objCBIndex = 2;
 	for(int i = 0; i < 5; ++i)
 	{
 		auto leftCylRitem = std::make_unique<RenderItem>();
@@ -696,17 +709,27 @@ void CGameFramework_Client::BuildRenderItems()
 		mAllRitems.push_back(std::move(rightCylRitem));
 		mAllRitems.push_back(std::move(leftSphereRitem));
 		mAllRitems.push_back(std::move(rightSphereRitem));
-	}
+	}*/
 
 	// All the render items are opaque.
-	for(auto& e : mAllRitems)
-		mOpaqueRitems.push_back(e.get());
+	//for(auto& e : mAllRitems)
+	//	mOpaqueRitems.push_back(e.get());
 
-	
+	for (auto& e : m_vObjects)
+		m_OpaqueObjects.push_back(e.get());
 		
 }
 
-void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
+void CGameFramework_Client::BuildComponent(void)
+{
+	CComponent* pComponent = nullptr;
+
+	pComponent = new RenderItem;
+	CComponent_Manager::GetInstance()->Add_Component(L"RenderItem", pComponent);
+
+}
+
+void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)
 {
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
@@ -715,14 +738,19 @@ void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, 
 	// For each render item...
 	for (size_t i = 0; i < ritems.size(); ++i)
 	{
-		auto ri = ritems[i];
+		if (ritems[i] == nullptr)
+			continue;
+
+		RenderItem* ri = (RenderItem*)ritems[i]->Get_Component(L"RenderItem");
+		if (ri == nullptr)
+			continue;
 
 		cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());
 		cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
 		cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
 
 		// Offset to the CBV in the descriptor heap for this object and for this frame resource.
-		UINT cbvIndex = mCurrFrameResourceIndex * (UINT)mOpaqueRitems.size() + ri->ObjCBIndex;
+		UINT cbvIndex = mCurrFrameResourceIndex * (UINT)m_OpaqueObjects.size() + ri->ObjCBIndex;
 		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 		cbvHandle.Offset(cbvIndex, m_CbvSrvUavDescriptorSize);
 

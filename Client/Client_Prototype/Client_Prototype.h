@@ -44,7 +44,9 @@ private:
 	void BuildPSOs();
 	void BuildFrameResources();
 	void BuildRenderItems();
-	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
+
+	void BuildComponent(void);
+	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems);
 
 private:
 	std::vector<std::unique_ptr<FrameResource>> mFrameResources;
@@ -64,10 +66,11 @@ private:
 
 	// List of all the render items.
 	std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+	std::vector<std::unique_ptr<CGameObject>> m_vObjects;
 
 	// Render items divided by PSO.
 	std::vector<RenderItem*> mOpaqueRitems;
-	std::vector<CGameObject*> m_vObjects;
+	std::vector<CGameObject*> m_OpaqueObjects;
 
 	PassConstants mMainPassCB;
 
