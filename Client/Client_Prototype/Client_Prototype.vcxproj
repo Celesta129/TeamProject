@@ -169,6 +169,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="D3DApp.h" />
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Function.h" />

@@ -112,6 +112,7 @@
     <ClInclude Include="Component_Manager.h">
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

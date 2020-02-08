@@ -45,7 +45,7 @@ protected:
 	DWORD m_nMode;
 	float m_fTimeLag;
 
-	CGameObject* m_pObject = NULL;
+	CGameObject* m_pTarget = NULL;
 public:
 	CCamera();
 	CCamera(CCamera* pCamera);
@@ -57,7 +57,7 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
-	void GenerateViewMatrix();
+	void GenerateViewMatrix(XMVECTOR pos, XMVECTOR target, XMVECTOR up);
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);
 	void GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float	fAspectRatio, float fFOVAngle);
 	/*카메라가 여러번 회전을 하게 되면 누적된 실수 연산의 부정확성 때문에 카메라의 로컬 x-축(Right), y-축(Up), z- 축(LookAt)이 서로 직교하지 않을 수 있다.\
@@ -69,7 +69,7 @@ public:
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList);
 
-	void SetObject(CGameObject *pObject) { m_pObject = pObject; }
+	void SetTarget(CGameObject *pObject) { m_pTarget = pObject; }
 	void SetMode(DWORD nMode) { m_nMode = nMode; }
 
 	void SetPosition(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
@@ -77,8 +77,12 @@ public:
 
 	void SetOffset(XMFLOAT3 xmf3Offset) { m_xmf3Offset = xmf3Offset; }
 	void SetTimeLag(float fTimeLag) { m_fTimeLag = fTimeLag; }
+
+	void SetTheta(float dTheta) { m_fTheta = dTheta; };
+	void SetPhi(float dPhi) { m_fPhi = m_fPhi; };
+	void SetRadius(float dRadius) { m_fRadius = m_fRadius; };
 public:
-	CGameObject* GetTargetObject() { return(m_pObject); }
+	CGameObject* GetTargetObject() { return(m_pTarget); }
 	DWORD GetMode() { return(m_nMode); }
 
 	XMFLOAT3& GetPosition() { return(m_xmf3Position); }
@@ -100,6 +104,11 @@ public:
 	XMFLOAT4X4 GetProjectionMatrix() { return(m_xmf4x4Projection); }
 	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
+
+	float GetTheta() { return m_fTheta; };
+	float GetPhi() { return m_fPhi; };
+	float GetRadius() { return m_fRadius; };
+
 
 	//카메라를 xmf3Shift 만큼 이동한다. 
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x;	m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }

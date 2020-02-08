@@ -21,30 +21,41 @@ CCamera::~CCamera()
 
 void CCamera::Update(float fTimeElapsed)
 {
+	CTransform* pTarget_Transfrom = nullptr;
+
 	// Convert Spherical to Cartesian coordinates.
 	m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
 	m_xmf3Position.z = m_fRadius * sinf(m_fPhi)*sinf(m_fTheta);
 	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);
 
-	if (m_pObject)
+	if (m_pTarget)
 	{
-		CTransform* pTransfrom = &m_pObject->GetRenderItem()->m_Transform;
+		pTarget_Transfrom = &(((RenderItem*)m_pTarget->Get_Component(L"RenderItem"))->m_Transform);
 
-		m_xmf3Position.x += pTransfrom->Get_Pos().x;
-		m_xmf3Position.z += pTransfrom->Get_Pos().z;
-		m_xmf3Position.y += pTransfrom->Get_Pos().y;
+		if (pTarget_Transfrom)
+		{
+			m_xmf3Position.x += pTarget_Transfrom->Get_Pos().x;
+			m_xmf3Position.z += pTarget_Transfrom->Get_Pos().z;
+			m_xmf3Position.y += pTarget_Transfrom->Get_Pos().y;
+		}
 	}
 
 	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
+
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z, 1.0f);
-	XMVECTOR target = XMVectorZero(); //targetPosVector
+	XMVECTOR target;
+	if (pTarget_Transfrom == nullptr)
+		target = XMVectorZero();
+	else
+		target = XMVectorSet(pTarget_Transfrom->Get_Pos().x, 
+							pTarget_Transfrom->Get_Pos().y, 
+							pTarget_Transfrom->Get_Pos().z,
+							1.f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&m_xmf4x4View, view);
-
-	GenerateViewMatrix();
+	GenerateViewMatrix(pos, target, up);
+	GenerateProjectionMatrix(NEAR_PLANE_DISTANCE,FAR_PLANE_DISTANCE, BASE_CAMERA_ASPECT, BASE_CAMERA_FOV);
 }
 
 void CCamera::CreateShaderVariables(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
@@ -59,13 +70,8 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList * pd3dCommandList)
 {
 }
 
-void CCamera::GenerateViewMatrix()
+void CCamera::GenerateViewMatrix(XMVECTOR pos, XMVECTOR target, XMVECTOR up)
 {
-	
-	XMVECTOR pos = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z, 1.f);
-	XMVECTOR target = XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);;
-	
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&m_xmf4x4View, view);
 }

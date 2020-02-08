@@ -46,6 +46,7 @@ private:
 	void BuildRenderItems();
 
 	void BuildComponent(void);
+	void BuildCamera(void);
 	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems);
 
 private:
@@ -78,7 +79,7 @@ private:
 
 	bool mIsWireframe = false;
 
-	CCamera m_Camera;
+	CCamera m_CurrentCamera;
 
 
 	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };

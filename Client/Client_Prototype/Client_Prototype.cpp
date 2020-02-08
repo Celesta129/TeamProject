@@ -64,6 +64,8 @@ bool CGameFramework_Client::Initialize()
 	BuildConstantBufferViews();
 	BuildPSOs();
 
+
+	BuildCamera();
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
 	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
@@ -82,6 +84,8 @@ void CGameFramework_Client::OnResize()
 	CD3DApp::OnResize();
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
+
+	m_CurrentCamera.Update(0);
 	/*if (m_pScene)
 		m_pScene->OnResize(AspectRatio());*/
 }
@@ -92,8 +96,7 @@ void CGameFramework_Client::Update(CTimer & const gt)
 	
 	OnKeyboardInput(gt);
 	UpdateCamera(gt);
-	m_Camera.Update(fTimeElapsed);
-
+	
 	// Cycle through the circular frame resource array.
 	mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
 	mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
@@ -208,6 +211,10 @@ void CGameFramework_Client::OnMouseMove(WPARAM btnState, int x, int y)
 
 		// Restrict the angle mPhi.
 		mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
+
+		m_CurrentCamera.SetTheta(dx);
+		m_CurrentCamera.SetPhi(dy);
+
 	}
 	else if ((btnState & MK_RBUTTON) != 0)
 	{
@@ -220,6 +227,8 @@ void CGameFramework_Client::OnMouseMove(WPARAM btnState, int x, int y)
 
 		// Restrict the radius.
 		mRadius = MathHelper::Clamp(mRadius, 5.0f, 150.0f);
+
+		m_CurrentCamera.SetRadius(mRadius);
 	}
 
 	mLastMousePos.x = x;
@@ -233,35 +242,49 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 	else
 		mIsWireframe = false;
 
-	//float fSpeed = 3.f;
-	//if (GetAsyncKeyState('A') & 0x8000)
-	//{
-	//	mOpaqueRitems[0]->World.m[3][0] -= fSpeed * gt.DeltaTime();
-	//	mOpaqueRitems[0]->NumFramesDirty = gNumFrameResources;
-	//}
-	//else if (GetAsyncKeyState('D') & 0x8000)
-	//{
-	//	mOpaqueRitems[0]->World.m[3][0] += fSpeed * gt.DeltaTime();
-	//	mOpaqueRitems[0]->NumFramesDirty = gNumFrameResources;
-	//}
 
-	//if (GetAsyncKeyState('W') & 0x8000)
-	//{
-	//	mOpaqueRitems[0]->World.m[3][2] += fSpeed * gt.DeltaTime();
-	//	mOpaqueRitems[0]->NumFramesDirty = gNumFrameResources;
-	//}
-	//else if (GetAsyncKeyState('S') & 0x8000)
-	//{
-	//	mOpaqueRitems[0]->World.m[3][2] -= fSpeed * gt.DeltaTime();
-	//	mOpaqueRitems[0]->NumFramesDirty = gNumFrameResources;
-	//}
+	float fSpeed = 3.f;
+	if (GetAsyncKeyState('A') & 0x8000)
+	{
+		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+		
+		pRenderItem->MovePos(&XMFLOAT3(-fSpeed * gt.DeltaTime(), 0.f, 0.f));
+		pRenderItem->NumFramesDirty = gNumFrameResources;
+	}
+	else if (GetAsyncKeyState('D') & 0x8000)
+	{
+		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+
+		pRenderItem->MovePos(&XMFLOAT3(fSpeed * gt.DeltaTime(), 0.f, 0.f));
+		pRenderItem->NumFramesDirty = gNumFrameResources;
+	}
+
+	if (GetAsyncKeyState('W') & 0x8000)
+	{
+		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+
+		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, fSpeed * gt.DeltaTime()));
+		pRenderItem->NumFramesDirty = gNumFrameResources;
+	}
+	else if (GetAsyncKeyState('S') & 0x8000)
+	{
+		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+
+		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, -fSpeed * gt.DeltaTime()));
+		pRenderItem->NumFramesDirty = gNumFrameResources;
+	}
 }
 
 void CGameFramework_Client::UpdateCamera(const CTimer & gt)
 {
-	CGameObject* pTarget = m_OpaqueObjects[0];
+	m_CurrentCamera.Update(gt.DeltaTime());
+
+	CGameObject* pTarget = nullptr;
+	if(!m_OpaqueObjects.empty())
+		pTarget = m_OpaqueObjects[0];
 	if (pTarget == nullptr)
 		return;
+
 	RenderItem* pRenderItem = pTarget->GetRenderItem();
 	XMFLOAT4X4 TargetWorld = pRenderItem->World;
 
@@ -293,7 +316,7 @@ void CGameFramework_Client::UpdateObjectCBs(const CTimer & gt)
 		// This needs to be tracked per frame resource.
 		if (pRenderItem->NumFramesDirty > 0)
 		{
-			XMMATRIX world = XMLoadFloat4x4(&pRenderItem->World);
+			XMMATRIX world = XMLoadFloat4x4(&pRenderItem->m_Transform.Get_World());
 			ObjectConstants objConstants;
 			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
 
@@ -307,8 +330,8 @@ void CGameFramework_Client::UpdateObjectCBs(const CTimer & gt)
 
 void CGameFramework_Client::UpdateMainPassCB(const CTimer & gt)
 {
-	XMMATRIX view = XMLoadFloat4x4(&mView);
-	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+	XMMATRIX view = XMLoadFloat4x4(&m_CurrentCamera.GetViewMatrix());
+	XMMATRIX proj = XMLoadFloat4x4(&m_CurrentCamera.GetProjectionMatrix());
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -321,7 +344,7 @@ void CGameFramework_Client::UpdateMainPassCB(const CTimer & gt)
 	XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-	mMainPassCB.EyePosW = mEyePos;
+	mMainPassCB.EyePosW = m_CurrentCamera.GetPosition();
 	mMainPassCB.RenderTargetSize = XMFLOAT2((float)m_ClientWidth, (float)m_ClientHeight);
 	mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / m_ClientWidth, 1.0f / m_ClientHeight);
 	mMainPassCB.NearZ = 1.0f;
@@ -378,7 +401,7 @@ void CGameFramework_Client::BuildConstantBufferViews()
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 			cbvDesc.BufferLocation = cbAddress;
-			cbvDesc.SizeInBytes = objCBByteSize;	// 256바이트로 정렬되어야한다.
+			cbvDesc.SizeInBytes = objCBByteSize;	// 256바이트의 정수배로 정렬되어야한다.
 
 			m_d3dDevice->CreateConstantBufferView(&cbvDesc, handle);
 		}
@@ -637,6 +660,8 @@ void CGameFramework_Client::BuildRenderItems()
 
 	RenderItem* boxRitem = (RenderItem*)boxCItem->Get_Component(L"RenderItem");
 	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(0.5f, 1.0f, 0.5f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
+	boxRitem->m_Transform.Set_World(&boxRitem->World);
+
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -645,12 +670,15 @@ void CGameFramework_Client::BuildRenderItems()
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
 	m_vObjects.push_back(std::move(boxCItem));
 
+	///////////////////////////////////////////////
 	auto gridCItem = make_unique<CGameObject>();
 	gridCItem->Initialize();
 
 	RenderItem* gridRitem = (RenderItem*)gridCItem->Get_Component(L"RenderItem");
     gridRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(20.0f, 1.0f, 20.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+	gridRitem->m_Transform.Set_World(&gridRitem->World);
+
 	gridRitem->ObjCBIndex = 1;
 	gridRitem->Geo = mGeometries["shapeGeo"].get();
 	gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -727,6 +755,20 @@ void CGameFramework_Client::BuildComponent(void)
 	pComponent = new RenderItem;
 	CComponent_Manager::GetInstance()->Add_Component(L"RenderItem", pComponent);
 
+}
+
+void CGameFramework_Client::BuildCamera(void)
+{
+	if (m_vObjects.empty())
+		return;
+
+	if (m_vObjects[0] == nullptr)
+		return;
+
+	if (m_vObjects[0]->Get_Component(L"RenderItem") == nullptr)
+		return;
+
+	m_CurrentCamera.SetTarget(m_vObjects[0].get());
 }
 
 void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)

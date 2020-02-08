@@ -1,5 +1,6 @@
 #pragma once
 #include "Timer.h"
+#include "Defines.h"
 
 class CD3DApp
 {
