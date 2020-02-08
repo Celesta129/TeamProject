@@ -4,11 +4,18 @@
 
 CGameObject::CGameObject()
 {
+	
 }
 
 
 CGameObject::~CGameObject()
 {
+	for (auto& e : m_mapComponent)
+	{
+		if(e.second->m_bIsManagers == false)
+			delete e.second;
+	}
+	m_mapComponent.clear();
 }
 
 void CGameObject::Update(float fTimeElapsed)

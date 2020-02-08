@@ -30,4 +30,6 @@ struct RenderItem : public CComponent
 	UINT IndexCount = 0;
 	UINT StartIndexLocation = 0;
 	int BaseVertexLocation = 0;
+
+	virtual CComponent* Clone(void);
 };

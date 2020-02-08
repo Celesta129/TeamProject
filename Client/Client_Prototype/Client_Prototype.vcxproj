@@ -167,6 +167,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="FrameResource.h" />
@@ -191,9 +192,11 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Component_Manager.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="RenderItem.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

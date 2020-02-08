@@ -3,7 +3,9 @@
 #include "../Common/UploadBuffer.h"
 
 #include "RenderItem.h"
-#include "Component.h"
+//#include "Component.h"
+
+class CComponent_Manager;
 class CMesh;
 
 class CGameObject
@@ -31,5 +33,7 @@ public:
 protected:
 	map<wstring, CComponent*> m_mapComponent;
 	RenderItem m_RenderItem;
+
+
 };
 

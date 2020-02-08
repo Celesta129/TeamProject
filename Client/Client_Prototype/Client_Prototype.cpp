@@ -283,7 +283,6 @@ void CGameFramework_Client::UpdateObjectCBs(const CTimer & gt)
 		if (e->NumFramesDirty > 0)
 		{
 			XMMATRIX world = XMLoadFloat4x4(&e->World);
-
 			ObjectConstants objConstants;
 			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
 
@@ -622,6 +621,10 @@ void CGameFramework_Client::BuildFrameResources()
 
 void CGameFramework_Client::BuildRenderItems()
 {
+	auto boxCItem = std::make_unique<CGameObject>();
+	boxCItem->GetRenderItem();
+	// 여기서부터 작업
+
 	auto boxRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(0.5f, 1.0f, 0.5f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
 	boxRitem->ObjCBIndex = 0;
@@ -698,6 +701,9 @@ void CGameFramework_Client::BuildRenderItems()
 	// All the render items are opaque.
 	for(auto& e : mAllRitems)
 		mOpaqueRitems.push_back(e.get());
+
+	
+		
 }
 
 void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)

@@ -44,6 +44,12 @@
     <Filter Include="02.Utility\04.Component\02.RenderItem">
       <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\05.Manager">
+      <UniqueIdentifier>{b9cf5362-d0e9-4a36-8aef-2dd9ab8a414b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\05.Manager\01.Component_Manager">
+      <UniqueIdentifier>{320761a0-4d0d-43fa-bde9-d7301b042663}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -103,6 +109,9 @@
     <ClInclude Include="GameObject.h">
       <Filter>02.Utility\03.Object</Filter>
     </ClInclude>
+    <ClInclude Include="Component_Manager.h">
+      <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -143,6 +152,12 @@
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>02.Utility\03.Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Component_Manager.cpp">
+      <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderItem.cpp">
+      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
