@@ -3,28 +3,34 @@
 
 #include <WindowsX.h>
 
-CD3DApp::CD3DApp(HINSTANCE hInstance)
+const int gNumFrameResources = 3;
+
+LRESULT CALLBACK
+MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if(m_pInstance == nullptr)
-		m_pInstance = this;
+	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
+	// before CreateWindow returns, and thus before mhMainWnd is valid.
+	return CD3DApp::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
+}
 
-	m_pTimer = new CTimer();
-
+CD3DApp::CD3DApp(HINSTANCE hInstance)
+	:m_hAppInst(hInstance)
+{
+	// Only one D3DApp can be constructed.
+	assert(m_pApp == nullptr);
+	m_pApp = this;
 }
 
 CD3DApp::~CD3DApp()
 {
 	if(m_d3dDevice != nullptr)
 		FlushCommandQueue();
-
-	if(m_pTimer != nullptr)
-		delete m_pTimer;
 }
 
-CD3DApp* CD3DApp::m_pInstance = nullptr;
-CD3DApp * CD3DApp::GetInstance(void)
+CD3DApp* CD3DApp::m_pApp = nullptr;
+CD3DApp * CD3DApp::GetApp(void)
 {
-	return m_pInstance;
+	return m_pApp;
 }
 
 HINSTANCE CD3DApp::AppInst() const
@@ -63,7 +69,7 @@ int CD3DApp::Run()
 {
 	MSG msg = { 0 };
 
-	m_pTimer->Reset();
+	m_Timer.Reset();
 
 	while (msg.message != WM_QUIT)
 	{
@@ -76,18 +82,18 @@ int CD3DApp::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-			m_pTimer->Tick();
+			m_Timer.Tick();
 
 			if (!m_bAppPaused)
 			{
 				CalculateFrameStats();
-				Update(m_pTimer);
-				Draw(m_pTimer);
+				Update(m_Timer);
+				Draw(m_Timer);
 			}
-			/*else
+			else
 			{
 				Sleep(100);
-			}*/
+			}
 		}
 	}
 
@@ -103,7 +109,7 @@ bool CD3DApp::Initialize()
 		return false;
 
 	// Do the initial resize code.
-	// 여기서 렌더타겟 뷰, 뎁스/스텐실 뷰를 생성
+	// 여기서 렌더타겟 뷰, 뎁스/스텐실 뷰를 생성 이 함수를 Resize시 다시 호출한다.
 	OnResize();
 
 	return true;
@@ -120,12 +126,12 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
 			m_bAppPaused = true;
-			m_pTimer->Stop();
+			m_Timer.Stop();
 		}
 		else
 		{
 			m_bAppPaused = false;
-			m_pTimer->Start();
+			m_Timer.Start();
 		}
 		return 0;
 
@@ -190,7 +196,7 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ENTERSIZEMOVE:
 		m_bAppPaused = true;
 		m_bResizing = true;
-		m_pTimer->Stop();
+		m_Timer.Stop();
 		return 0;
 
 		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
@@ -198,7 +204,7 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_EXITSIZEMOVE:
 		m_bAppPaused = false;
 		m_bResizing = false;
-		m_pTimer->Start();
+		m_Timer.Start();
 		OnResize();
 		return 0;
 
@@ -350,13 +356,7 @@ void CD3DApp::OnResize()
 
 	m_ScissorRect = { 0, 0, m_ClientWidth, m_ClientHeight };
 }
-LRESULT CALLBACK
-MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
-	// before CreateWindow returns, and thus before mhMainWnd is valid.
-	return CD3DApp::GetInstance()->MsgProc(hwnd, msg, wParam, lParam);
-}
+
 bool CD3DApp::InitMainWindow()
 {
 	WNDCLASS wc;
@@ -416,30 +416,12 @@ bool CD3DApp::InitDirect3D()
 		debugController->EnableDebugLayer();
 	}
 #endif
-	//ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
-	ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&m_dxgiFactory)));
-
-	HRESULT hardwareResult = E_FAIL;
-	IDXGIAdapter1 *pd3dAdapter = NULL;
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_dxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
-	{
-		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
-		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
-		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		
-		hardwareResult = D3D12CreateDevice(
-			pd3dAdapter,
-			D3D_FEATURE_LEVEL_12_0,
-			IID_PPV_ARGS(&m_d3dDevice));
-
-		if (SUCCEEDED(hardwareResult))  break;
-		// 모든 하드웨어 어댑터에 대하여 특성레벨 12를 지원하는 하드웨어 디바이스 생성
-	}
-	//// Try to create hardware device.
-	// HRESULT hardwareResult = D3D12CreateDevice(
-	//	nullptr,             // default adapter
-	//	D3D_FEATURE_LEVEL_12_0,
-	//	IID_PPV_ARGS(&m_d3dDevice));
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
+	
+	HRESULT hardwareResult = D3D12CreateDevice(
+		nullptr,             // default adapter
+		D3D_FEATURE_LEVEL_11_0,
+		IID_PPV_ARGS(&m_d3dDevice));
 
 	// Fallback to WARP device.
 	if (FAILED(hardwareResult))
@@ -517,6 +499,8 @@ void CD3DApp::CreateCommandObjects()
 	//닫힌상태로 시작해서 이후 명령 목록을 처음 참조할때 Reset을 호출한다.
 	// Reset을 호출하려면 명령목록이 닫혀있어야한다.
 	m_GraphicsCommandList->Close();
+
+
 }
 
 void CD3DApp::CreateSwapChain()
@@ -551,7 +535,9 @@ void CD3DApp::CreateSwapChain()
 
 void CD3DApp::FlushCommandQueue()
 {
+	// Advance the fence value to mark commands up to this fence point.
 	m_nFenceValue++;
+	
 	ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), m_nFenceValue));
 
 	// Wait until the GPU has completed commands up to this fence point.
@@ -570,9 +556,34 @@ void CD3DApp::FlushCommandQueue()
 
 void CD3DApp::CalculateFrameStats()
 {
-	wstring caption = m_MainWndCaption;
+	/*wstring caption = m_MainWndCaption;
 	m_pTimer->GetFrameRate(&caption);
-	::SetWindowText(m_hMainWnd, caption.c_str());
+	::SetWindowText(m_hMainWnd, caption.c_str());*/
+
+	static int frameCnt = 0;
+	static float timeElapsed = 0.0f;
+
+	frameCnt++;
+
+	// Compute averages over one second period.
+	if ((m_Timer.TotalTime() - timeElapsed) >= 1.0f)
+	{
+		float fps = (float)frameCnt; // fps = frameCnt / 1
+		float mspf = 1000.0f / fps;
+
+		wstring fpsStr = to_wstring(fps);
+		wstring mspfStr = to_wstring(mspf);
+
+		wstring windowText = m_MainWndCaption +
+			L"    fps: " + fpsStr;// +
+			//L"   mspf: " + mspfStr;
+
+		SetWindowText(m_hMainWnd, windowText.c_str());
+
+		// Reset for next average.
+		frameCnt = 0;
+		timeElapsed += 1.0f;
+	}
 }
 
 void CD3DApp::LogAdapters()
@@ -585,8 +596,8 @@ void CD3DApp::LogAdapters()
 		DXGI_ADAPTER_DESC desc;
 		adapter->GetDesc(&desc);
 
-		std::wstring text = L"Adapter: ";
-		text == desc.Description;
+		std::wstring text = L"***Adapter: ";
+		text += desc.Description;
 		text += L"\n";
 
 		OutputDebugString(text.c_str());
@@ -612,12 +623,12 @@ void CD3DApp::LogAdapterOutputs(IDXGIAdapter * adapter)
 		DXGI_OUTPUT_DESC desc;
 		output->GetDesc(&desc);
 
-		std::wstring text = L"OutPut: ";
+		std::wstring text = L"***Output: ";
 		text += desc.DeviceName;
 		text += L"\n";
 		OutputDebugString(text.c_str());
 
-		LogOutputDisplayModes(output, DXGI_FORMAT_B8G8R8A8_UNORM);
+		LogOutputDisplayModes(output, m_BackBufferFormat);
 
 		ReleaseCom(output);
 

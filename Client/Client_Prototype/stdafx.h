@@ -25,6 +25,7 @@
 #include <list>
 #include <algorithm>
 
+
 #include <wrl.h>
 #include <shellapi.h>
 
@@ -51,6 +52,8 @@ using Microsoft::WRL::ComPtr;
 
 #define FRAME_BUFFER_WIDTH 1280
 #define FRAME_BUFFER_HEIGHT 720
+
+#define MAX_OBJECT 255
 
 #define EPSILON 1.0e-10f
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

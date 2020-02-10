@@ -4,9 +4,8 @@
 #pragma comment (lib, "winmm.lib")
 
 CTimer::CTimer()
-	:m_SecondsPerCount(0.0), m_DeltaTime(-1.0), m_BaseTime(0),
-	m_PausedTime(0), m_PrevTime(0), m_CurrTime(0), m_bStopped(false),
-	m_nCurrentFrameRate(0), m_FPSTimeElapsed(0), m_nFramePerSecond(0)
+	: m_SecondsPerCount(0.0), m_DeltaTime(-1.0), m_BaseTime(0),
+	m_PausedTime(0), m_PrevTime(0), m_CurrTime(0), m_bStopped(false)
 {
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
@@ -14,11 +13,12 @@ CTimer::CTimer()
 }
 
 
+
 CTimer::~CTimer()
 {
 }
 
-void CTimer::Tick(float fLockFPS)
+void CTimer::Tick()
 {
 	if (m_bStopped)
 	{
@@ -36,16 +36,6 @@ void CTimer::Tick(float fLockFPS)
 	// Prepare for next frame.
 	m_PrevTime = m_CurrTime;
 
-
-	m_nFramePerSecond++;
-	m_FPSTimeElapsed += m_DeltaTime;
-	if (m_FPSTimeElapsed >= 1.0f)
-	{
-		m_nCurrentFrameRate = m_nFramePerSecond;
-		m_nFramePerSecond = 0;
-		m_FPSTimeElapsed = 0.0f;
-	}
-
 	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 	// processor goes into a power save mode or we get shuffled to another
 	// processor, then mDeltaTime can be negative.
@@ -59,7 +49,11 @@ void CTimer::Start(void)
 {
 	__int64 startTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
-
+	// Accumulate the time elapsed between stop and start pairs.
+	//
+	//                     |<-------d------->|
+	// ----*---------------*-----------------*------------> time
+	//  mBaseTime       mStopTime        startTime     
 	if (m_bStopped)
 	{
 		m_PausedTime += (startTime - m_StopTime);
@@ -75,29 +69,31 @@ void CTimer::Stop(void)
 	m_bStopped = true;
 }
 
-unsigned long CTimer::GetFrameRate(wstring* pString)
+float CTimer::TotalTime() const
 {
-	if (pString)
+	if (m_bStopped)
 	{
-		wstring temp(*pString);
-		char FPSBuffer[10];
-	
-		_itoa_s(m_nCurrentFrameRate, FPSBuffer, 10);
-		wstring w_fps(FPSBuffer, &FPSBuffer[10]);
-
-		temp += L": ";
-		temp += w_fps.c_str();
-		temp += L" FPS";
-		*pString = temp;
+		return (float)(((m_StopTime - m_PausedTime) - m_BaseTime)*m_SecondsPerCount);
 	}
-	return(m_nCurrentFrameRate);
+	// The distance mCurrTime - mBaseTime includes paused time,
+	// which we do not want to count.  To correct this, we can subtract 
+	// the paused time from mCurrTime:  
+	//
+	//  (mCurrTime - mPausedTime) - mBaseTime 
+	//
+	//                     |<--paused time-->|
+	// ----*---------------*-----------------*------------*------> time
+	//  mBaseTime       mStopTime        startTime     mCurrTime
+	else
+	{
+		return (float)(((m_CurrTime - m_PausedTime) - m_BaseTime)*m_SecondsPerCount);
+	}
 }
 
-float CTimer::GetTimeElapsed() const
+float CTimer::DeltaTime(void) const
 {
-	return (float)m_DeltaTime;;
+	return (float)m_DeltaTime;
 }
-
 
 void CTimer::Reset()
 {

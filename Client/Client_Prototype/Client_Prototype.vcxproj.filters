@@ -17,26 +17,23 @@
     <Filter Include="02.Utility">
       <UniqueIdentifier>{98a4304a-e5a1-4bf8-b10f-d39790b1fc04}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\01.Timer">
-      <UniqueIdentifier>{19a28ae7-e205-4e89-86c4-b1efae2835dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\02.Camera">
-      <UniqueIdentifier>{cf2e6e46-d7d0-49a8-9ba4-d35b1338a03b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\03.Scene">
-      <UniqueIdentifier>{84042148-b4d0-45be-8c55-b841a69bca5e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01.FrameWork\D3DApp">
       <UniqueIdentifier>{527c0112-d3e7-49a5-8d2e-ce8007239843}</UniqueIdentifier>
     </Filter>
     <Filter Include="Common">
       <UniqueIdentifier>{7aaba1fe-b49d-4adb-bdb6-4874952b7f11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03.Shaders">
+      <UniqueIdentifier>{e0c69fbe-ee0b-4382-849c-34c65e081047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\01.GameTimer">
+      <UniqueIdentifier>{77b9810d-6d86-4458-a689-3b195fbc77bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04.RenderItem">
+      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Client_Prototype.h">
-      <Filter>99.Default</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>99.Default</Filter>
     </ClInclude>
@@ -45,15 +42,6 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>00.stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>02.Utility\01.Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>02.Utility\02.Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>02.Utility\03.Scene</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp.h">
       <Filter>01.FrameWork\D3DApp</Filter>
@@ -76,22 +64,25 @@
     <ClInclude Include="..\Common\MathHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Client_Prototype.h">
+      <Filter>01.FrameWork</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\GeometryGenerator.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>02.Utility\01.GameTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderItem.h">
+      <Filter>04.RenderItem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client_Prototype.cpp">
-      <Filter>99.Default</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>00.stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>02.Utility\01.Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>02.Utility\02.Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>02.Utility\03.Scene</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp.cpp">
       <Filter>01.FrameWork\D3DApp</Filter>
@@ -104,6 +95,18 @@
     </ClCompile>
     <ClCompile Include="..\Common\MathHelper.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Client_Prototype.cpp">
+      <Filter>01.FrameWork</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\GeometryGenerator.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>02.Utility\01.GameTimer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -118,5 +121,10 @@
     <Image Include="Client_Prototype.ico">
       <Filter>99.Default\리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\color.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

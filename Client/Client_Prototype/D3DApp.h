@@ -3,7 +3,7 @@
 
 class CD3DApp
 {
-	static CD3DApp* m_pInstance;
+	static CD3DApp* m_pApp;
 protected:
 	CD3DApp(HINSTANCE hInstance);
 	CD3DApp(const CD3DApp& rhs) = delete;
@@ -11,7 +11,7 @@ protected:
 	virtual ~CD3DApp();
 
 public:
-	static CD3DApp* GetInstance(void);
+	static CD3DApp* GetApp(void);
 
 	HINSTANCE AppInst() const;
 	HWND MainWnd() const;
@@ -20,6 +20,16 @@ public:
 	bool Get4xMsaaState() const;
 	void Set4xMsaaState(bool value);
 
+	UINT Get4xMsaaQuality(void) {
+		return m_n4xMsaaQuality;
+	}
+
+	DXGI_FORMAT GetBackBufferFormat(void) {
+		return m_BackBufferFormat;
+	}
+	DXGI_FORMAT GetDepthStencilFormat(void) {
+		return m_DepthStencilFormat;
+	}
 	int Run();
 
 	virtual bool Initialize();
@@ -29,8 +39,8 @@ public:
 protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps();
 	virtual void OnResize();
-	virtual void Update(CTimer* const gt) = 0;
-	virtual void Draw(CTimer* const gt) = 0;
+	virtual void Update(CTimer& const gt) = 0;
+	virtual void Draw(CTimer& const gt) = 0;
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) {};
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) {};
@@ -77,7 +87,7 @@ protected:
 	bool m_b4xMsaaState = false;
 	UINT m_n4xMsaaQuality = 0;
 
-	CTimer* m_pTimer = nullptr;
+	CTimer m_Timer;
 
 	ComPtr<IDXGIFactory4> m_dxgiFactory = nullptr;
 	ComPtr<IDXGISwapChain> m_dxgiSwapChain = nullptr;
