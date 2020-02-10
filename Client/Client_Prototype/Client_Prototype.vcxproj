@@ -164,19 +164,25 @@
     <ClInclude Include="..\Common\DDSTextureLoader.h" />
     <ClInclude Include="..\Common\GeometryGenerator.h" />
     <ClInclude Include="..\Common\MathHelper.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="D3DApp.h" />
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Functor.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="RenderItem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Struct.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="Typedef.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +190,14 @@
     <ClCompile Include="..\Common\DDSTextureLoader.cpp" />
     <ClCompile Include="..\Common\GeometryGenerator.cpp" />
     <ClCompile Include="..\Common\MathHelper.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Component_Manager.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="RenderItem.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -194,6 +205,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc" />

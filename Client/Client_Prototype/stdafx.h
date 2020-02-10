@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <list>
+#include <map>
 #include <algorithm>
 
 
@@ -50,10 +51,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
-#define FRAME_BUFFER_WIDTH 1280
-#define FRAME_BUFFER_HEIGHT 720
 
-#define MAX_OBJECT 255
 
 #define EPSILON 1.0e-10f
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -71,8 +69,10 @@ namespace Vector4
 
 }
 
+#include "Defines.h"
 #include "Typedef.h"
 #include "Struct.h"
 #include "Enum.h"
 #include "Macros.h"
 #include "Function.h"
+#include "Functor.h"

@@ -4,24 +4,27 @@
 
 #include "RenderItem.h"
 
+class CComponent_Manager;
 class CMesh;
 
-class CObject
+class CGameObject
 {
 public:
-	CObject();
-	virtual ~CObject();
+	CGameObject();
+	virtual ~CGameObject();
 
 public:
+	HRESULT Initialize(void);
+
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:
-	XMFLOAT4X4* GetWorld(void);
-	XMFLOAT3 GetPos(void);
-	XMFLOAT3 GetScale(void);
+	CComponent* Get_Component(const wstring tag);
 
+public:
 	RenderItem* GetRenderItem(void);
+
 	UINT GetObjCBIndex(void);
 	UINT GetStartIndexLocation(void);
 	UINT GetBaseVertexLocation(void);
@@ -29,6 +32,9 @@ public:
 	void SetMesh(CMesh* pMesh);
 	
 protected:
+	map<wstring, CComponent*> m_mapComponent;
 	RenderItem m_RenderItem;
+
+	CComponent_Manager* m_pComponent_Manager = nullptr;
 };
 

@@ -5,6 +5,8 @@
 #include "RenderItem.h"
 #include "FrameResource.h"
 
+#include "Camera.h"
+#include "GameObject.h"
 //class CScene;
 
 class CGameFramework_Client : public CD3DApp
@@ -42,7 +44,10 @@ private:
 	void BuildPSOs();
 	void BuildFrameResources();
 	void BuildRenderItems();
-	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
+
+	void BuildComponent(void);
+	void BuildCamera(void);
+	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems);
 
 private:
 	std::vector<std::unique_ptr<FrameResource>> mFrameResources;
@@ -62,15 +67,20 @@ private:
 
 	// List of all the render items.
 	std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+	std::vector<std::unique_ptr<CGameObject>> m_vObjects;
 
 	// Render items divided by PSO.
 	std::vector<RenderItem*> mOpaqueRitems;
+	std::vector<CGameObject*> m_OpaqueObjects;
 
 	PassConstants mMainPassCB;
 
 	UINT mPassCbvOffset = 0;
 
 	bool mIsWireframe = false;
+
+	CCamera m_CurrentCamera;
+
 
 	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT4X4 mView = MathHelper::Identity4x4();
