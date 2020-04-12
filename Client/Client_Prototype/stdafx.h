@@ -52,12 +52,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 
 
-#include "assimp/Importer.hpp"
-#include "assimp\cimport.h"
-#include "assimp\postprocess.h"
-#include "assimp\scene.h"
 
-#pragma comment(lib, "assimp-vc140-mt.lib")
 
 #define EPSILON 1.0e-10f
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

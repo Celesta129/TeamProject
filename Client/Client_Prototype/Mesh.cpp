@@ -11,6 +11,10 @@ CMesh::CMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
 {
 }
 
+CMesh::CMesh(const CMesh &)
+{
+}
+
 
 void CMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList * pCommandList)
 {
@@ -108,3 +112,22 @@ void CBoxMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pC
 	m_MeshGeo->DrawArgs["box"] = submesh;
 }
 
+MMesh::MMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
+{
+}
+
+MMesh::~MMesh()
+{
+}
+
+void MMesh::ReleaseUploadBuffers()
+{
+}
+
+void MMesh::Render(ID3D12GraphicsCommandList * pd3dCommandList)
+{
+}
+
+void MMesh::Render(ID3D12GraphicsCommandList * pd3dCommandList, UINT nInstanceCount)
+{
+}

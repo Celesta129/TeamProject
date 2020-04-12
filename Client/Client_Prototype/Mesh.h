@@ -3,6 +3,12 @@
 #include "Component.h"
 #include "Vertex.h"
 
+#include "assimp/Importer.hpp"
+#include "assimp\cimport.h"
+#include "assimp\postprocess.h"
+#include "assimp\scene.h"
+
+#pragma comment(lib, "assimp-vc140-mt.lib")
 
 inline XMMATRIX aiMatrixToXMMatrix(const aiMatrix4x4& offset)
 {
@@ -53,12 +59,32 @@ struct Bone
 	}
 };
 
+struct mesh
+{
+	vector<VertexData>      m_vertices;
+	vector<int>            m_indices;
+	UINT               m_materialIndex;
+
+	mesh() { m_materialIndex = 0; }
+	~mesh() {
+		//cout << "mesh ¼Ò¸êÀÚ" << endl;
+		m_vertices.clear();
+		m_indices.clear();
+	}
+	void SetMeshesTextureIndex(UINT index) {
+		for (auto& d : m_vertices)
+			d.m_nTextureNum = index;
+	}
+
+};
+
+
 class CMesh : public CComponent
 {
 public:
 	CMesh();
 	CMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
-
+	CMesh(const CMesh&);
 	virtual ~CMesh() {
 		m_vertices.clear();
 		m_indices.clear();
@@ -87,7 +113,7 @@ public:
 
 	virtual CComponent* Clone();
 protected:
-	//unique_ptr<MeshGeometry> m_MeshGeo;
+	unique_ptr<MeshGeometry> m_MeshGeo;
 };
 
 class CBoxMesh : public CMesh 
@@ -97,6 +123,46 @@ public:
 	virtual ~CBoxMesh();
 
 	virtual void BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
+};
+
+class MMesh
+{
+public:
+	MMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual ~MMesh();
+
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
+	void ReleaseUploadBuffers();
+
+protected:
+	ComPtr<ID3D12Resource>			m_pd3dVertexBuffer = NULL;
+	ComPtr<ID3D12Resource>			m_pd3dVertexUploadBuffer = NULL;
+
+	ComPtr<ID3D12Resource>			m_pd3dIndexBuffer = NULL;
+	ComPtr<ID3D12Resource>			m_pd3dIndexUploadBuffer = NULL;
+
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
+
+	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	UINT							m_nSlot = 0;
+	UINT							m_nVertices = 0;
+	UINT							m_nStride = 0;
+	UINT							m_nOffset = 0;
+
+	UINT							m_nIndices = 0;
+	UINT							m_nStartIndex = 0;
+	int								m_nBaseVertex = 0;
+public:
+	BoundingOrientedBox				m_xmOOBB;
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, UINT nInstanceCount);
 };
 
 

@@ -3,7 +3,7 @@
 
 
 ModelMesh::ModelMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, mesh & meshData)
-	:CMesh(pd3dDevice, pd3dCommandList)
+	:MMesh(pd3dDevice, pd3dCommandList)
 {
 }
 
@@ -54,7 +54,7 @@ void LoadModel::InitScene()
 
 		m_numVertices += (UINT)m_Meshes[i].m_vertices.size();
 	}
-	m_numBones = (UINT)m_Bones.size();
+	//m_numBones = (UINT)m_Bones.size();
 	
 }
 
@@ -99,39 +99,39 @@ void LoadModel::InitMesh(UINT index, const aiMesh * pMesh)
 
 void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 {
-	for (UINT i = 0; i < pMesh->mNumBones; ++i) {
-		int BoneIndex = -1;
-		const aiBone* pBone = pMesh->mBones[i];
+	//for (UINT i = 0; i < pMesh->mNumBones; ++i) {
+	//	int BoneIndex = -1;
+	//	const aiBone* pBone = pMesh->mBones[i];
 
-		int tmpIndex = 0;
-		for (const auto& p : m_Bones) { //이미 존재하는 뼈인지 검색
-			if (p.first == pBone->mName.data) {
-				BoneIndex = tmpIndex;
-				//현재 뼈가 이미 벡터에 저장된 뼈일 경우
-				//인덱스를 해당 뼈의 인덱스로 저장
-				break;
-			}
-			tmpIndex++;
-		}
+	//	int tmpIndex = 0;
+	//	for (const auto& p : m_Bones) { //이미 존재하는 뼈인지 검색
+	//		if (p.first == pBone->mName.data) {
+	//			BoneIndex = tmpIndex;
+	//			//현재 뼈가 이미 벡터에 저장된 뼈일 경우
+	//			//인덱스를 해당 뼈의 인덱스로 저장
+	//			break;
+	//		}
+	//		tmpIndex++;
+	//	}
 
-		if (BoneIndex < 0) { //없으면 새로 추가
-			BoneIndex = (int)m_Bones.size();
-			//새로 저장하는 뼈일 경우 
-			//인덱스는 현재 뼈의 개수 (0개일 경우 0부터 시작)
+	//	if (BoneIndex < 0) { //없으면 새로 추가
+	//		BoneIndex = (int)m_Bones.size();
+	//		//새로 저장하는 뼈일 경우 
+	//		//인덱스는 현재 뼈의 개수 (0개일 경우 0부터 시작)
 
-			Bone bone;
-			bone.BoneOffset = aiMatrixToXMMatrix(pBone->mOffsetMatrix);
-			m_Bones.emplace_back(make_pair(pBone->mName.data, bone));
-		}
+	//		Bone bone;
+	//		bone.BoneOffset = aiMatrixToXMMatrix(pBone->mOffsetMatrix);
+	//		m_Bones.emplace_back(make_pair(pBone->mName.data, bone));
+	//	}
 
 
-		for (UINT b = 0; b < pBone->mNumWeights; ++b) {
-			UINT vertexID = pBone->mWeights[b].mVertexId;
-			float weight = pBone->mWeights[b].mWeight;
-			m_Meshes[index].m_vertices[vertexID].AddBoneData(BoneIndex, weight);
+	//	for (UINT b = 0; b < pBone->mNumWeights; ++b) {
+	//		UINT vertexID = pBone->mWeights[b].mVertexId;
+	//		float weight = pBone->mWeights[b].mWeight;
+	//		m_Meshes[index].m_vertices[vertexID].AddBoneData(BoneIndex, weight);
 
-		}
-	}
+	//	}
+	//}
 }
 
 void LoadModel::SetMeshs(ID3D12Device * pd3dDevice, ID3D12CommandList * pd3dCommandList)

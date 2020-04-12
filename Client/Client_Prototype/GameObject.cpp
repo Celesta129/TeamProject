@@ -29,7 +29,7 @@ HRESULT CGameObject::Initialize(void)
 		return E_FAIL;
 	}
 	m_mapComponent.insert(make_pair(L"RenderItem", pRenderItem));
-	//m_model = new LoadModel("../resouces/character_baby_idle.fbx");
+	m_model = new LoadModel("./resources/idle_Anim.FBX");
 	return S_OK;
 }
 

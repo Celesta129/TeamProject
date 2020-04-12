@@ -3,14 +3,8 @@
 
 #include "Mesh.h"
 
-#include "assimp/Importer.hpp"   // assimp ¸ðµ¨ import
-#include "assimp/cimport.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
 
-
-#pragma comment(lib, "assimp-vc140-mt.lib")
-class ModelMesh : public CMesh
+class ModelMesh : public MMesh
 {
 public:
 	ModelMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, mesh& meshData);
@@ -22,7 +16,7 @@ class LoadModel
 {
 private:
 	const aiScene* m_pScene;	//¸ðµ¨
-	vector<CMesh> m_Meshes;		// ¸Þ½¬
+	vector<mesh> m_Meshes;		// ¸Þ½¬
 	vector<shared_ptr<ModelMesh>> m_ModelMeshes;	//¸Þ½¬ Á¤º¸ ¸®¼Ò½º
 	vector<pair<string, aiBone>> m_Bones;		// »À
 
