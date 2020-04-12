@@ -1,15 +1,17 @@
 #pragma once
+#include "stdafx.h"
+
 class CComponent
 {
 public:
 	CComponent();
 	virtual ~CComponent();
 
-
 public:
-	bool m_bIsManagers = false;					// 즉 컴포넌트 매니저는 1. 무조건! 원형만 갖고있어야함(IsManagers = true).
-												// 2. 오브젝트측에서는 IsManagers가 true일시 지우면 절대로 안됨.
-
+	void Addref(void) { m_nReference++; }
+	UINT release(void);
+private:
+	UINT m_nReference = 0;
 public:
 	virtual CComponent* Clone(void) = 0;		// Clone 구현시 new Component(this)와 return this; 구분할것. 즉, 새로 복사-생성해서 넘길것과 자신의 포인터만 넘길 컴포넌트를 구분해야함.
 												// 이렇게 구현하려면 정확히는 레퍼런스 카운팅을 해서 Release 함수를 만들어야겠지만 시간상 생략함. 
@@ -18,9 +20,6 @@ public:
 
 												// 즉 구현시 1. 매니저가 포인터를 넘겨주는 경우 IsManagers = true, return this;
 												// 2. 매니저가 새로 복사생성해서 넘겨주는경우 IsManagers = false, return new(Component); 일것임. 주의 또 주의!
-												
-											
-
 	
 };
 

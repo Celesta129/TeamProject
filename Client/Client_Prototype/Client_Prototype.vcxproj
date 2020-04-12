@@ -74,21 +74,25 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\Common\;$(IncludePath)</IncludePath>
     <ExecutablePath>..\Common\;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>..\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\Common\;$(IncludePath)</IncludePath>
     <ExecutablePath>..\Common\;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>..\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\Common\;$(IncludePath)</IncludePath>
     <ExecutablePath>..\Common\;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>..\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\Common\;$(IncludePath)</IncludePath>
     <ExecutablePath>..\Common\;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>..\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -174,8 +178,11 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Functor.h" />
+    <ClInclude Include="LoadModel.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="RenderItem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -184,6 +191,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Typedef.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\d3dUtil.cpp" />
@@ -194,9 +202,13 @@
     <ClCompile Include="Client_Prototype.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="LoadModel.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="RenderItem.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -46,7 +46,7 @@ void CTransform::Set_Pos(XMFLOAT3 * pPos)
 CComponent * CTransform::Clone(void)
 {
 	CTransform* pTransfrom = new CTransform(*this);
-	pTransfrom->m_bIsManagers = false;
-
+	
+	Addref();
 	return pTransfrom;
 }

@@ -22,7 +22,19 @@ CComponent * CComponent_Manager::Clone_Component(const wstring & tag)
 
 void CComponent_Manager::Clear_Component(void)
 {
+	for (auto& e : m_mapComponent)
+	{
+		if (e.second != nullptr)
+		{
+			UINT ref = e.second->release();
 
+			if (ref <= 0)
+			{
+				e.second = nullptr;
+			}
+		}
+	}
+	m_mapComponent.clear();
 }
 
 CComponent * CComponent_Manager::Find_Component(const wstring & tag)
@@ -37,13 +49,5 @@ CComponent * CComponent_Manager::Find_Component(const wstring & tag)
 
 void CComponent_Manager::Release(void)
 {
-	for (auto& e : m_mapComponent)
-	{
-		if (e.second != nullptr)
-		{
-			delete e.second;
-			e.second = nullptr;
-		}
-	}
-	m_mapComponent.clear();
+	Clear_Component();
 }

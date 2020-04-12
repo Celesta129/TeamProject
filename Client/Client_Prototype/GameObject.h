@@ -3,10 +3,9 @@
 #include "../Common/UploadBuffer.h"
 
 #include "RenderItem.h"
-
+#include "LoadModel.h"
 class CComponent_Manager;
 class CMesh;
-
 class CGameObject
 {
 public:
@@ -32,6 +31,8 @@ public:
 	void SetMesh(CMesh* pMesh);
 	
 protected:
+	LoadModel* m_model;
+
 	map<wstring, CComponent*> m_mapComponent;
 	RenderItem m_RenderItem;
 

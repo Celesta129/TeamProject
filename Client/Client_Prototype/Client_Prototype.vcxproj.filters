@@ -50,6 +50,18 @@
     <Filter Include="02.Utility\05.Manager\01.Component_Manager">
       <UniqueIdentifier>{320761a0-4d0d-43fa-bde9-d7301b042663}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\04.Component\03.Mesh">
+      <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\03.Mesh\Vertex">
+      <UniqueIdentifier>{c5503c3b-3636-46be-b633-32be39f2eca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model">
+      <UniqueIdentifier>{7dff71a1-7ac4-4c87-a632-4460e5ab2e56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\LoadModel">
+      <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -113,6 +125,18 @@
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClInclude>
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="LoadModel.h">
+      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>02.Utility\04.Component\03.Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>02.Utility\04.Component\04.Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -159,6 +183,18 @@
     </ClCompile>
     <ClCompile Include="RenderItem.cpp">
       <Filter>02.Utility\04.Component\02.RenderItem</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadModel.cpp">
+      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>02.Utility\04.Component\03.Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>02.Utility\04.Component\04.Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -212,8 +212,8 @@ void CGameFramework_Client::OnMouseMove(WPARAM btnState, int x, int y)
 		// Restrict the angle mPhi.
 		mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
 
-		m_CurrentCamera.SetTheta(dx);
-		m_CurrentCamera.SetPhi(dy);
+		m_CurrentCamera.SetTheta(mTheta);
+		m_CurrentCamera.SetPhi(mPhi);
 
 	}
 	else if ((btnState & MK_RBUTTON) != 0)

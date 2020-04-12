@@ -1,20 +1,29 @@
 #include "Mesh.h"
+#include "FrameResource.h"
 
 
 
+CMesh::CMesh()
+{
+}
 
 CMesh::CMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
 {
 }
 
 
-CMesh::~CMesh()
-{
-}
-
 void CMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList * pCommandList)
 {
 	
+}
+
+void CMesh::Render(ID3D12GraphicsCommandList * pd3dCommandList)
+{
+}
+
+CComponent * CMesh::Clone()
+{
+	return nullptr;
 }
 
 CBoxMesh::CBoxMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList)
@@ -98,3 +107,4 @@ void CBoxMesh::BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pC
 
 	m_MeshGeo->DrawArgs["box"] = submesh;
 }
+

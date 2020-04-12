@@ -12,10 +12,7 @@ CGameObject::~CGameObject()
 {
 	for (auto& e : m_mapComponent)
 	{
-		if (e.second->m_bIsManagers == false)
-			delete e.second;
-		else
-			e.second = nullptr;
+		e.second->release();
 	}
 	m_mapComponent.clear();
 }
@@ -32,7 +29,7 @@ HRESULT CGameObject::Initialize(void)
 		return E_FAIL;
 	}
 	m_mapComponent.insert(make_pair(L"RenderItem", pRenderItem));
-
+	//m_model = new LoadModel("../resouces/character_baby_idle.fbx");
 	return S_OK;
 }
 
@@ -44,6 +41,7 @@ void CGameObject::Update(float fTimeElapsed)
 void CGameObject::Render(ID3D12GraphicsCommandList* pCommandList)
 {
 
+	
 }
 
 CComponent * CGameObject::Get_Component(const wstring tag)
