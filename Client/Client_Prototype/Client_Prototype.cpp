@@ -5,6 +5,7 @@
 #include "../Common/GeometryGenerator.h"
 #include "Camera.h"
 #include "Component_Manager.h"
+#include "Map_1.h"
 
 #define MAX_LOADSTRING 100
 
@@ -53,6 +54,13 @@ bool CGameFramework_Client::Initialize()
 	if (!CD3DApp::Initialize())
 		return false;
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+
+	m_pScene = new CMap_1(m_d3dDevice, m_GraphicsCommandList);
+	if (!m_pScene->Initialize(m_CbvSrvUavDescriptorSize)) 
+	{
+		return false;
+	}
+
 	BuildComponent();
 	
 	BuildRootSignature();
@@ -773,31 +781,20 @@ void CGameFramework_Client::BuildCamera(void)
 
 void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)
 {
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	
+	m_pScene->Render(mCurrFrameResourceIndex, cmdList, m_CbvSrvUavDescriptorSize);
 
-	auto objectCB = mCurrFrameResource->ObjectCB->Resource();
+	//cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());
+	//cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
+	//cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
 
-	// For each render item...
-	for (size_t i = 0; i < ritems.size(); ++i)
-	{
-		if (ritems[i] == nullptr)
-			continue;
+	//// Offset to the CBV in the descriptor heap for this object and for this frame resource.
+	//UINT cbvIndex = mCurrFrameResourceIndex * (UINT)m_OpaqueObjects.size() + ri->ObjCBIndex;
+	//auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+	//cbvHandle.Offset(cbvIndex, m_CbvSrvUavDescriptorSize);
 
-		RenderItem* ri = (RenderItem*)ritems[i]->Get_Component(L"RenderItem");
-		if (ri == nullptr)
-			continue;
+	//cmdList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
-		cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());
-		cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
-		cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
 
-		// Offset to the CBV in the descriptor heap for this object and for this frame resource.
-		UINT cbvIndex = mCurrFrameResourceIndex * (UINT)m_OpaqueObjects.size() + ri->ObjCBIndex;
-		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-		cbvHandle.Offset(cbvIndex, m_CbvSrvUavDescriptorSize);
-
-		cmdList->SetGraphicsRootDescriptorTable(0, cbvHandle);
-
-		cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
-	}
+	//cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
 }

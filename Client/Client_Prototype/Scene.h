@@ -1,32 +1,34 @@
 #pragma once
 #include "../Common/UploadBuffer.h"
+#include "Component_Manager.h"
 #include "FrameResource.h"
-#include "Object.h"
+#include "GameObject.h"
 
 class CGameObject;
 class CCamera;
 class CBox;
 class CBoxMesh;
 
+class CShader;
 class CScene
 {
 public:
 	CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList);
 	virtual ~CScene();
 
-	bool Initialize(UINT CbvSrvUavDescriptorSize);
+	virtual bool Initialize(UINT CbvSrvUavDescriptorSize);
 
 	//씬에서 마우스와 키보드 메시지를 처리한다. 
-	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	void ReleaseObjects();
+	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void ReleaseObjects();
 
-	void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float fTimeElapsed);
 
 	virtual void Update(float fTimeElapsed, ID3D12Fence* pFence);
-	virtual void Render(UINT CbvSrvUavDescriptorSize);
+	virtual void Render(UINT frameResourceIndex, ID3D12GraphicsCommandList* cmdList, UINT CbvSrvUavDescriptorSize);
 
 	void ReleaseUploadBuffers();
 
@@ -44,17 +46,18 @@ public:
 	}
 
 protected:
-	void BuildRootSignature(void);
-	void BuildDescriptorHeaps(void);
-	void BuildConstantBufferViews(UINT CbvSrvUavDescriptorSize);
-	void BuildShadersAndInputLayout(void);
-	void BuildPSOs(void);
-	void BuildFrameResources(void);
-	void BuildShapeGeometry(void);
-	void BuildRenderItems(void);
+	virtual void BuildComponents(void);
+	virtual void BuildRootSignature(void);
+	virtual void BuildDescriptorHeaps(void);
+	virtual void BuildConstantBufferViews(UINT CbvSrvUavDescriptorSize);
+	virtual void BuildShadersAndInputLayout(void);
+	virtual void BuildPSOs(void);
+	virtual void BuildFrameResources(void);
+	virtual void BuildShapeGeometry(void);
+	virtual void BuildRenderItems(void);
 
-	void BuildMesh(void);
-	void BuildObject(void);
+	virtual void BuildMesh(void);
+	virtual void BuildObject(void);
 
 protected:
 	static const int NumFrameResources = 3;
@@ -70,24 +73,48 @@ protected:
 	//CObjectShader *m_pShaders = NULL;
 	//int m_nShaders = 0;
 
-	ComPtr<ID3D12RootSignature> m_d3dGraphicsRootSignature = nullptr;
-	ComPtr<ID3D12DescriptorHeap> m_CbvHeap = nullptr;		// ConstantBufferViewHeap
+	ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
+	ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;		// ConstantBufferViewHeap
 	
-	UINT m_PassCbvOffset = 0;
+	UINT mPassCbvOffset = 0;
+
+	UINT m_CbvSrvUavDescriptorSize = 120;
 
 	ComPtr<ID3DBlob> m_vsByteCode = nullptr;		// Vertex Shader
 	ComPtr<ID3DBlob> m_psByteCode = nullptr;		// Pixel Shader
 
-	vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayout;
+	vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
 	ComPtr<ID3D12PipelineState> m_PSO = nullptr;		// Pipeline State Object
 
-	vector<CObject*> m_vObjects;		// 같은 PSO를 사용하는 렌더링 오브젝트는 같은 목록에 둔다.
+
+protected:
+	// List of all the render items.
+	std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+	std::vector<std::unique_ptr<CGameObject>> m_vObjects;
+	// Render items divided by PSO.
+	std::vector<RenderItem*> mOpaqueRitems;
+	std::vector<CGameObject*> m_OpaqueObjects;
+
 protected:
 	CCamera* m_pCamera = nullptr;
 	CBoxMesh* m_pBoxMesh = nullptr;
 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
+	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
+	std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
+	vector<CShader*> m_vShaders;
+
+protected:
+	CComponent_Manager* m_pComponent_Manager = nullptr;
+
+
+	DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	DXGI_FORMAT m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	bool m_b4xMsaaState = true;
+	UINT m_n4xMsaaQuality = 0;
 
 };
+
 

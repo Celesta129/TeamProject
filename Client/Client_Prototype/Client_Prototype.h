@@ -7,7 +7,9 @@
 
 #include "Camera.h"
 #include "GameObject.h"
+#include "Scene.h"
 //class CScene;
+class CShader;
 
 class CGameFramework_Client : public CD3DApp
 {
@@ -23,6 +25,7 @@ private:
 	virtual void FlushCommandQueue(void);
 
 private:
+
 	virtual void OnResize() override;
 	virtual void Update(CTimer& const gt)override;
 	virtual void Draw(CTimer& const gt)override;
@@ -50,6 +53,8 @@ private:
 	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems);
 
 private:
+	CScene* m_pScene = nullptr;
+
 	std::vector<std::unique_ptr<FrameResource>> mFrameResources;
 	FrameResource* mCurrFrameResource = nullptr;
 	int mCurrFrameResourceIndex = 0;

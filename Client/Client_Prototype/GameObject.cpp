@@ -41,7 +41,6 @@ void CGameObject::Update(float fTimeElapsed)
 void CGameObject::Render(ID3D12GraphicsCommandList* pCommandList)
 {
 
-	
 }
 
 CComponent * CGameObject::Get_Component(const wstring tag)
