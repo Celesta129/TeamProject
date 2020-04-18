@@ -62,6 +62,15 @@
     <Filter Include="02.Utility\04.Component\04.Model\LoadModel">
       <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\06.Shader">
+      <UniqueIdentifier>{91c5167d-3028-41f9-9356-be7b44126dc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\07.Scene">
+      <UniqueIdentifier>{de144304-3b46-4881-9cc1-056472a0307d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\07.Scene\01.map1">
+      <UniqueIdentifier>{16105d69-844a-4ba4-8c4e-0db85b95032d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -134,8 +143,17 @@
     <ClInclude Include="Vertex.h">
       <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Model_Animation.h">
       <Filter>02.Utility\04.Component\04.Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>02.Utility\06.Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>02.Utility\07.Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Map_1.h">
+      <Filter>02.Utility\07.Scene\01.map1</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -193,8 +211,17 @@
     <ClCompile Include="Vertex.cpp">
       <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Model_Animation.cpp">
       <Filter>02.Utility\04.Component\04.Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>02.Utility\06.Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>02.Utility\07.Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Map_1.cpp">
+      <Filter>02.Utility\07.Scene\01.map1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
