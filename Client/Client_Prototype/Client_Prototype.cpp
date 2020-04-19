@@ -5,7 +5,7 @@
 #include "../Common/GeometryGenerator.h"
 #include "Camera.h"
 #include "Component_Manager.h"
-#include "Map_1.h"
+#include "Scene.h"
 
 #define MAX_LOADSTRING 100
 
@@ -46,6 +46,7 @@ CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 
 CGameFramework_Client::~CGameFramework_Client()
 {
+	if(m_pScene) delete m_pScene;
 	CComponent_Manager::DestroyInstance();
 }
 
@@ -55,7 +56,7 @@ bool CGameFramework_Client::Initialize()
 		return false;
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
-	m_pScene = new CMap_1(m_d3dDevice, m_GraphicsCommandList);
+	m_pScene = new CScene(m_d3dDevice, m_GraphicsCommandList);
 	if (!m_pScene->Initialize(m_CbvSrvUavDescriptorSize)) 
 	{
 		return false;
@@ -106,18 +107,10 @@ void CGameFramework_Client::Update(CTimer & const gt)
 	UpdateCamera(gt);
 	
 	// Cycle through the circular frame resource array.
-	mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
+	mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
 	mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
 
-	// Has the GPU finished processing the commands of the current frame resource?
-	// If not, wait until the GPU has completed commands up to this fence point.
-	if (mCurrFrameResource->Fence != 0 && m_Fence->GetCompletedValue() < mCurrFrameResource->Fence)
-	{
-		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-		ThrowIfFailed(m_Fence->SetEventOnCompletion(mCurrFrameResource->Fence, eventHandle));
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
+	m_pScene->Update(gt, m_Fence.Get(), m_GraphicsCommandList.Get());
 
 	UpdateObjectCBs(gt);
 	UpdateMainPassCB(gt);
@@ -257,14 +250,14 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
 		
 		pRenderItem->MovePos(&XMFLOAT3(-fSpeed * gt.DeltaTime(), 0.f, 0.f));
-		pRenderItem->NumFramesDirty = gNumFrameResources;
+		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
 	}
 	else if (GetAsyncKeyState('D') & 0x8000)
 	{
 		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
 
 		pRenderItem->MovePos(&XMFLOAT3(fSpeed * gt.DeltaTime(), 0.f, 0.f));
-		pRenderItem->NumFramesDirty = gNumFrameResources;
+		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
 	}
 
 	if (GetAsyncKeyState('W') & 0x8000)
@@ -272,14 +265,14 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
 
 		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, fSpeed * gt.DeltaTime()));
-		pRenderItem->NumFramesDirty = gNumFrameResources;
+		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
 	}
 	else if (GetAsyncKeyState('S') & 0x8000)
 	{
 		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
 
 		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, -fSpeed * gt.DeltaTime()));
-		pRenderItem->NumFramesDirty = gNumFrameResources;
+		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
 	}
 }
 
@@ -370,18 +363,18 @@ void CGameFramework_Client::BuildDescriptorHeaps()
 
 	// Need a CBV descriptor for each object for each frame resource,
 	// +1 for the perPass CBV for each frame resource.
-	UINT numDescriptors = (objCount + 1) * gNumFrameResources;
+	UINT numDescriptors = (objCount + 1) * NUM_FRAME_RESOURCE;
 
 	// Save an offset to the start of the pass CBVs.  These are the last 3 descriptors.
 	// 마지막 3개의 디스크립터(서술자)는 패스별 CBV를 위한것이다.
-	mPassCbvOffset = objCount * gNumFrameResources;
+	mPassCbvOffset = objCount * NUM_FRAME_RESOURCE;
 
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.NumDescriptors = numDescriptors;
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
+	ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&cbvHeapDesc,						//////////////// 셰이더에서 해야할것임. 쉬다와서 작업할것.
 		IID_PPV_ARGS(&mCbvHeap)));
 }
 
@@ -392,7 +385,7 @@ void CGameFramework_Client::BuildConstantBufferViews()
 	UINT objCount = (UINT)m_OpaqueObjects.size();
 
 	// Need a CBV descriptor for each object for each frame resource.
-	for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
+	for (int frameIndex = 0; frameIndex < NUM_FRAME_RESOURCE; ++frameIndex)
 	{
 		auto objectCB = mFrameResources[frameIndex]->ObjectCB->Resource();
 		for (UINT i = 0; i < objCount; ++i)
@@ -418,7 +411,7 @@ void CGameFramework_Client::BuildConstantBufferViews()
 	UINT passCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 
 	// Last three descriptors are the pass CBVs for each frame resource.
-	for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
+	for (int frameIndex = 0; frameIndex < NUM_FRAME_RESOURCE; ++frameIndex)
 	{
 		auto passCB = mFrameResources[frameIndex]->PassCB->Resource();
 		D3D12_GPU_VIRTUAL_ADDRESS cbAddress = passCB->GetGPUVirtualAddress();
@@ -454,7 +447,7 @@ void CGameFramework_Client::BuildRootSignature()
 	// A root signature is an array of root parameters.
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(2, slotRootParameter, 0, nullptr,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
+	
 	// create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;
 	ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -654,7 +647,7 @@ void CGameFramework_Client::BuildPSOs()
 
 void CGameFramework_Client::BuildFrameResources()
 {
-	for (int i = 0; i < gNumFrameResources; ++i)
+	for (int i = 0; i < NUM_FRAME_RESOURCE; ++i)
 	{
 		mFrameResources.push_back(std::make_unique<FrameResource>(m_d3dDevice.Get(),
 			1, (UINT)m_vObjects.size()));

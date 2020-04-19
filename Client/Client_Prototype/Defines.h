@@ -11,4 +11,4 @@
 
 #define MAX_OBJECT 255
 
-#define MAX_FRAME_RESOURCE 3
+#define NUM_FRAME_RESOURCE 3

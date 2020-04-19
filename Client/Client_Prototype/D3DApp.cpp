@@ -3,7 +3,8 @@
 
 #include <WindowsX.h>
 
-const int gNumFrameResources = 3;
+int gClientWidth;
+int gClientHeight;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -274,6 +275,7 @@ void CD3DApp::CreateRtvAndDsvDescriptorHeaps()
 
 void CD3DApp::OnResize()
 {
+	
 	assert(m_d3dDevice);
 	assert(m_dxgiSwapChain);
 	assert(m_CommandAllocator);
@@ -355,6 +357,9 @@ void CD3DApp::OnResize()
 	m_ViewPort.MaxDepth = 1.0f;
 
 	m_ScissorRect = { 0, 0, m_ClientWidth, m_ClientHeight };
+
+	gClientWidth = m_ClientWidth;
+	gClientHeight = m_ClientHeight;
 }
 
 bool CD3DApp::InitMainWindow()
@@ -379,6 +384,7 @@ bool CD3DApp::InitMainWindow()
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
 	RECT R = { 0, 0, m_ClientWidth, m_ClientHeight };
+
 	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
 	int width = R.right - R.left;
 	int height = R.bottom - R.top;

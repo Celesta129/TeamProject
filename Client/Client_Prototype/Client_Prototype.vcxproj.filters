@@ -68,9 +68,6 @@
     <Filter Include="02.Utility\07.Scene">
       <UniqueIdentifier>{de144304-3b46-4881-9cc1-056472a0307d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\07.Scene\01.map1">
-      <UniqueIdentifier>{16105d69-844a-4ba4-8c4e-0db85b95032d}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -152,9 +149,7 @@
     <ClInclude Include="Scene.h">
       <Filter>02.Utility\07.Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Map_1.h">
-      <Filter>02.Utility\07.Scene\01.map1</Filter>
-    </ClInclude>
+    <ClInclude Include="Extern.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -219,9 +214,6 @@
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>02.Utility\07.Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_1.cpp">
-      <Filter>02.Utility\07.Scene\01.map1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

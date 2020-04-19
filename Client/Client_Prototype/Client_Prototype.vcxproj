@@ -172,7 +172,7 @@
     <ClInclude Include="Client_Prototype.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
-    <ClInclude Include="Map_1.h" />
+    <ClInclude Include="Extern.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="D3DApp.h" />
@@ -203,7 +203,6 @@
     <ClCompile Include="..\Common\MathHelper.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
-    <ClCompile Include="Map_1.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
     <ClCompile Include="Scene.cpp" />

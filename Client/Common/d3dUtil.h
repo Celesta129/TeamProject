@@ -29,7 +29,7 @@
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
 
-extern const int gNumFrameResources;
+extern const int NUM_FRAME_RESOURCE;
 
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
 {
@@ -253,8 +253,8 @@ struct Material
 	// Dirty flag indicating the material has changed and we need to update the constant buffer.
 	// Because we have a material constant buffer for each FrameResource, we have to apply the
 	// update to each FrameResource.  Thus, when we modify a material we should set 
-	// NumFramesDirty = gNumFrameResources so that each frame resource gets the update.
-	int NumFramesDirty = gNumFrameResources;
+	// NumFramesDirty = NUM_FRAME_RESOURCE so that each frame resource gets the update.
+	int NumFramesDirty = NUM_FRAME_RESOURCE;
 
 	// Material constant buffer data used for shading.
 	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };

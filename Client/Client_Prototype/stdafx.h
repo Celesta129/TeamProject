@@ -175,6 +175,7 @@ namespace Vector4
 
 }
 
+#include "Extern.h"
 #include "Defines.h"
 #include "Typedef.h"
 #include "Struct.h"
