@@ -1,5 +1,11 @@
 #include "RenderItem.h"
 
+RenderItem::RenderItem(const RenderItem & rhs)
+{
+	m_Transform = rhs.m_Transform;
+	World = rhs.World;
+}
+
 void RenderItem::MovePos(float fDeltaX, float fDeltaY, float fDeltaZ)
 {
 	

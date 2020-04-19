@@ -8,6 +8,7 @@ class CTransform :
 {
 public:
 	CTransform();
+	CTransform(const CTransform& rhs);
 	virtual ~CTransform();
 
 	XMFLOAT4X4 Get_World(void) {return m_xmf4x4World;	};
@@ -24,6 +25,6 @@ public:
 public:
 	virtual CComponent* Clone(void);
 private:
-	XMFLOAT4X4 m_xmf4x4World;
+	XMFLOAT4X4 m_xmf4x4World = MathHelper::Identity4x4();
 };
 

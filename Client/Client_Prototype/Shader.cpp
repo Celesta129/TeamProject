@@ -18,7 +18,7 @@ CShader::~CShader()
 	}
 }
 
-void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList)
+void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera)
 {
 	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
 	m_CurrFrameResource = m_vFrameresources[m_CurrFrameResourceIndex].get();
@@ -34,9 +34,22 @@ void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCo
 		CloseHandle(eventHandle);
 	}
 
-	UpdateShaderVariables(timer, cmdList);
+	UpdateShaderVariables(timer, cmdList, pCamera);
 
 	
+}
+
+bool CShader::Push_Object(CGameObject * pObject)
+{
+	for (UINT i = 0; i < m_vObjects.size(); ++i)
+	{
+		if (m_vObjects[i] == nullptr)
+		{
+			m_vObjects[i] = pObject;
+			return true;
+		}
+	}
+	return false;
 }
 
 D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
@@ -244,6 +257,8 @@ void CShader::CreateDescriptorHeaps(ID3D12Device* pd3dDevice)
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(pd3dDevice->CreateDescriptorHeap(&cbvHeapDesc,						
 		IID_PPV_ARGS(&m_CbvHeap)));
+
+
 }
 
 void CShader::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -333,10 +348,10 @@ void CShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3
 	BuildObjects();
 }
 
-void CShader::UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList * pd3dCommandList)
+void CShader::UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera* pCamera)
 {
 	UpdateObjectCBs(timer);
-	UpdateMainPassCB(timer);
+	UpdateMainPassCB(timer, pCamera);
 }
 
 void CShader::ReleaseShaderVariables()
@@ -344,10 +359,10 @@ void CShader::ReleaseShaderVariables()
 
 }
 
-void CShader::UpdateMainPassCB(const CTimer& timer)
+void CShader::UpdateMainPassCB(const CTimer& timer, CCamera* pCamera)
 {
-	XMMATRIX view = XMLoadFloat4x4(&m_pCurrentCamera->GetViewMatrix());
-	XMMATRIX proj = XMLoadFloat4x4(&m_pCurrentCamera->GetProjectionMatrix());
+	XMMATRIX view = XMLoadFloat4x4(&pCamera->GetViewMatrix());
+	XMMATRIX proj = XMLoadFloat4x4(&pCamera->GetProjectionMatrix());
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -360,7 +375,7 @@ void CShader::UpdateMainPassCB(const CTimer& timer)
 	XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-	mMainPassCB.EyePosW = m_pCurrentCamera->GetPosition();
+	mMainPassCB.EyePosW = pCamera->GetPosition();
 	mMainPassCB.RenderTargetSize = XMFLOAT2((float)gClientWidth, (float)gClientHeight);
 	mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / gClientWidth, 1.0f / gClientHeight);
 	mMainPassCB.NearZ = 1.0f;
@@ -407,12 +422,38 @@ void CShader::BuildObjects(void)
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
-	pd3dCommandList->SetPipelineState(m_pPSOs[0].Get());
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
+
+	int passCbvIndex = mPassCbvOffset + m_CurrFrameResourceIndex;
+	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
+
+
+	if (m_RootSignature[PSO_OBJECT])
+		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[PSO_OBJECT].Get());
+
+	if (m_pPSOs[PSO_OBJECT])
+		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
+
+	pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
 }
 
-void CShader::Render(UINT frameResourceIndex, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
 	OnPrepareRender(pd3dCommandList);
+	for (auto& object : m_vObjects)
+	{
+		if (object == nullptr)
+			continue;
+		object->Render(pd3dCommandList);
+	}
+
+	++m_CurrFrameResource->Fence;
 }
 
 CObjectsShader::CObjectsShader()
@@ -511,6 +552,6 @@ void CObjectsShader::ReleaseUploadBuffers()
 
 void CObjectsShader::Render(UINT frameResourceIndex, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
-	CShader::Render(frameResourceIndex, pd3dCommandList, pCamera);
+	CShader::Render(pd3dCommandList, pCamera);
 	for (int j = 0; j < m_nObjects; j++) { if (m_ppObjects[j]) { m_ppObjects[j]->Render(pd3dCommandList); } }
 }

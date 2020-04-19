@@ -9,6 +9,8 @@
 
 #define MAX_LOADSTRING 100
 
+UINT g_CbvSrvUavDescriptorSize;
+
 // 전역 변수:
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
@@ -62,19 +64,6 @@ bool CGameFramework_Client::Initialize()
 		return false;
 	}
 
-	BuildComponent();
-	
-	BuildRootSignature();
-	BuildShadersAndInputLayout();
-	BuildShapeGeometry();
-	BuildRenderItems();
-	BuildFrameResources();
-	BuildDescriptorHeaps();
-	BuildConstantBufferViews();
-	BuildPSOs();
-
-
-	BuildCamera();
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
 	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
@@ -94,9 +83,9 @@ void CGameFramework_Client::OnResize()
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
 
-	m_CurrentCamera.Update(0);
-	/*if (m_pScene)
-		m_pScene->OnResize(AspectRatio());*/
+	//m_CurrentCamera.Update(0);
+	if (m_pScene)
+		m_pScene->OnResize(AspectRatio());
 }
 
 void CGameFramework_Client::Update(CTimer & const gt)
@@ -104,33 +93,25 @@ void CGameFramework_Client::Update(CTimer & const gt)
 	float fTimeElapsed = gt.DeltaTime();
 	
 	OnKeyboardInput(gt);
-	UpdateCamera(gt);
+	//UpdateCamera(gt);
 	
 	// Cycle through the circular frame resource array.
-	mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
-	mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
+	//mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
+	//mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
 
 	m_pScene->Update(gt, m_Fence.Get(), m_GraphicsCommandList.Get());
 
-	UpdateObjectCBs(gt);
-	UpdateMainPassCB(gt);
+	//UpdateObjectCBs(gt);
+	//UpdateMainPassCB(gt);
 }
 
 void CGameFramework_Client::Draw(CTimer & const gt)
 {
-	auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
+	//auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
 
 	// 커맨드리스트 리셋
 	ThrowIfFailed(m_CommandAllocator->Reset());
-	if (mIsWireframe)
-	{
-		ThrowIfFailed(m_GraphicsCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque_wireframe"].Get()));
-	}
-	else
-	{
-		ThrowIfFailed(m_GraphicsCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque"].Get()));
-	}
-
+	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(),NULL));
 
 	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
 	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
@@ -149,7 +130,7 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	m_GraphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 	
 	// 씬 렌더링. 렌더코드는 여기에!
-	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
+	/*ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
 	m_GraphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	m_GraphicsCommandList->SetGraphicsRootSignature(mRootSignature.Get());
@@ -157,9 +138,9 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	int passCbvIndex = mPassCbvOffset + mCurrFrameResourceIndex;
 	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 	passCbvHandle.Offset(passCbvIndex, m_CbvSrvUavDescriptorSize);
-	m_GraphicsCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
+	m_GraphicsCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);*/
 
-	DrawRenderItems(m_GraphicsCommandList.Get(), m_OpaqueObjects);
+	m_pScene->Render(m_GraphicsCommandList.Get());
 
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -177,7 +158,7 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_iSwapChainBufferCount;
 
 
-	mCurrFrameResource->Fence = ++m_nFenceValue;
+	//mCurrFrameResource->Fence = ++m_nFenceValue;
 	// Add an instruction to the command queue to set a new fence point. 
    // Because we are on the GPU timeline, the new fence point won't be 
    // set until the GPU finishes processing all the commands prior to this Signal().
@@ -751,11 +732,7 @@ void CGameFramework_Client::BuildRenderItems()
 
 void CGameFramework_Client::BuildComponent(void)
 {
-	CComponent* pComponent = nullptr;
-
-	pComponent = new RenderItem;
-	CComponent_Manager::GetInstance()->Add_Component(L"RenderItem", pComponent);
-
+	
 }
 
 void CGameFramework_Client::BuildCamera(void)
@@ -775,7 +752,7 @@ void CGameFramework_Client::BuildCamera(void)
 void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)
 {
 	
-	m_pScene->Render(mCurrFrameResourceIndex, cmdList, m_CbvSrvUavDescriptorSize);
+	m_pScene->Render(cmdList);
 
 	//cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());
 	//cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());

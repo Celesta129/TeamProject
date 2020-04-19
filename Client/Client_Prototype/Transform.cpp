@@ -7,6 +7,11 @@ CTransform::CTransform()
 {
 }
 
+CTransform::CTransform(const CTransform & rhs)
+{
+	m_xmf4x4World = rhs.m_xmf4x4World;
+}
+
 
 CTransform::~CTransform()
 {

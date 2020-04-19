@@ -18,7 +18,6 @@ public:
 	virtual ~CScene();
 
 	virtual bool Initialize(UINT CbvSrvUavDescriptorSize);
-	virtual void BuildShaders();
 	//씬에서 마우스와 키보드 메시지를 처리한다. 
 	virtual bool OnKeyboardInput(const float& fTimeElapsed);
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -32,7 +31,7 @@ public:
 
 	virtual void UpdateCamera(const float& fTimeElapsed);
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList);
-	virtual void Render(UINT frameResourceIndex, ID3D12GraphicsCommandList* cmdList, UINT CbvSrvUavDescriptorSize);
+	virtual void Render(ID3D12GraphicsCommandList* cmdList);
 
 	void ReleaseUploadBuffers();
 
@@ -49,7 +48,9 @@ protected:
 	virtual void BuildShapeGeometry(void);
 	virtual void BuildRenderItems(void);
 
+	virtual void BuildShaders();
 	virtual void BuildMesh(void);
+	virtual void BuildCamera(void);
 	virtual void BuildObject(void);
 
 
@@ -64,8 +65,20 @@ protected:
 	ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 protected:
+	vector<CGameObject*> m_vObjects;
+
+	// -----------for camera--------------------
 	vector<CCamera*> m_vCameras;
 	CCamera* m_pCurrentCamera = nullptr;
+
+	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
+	XMFLOAT4X4 mView = MathHelper::Identity4x4();
+	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+	float mTheta = 1.5f*XM_PI;
+	float mPhi = 0.2f*XM_PI;
+	float mRadius = 15.0f;
+	//---------------------------------------------
+
 	CBoxMesh* m_pBoxMesh = nullptr;
 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;

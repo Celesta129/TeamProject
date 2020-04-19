@@ -9,6 +9,7 @@ struct RenderItem : public CComponent
 {
 public:
 	RenderItem() = default;
+	RenderItem(const RenderItem& rhs);
 
 	CTransform m_Transform;
 	XMFLOAT4X4 World = MathHelper::Identity4x4();

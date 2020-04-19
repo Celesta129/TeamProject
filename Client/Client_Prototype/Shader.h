@@ -19,8 +19,10 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	void Update(const CTimer& timer,  ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList);
+	void Update(const CTimer& timer,  ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera);
+	bool Push_Object(CGameObject* pObject);
 
+public:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -31,6 +33,7 @@ public:
 		LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
 
 	virtual void CreatePipeLineParts(void);
+
 	virtual void CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index);
 	virtual void CreateFrameResources(ID3D12Device * pd3dDevice);
 	virtual void CreateDescriptorHeaps(ID3D12Device* pd3dDevice);
@@ -42,25 +45,26 @@ public:
 	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
 	
-	virtual void UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList *pd3dCommandList, CCamera* pCamera);
 	virtual void ReleaseShaderVariables();
 	
-	virtual void UpdateMainPassCB(const CTimer& timer);
+	virtual void UpdateMainPassCB(const CTimer& timer, CCamera* pCamera);
 	virtual void UpdateObjectCBs(const CTimer& timer);
 	
 	virtual void BuildObjects(void);
 	
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void Render(UINT frameResourceIndex, ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 
 protected:
-	vector<CGameObject* >	m_vObjects;
+	vector<CGameObject*>	m_vObjects;
 	UINT m_nObjects = 0;
-
-	CCamera* m_pCurrentCamera;
+	
 protected:
 	ComPtr<ID3D12RootSignature>* m_RootSignature = nullptr;
 	ComPtr<ID3D12DescriptorHeap> m_CbvHeap = nullptr;
+	//ComPtr<ID3D12DescriptorHeap> m_CbvSrvDescriptorHeap = nullptr;
+
 	ComPtr<ID3D12PipelineState>* m_pPSOs;		UINT m_nPSO = 0;
 
 	PassConstants mMainPassCB;
