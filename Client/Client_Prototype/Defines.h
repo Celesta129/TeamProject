@@ -12,3 +12,9 @@
 #define MAX_OBJECT 255
 
 #define NUM_FRAME_RESOURCE 3
+
+const UINT LOOP_IN = 0;
+const UINT LOOP_END = 1;
+const UINT LOOP_TRIGGER = 2;
+const UINT LOOP_STOP = 3;
+const UINT LOOP_SKIP = 4;

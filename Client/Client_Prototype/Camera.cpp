@@ -23,14 +23,10 @@ CCamera::~CCamera()
 void CCamera::Update(float fTimeElapsed)
 {
 	// Convert Spherical to Cartesian coordinates.
-	/*m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
+	m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
 	m_xmf3Position.z = m_fRadius * sinf(m_fPhi)*sinf(m_fTheta);
-	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);*/
+	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);
 	
-	//m_xmf3Position.x = 0.f; 
-	//m_xmf3Position.z = -(m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta));
-	//m_xmf3Position.y = m_fRadius * sinf(m_fTheta) + m_fRadius * -sinf(m_fTheta);
-
 	if (m_pTarget == nullptr)
 		return;
 
@@ -52,17 +48,14 @@ void CCamera::Update(float fTimeElapsed)
 	XMVECTOR target;
 	if (pTarget_Transfrom == nullptr)
 	{
-		target = XMVectorSet(m_xmf3Position.x,
-			m_xmf3Position.y,// +-(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
-			m_xmf3Position.z,// +-(m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta)),
-			1.f);
+		target = XMVectorZero();
 	}
 	else
 		target = XMVectorSet(pTarget_Transfrom->Get_Pos().x, 
 							pTarget_Transfrom->Get_Pos().y, 
 							pTarget_Transfrom->Get_Pos().z,
 							1.f);
-	//target = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y + m_fRadius , m_xmf3Position.z , 1.f);
+	
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	GenerateViewMatrix(pos, target, up);

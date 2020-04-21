@@ -33,9 +33,9 @@ protected:
 	float m_fYaw;
 	float m_fRoll;
 
-	float m_fTheta = 0.25f*XM_PI;
+	float m_fTheta = 1.25f*XM_PI;
 	float m_fPhi = 0.2f*XM_PI;
-	float m_fRadius = 800.0f;
+	float m_fRadius = 150.0f;
 
 	// 플레이어가 바라볼 위치벡터. 3인칭에서 사용
 	XMFLOAT3 m_xmf3LookAtWorld;
@@ -81,6 +81,9 @@ public:
 	void SetTheta(float dTheta) { m_fTheta = dTheta; };
 	void SetPhi(float dPhi) { m_fPhi = m_fPhi; };
 	void SetRadius(float dRadius) { m_fRadius = m_fRadius; };
+
+	void MoveTheta(float dTheta) { m_fTheta += dTheta; }
+	void MovePhi(float dPhi) { m_fPhi += dPhi; }
 public:
 	CGameObject* GetTargetObject() { return(m_pTarget); }
 	DWORD GetMode() { return(m_nMode); }

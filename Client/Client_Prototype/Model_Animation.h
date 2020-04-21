@@ -1,7 +1,7 @@
 #pragma once
 #include "LoadModel.h"
 
-class LoadAnimation
+class LoadAnimation : public CComponent
 {
 private:
 	const aiScene* m_pScene;
@@ -16,10 +16,10 @@ private:
 	float start_time;
 	float end_time;
 	float trigger_time;
-	float now_time;
-	float posible_skip;
+	float now_time;		// 현재 애니메이션 시간
+	float posible_skip;	// 현재 애니메이션을 스킵 가능한 시간
 
-	BOOL animation_Loop = true;
+	BOOL animation_Loop = true;	//루프 여부
 	BOOL stop_anim = false;// 중단가능한지
 	UINT next_index = 0;
 
@@ -57,6 +57,8 @@ public:
 	void InitSpeed() {
 		m_fAnimSpeed = m_fInitSpeed;
 	}
+
+
 	UINT BoneTransform(UINT& index, float ftime, vector<XMFLOAT4>& transforms);
 	void ReadNodeHeirarchy(float fAnimTime, const aiNode* pNode, const XMMATRIX& ParentTransform);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string& NodeName);
@@ -75,6 +77,8 @@ public:
 	float getAnimTime() const { return now_time; }
 
 	//XMFLOAT4 getHandPos() { return m_handpos; }
+public:
+	virtual CComponent* Clone(void);
 
 };
 class Model_Animation
