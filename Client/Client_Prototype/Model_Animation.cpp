@@ -40,7 +40,7 @@ LoadAnimation::LoadAnimation(string filename, float trigger, float skip)
 		now_time = start_time;
 
 		m_fAnimSpeed = (end_time - start_time) / m_pAnim->mChannels[0]->mNumPositionKeys;
-		m_fAnimSpeed = m_pAnim->mTicksPerSecond;
+		m_fAnimSpeed = (float)m_pAnim->mTicksPerSecond;
 		m_fInitSpeed = m_fAnimSpeed;
 	}
 

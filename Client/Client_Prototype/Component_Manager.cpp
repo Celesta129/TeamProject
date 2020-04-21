@@ -26,7 +26,7 @@ void CComponent_Manager::Clear_Component(void)
 	{
 		if (e.second != nullptr)
 		{
-			UINT ref = e.second->release();
+			UINT ref = e.second->Release();
 
 			if (ref <= 0)
 			{

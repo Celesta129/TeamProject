@@ -50,8 +50,8 @@ void CTransform::Set_Pos(XMFLOAT3 * pPos)
 
 CComponent * CTransform::Clone(void)
 {
+	// 새로 만들어서 넘긴다.
 	CTransform* pTransfrom = new CTransform(*this);
 	
-	Addref();
 	return pTransfrom;
 }

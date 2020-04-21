@@ -32,6 +32,8 @@ public:
 		return m_DepthStencilFormat;
 	}
 	int Run();
+	//for debug
+	ComPtr<ID3D12Device> GetDevice() { return m_d3dDevice; };
 
 	virtual bool Initialize();
 	// 여기서부터
@@ -40,8 +42,8 @@ public:
 protected:
 	virtual void CreateRtvAndDsvDescriptorHeaps();
 	virtual void OnResize();
-	virtual void Update(CTimer& const gt) = 0;
-	virtual void Draw(CTimer& const gt) = 0;
+	virtual void Update(const CTimer&  gt) = 0;
+	virtual void Draw(const CTimer&  gt) = 0;
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) {};
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) {};
@@ -75,6 +77,7 @@ protected:
 	void LogAdapterOutputs(IDXGIAdapter* adapter);
 	void LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);
 
+	
 protected:
 
 	HINSTANCE m_hAppInst = nullptr;

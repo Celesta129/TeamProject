@@ -39,6 +39,5 @@ CComponent * RenderItem::Clone(void)
 {
 	RenderItem* pRenderItem = new RenderItem(*this);
 	
-	Addref();
 	return pRenderItem;
 }

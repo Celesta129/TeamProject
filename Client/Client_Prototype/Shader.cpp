@@ -9,6 +9,7 @@ CShader::CShader()
 
 CShader::~CShader()
 {
+	ReleaseShaderVariables();
 	if (m_ppd3dPipelineStates)
 	{
 		for (int i = 0; i < m_nPipelineStates; i++)
@@ -26,6 +27,7 @@ void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCo
 	//gpu가 현재 프레임 자원의 명령을 다 처리했는지 확인.
 	// 다직 다 처리하지않았으면 gpu가 이 펜스지점까지 명령들을 처리할때까지 기다린다.
 	// 결국 이전 방식과 근본적으로 다른건 없지만 명령 처리할 자원을 3개를 만들어 한 GPU작업이 완료될떄까지 CPU가 놀지않고 다른 명령 제출을 한다는 차이점이있다.
+	
 	if (m_CurrFrameResource->Fence != 0 && pFence->GetCompletedValue() < m_CurrFrameResource->Fence)
 	{
 		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
@@ -390,27 +392,17 @@ void CShader::UpdateMainPassCB(const CTimer& timer, CCamera* pCamera)
 void CShader::UpdateObjectCBs(const CTimer & timer)
 {
 	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
-
-	for (auto& object : m_vObjects)
+	for (UINT index = 0; index < m_vObjects.size(); ++index)
 	{
-		if (object == nullptr)
-			continue;
+		CGameObject* pObject = m_vObjects[index];
 
-		RenderItem* pRenderItem = (RenderItem*)object->Get_Component(L"RenderItem");
-		if (pRenderItem == nullptr)
+		if (pObject == nullptr)
 			continue;
-		// Only update the cbuffer data if the constants have changed.  
-		// This needs to be tracked per frame resource.
-		if (pRenderItem->NumFramesDirty > 0)
+		// ObjectCB를 갱신할 필요가 생겼다면 갱신한다.
+		if (pObject->GetFramesDirty() > 0)
 		{
-			XMMATRIX world = XMLoadFloat4x4(&pRenderItem->m_Transform.Get_World());
-			ObjectConstants objConstants;
-			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
-
-			currObjectCB->CopyData(pRenderItem->ObjCBIndex, objConstants);
-
-			// Next FrameResource need to be updated too.
-			pRenderItem->NumFramesDirty--;
+			currObjectCB->CopyData(index, pObject->GetObjectConstants());
+			pObject->DecreaseFramesDirty();
 		}
 	}
 }
@@ -422,16 +414,16 @@ void CShader::BuildObjects(void)
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
-
+	
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
 
-	int passCbvIndex = mPassCbvOffset + m_CurrFrameResourceIndex;
+	int passCbvIndex = mPassCbvOffset * m_CurrFrameResourceIndex;
 	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
 	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
-	pd3dCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// Pass는 0번
 
 
 	if (m_RootSignature[PSO_OBJECT])
@@ -441,19 +433,36 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
 
 	pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
+
+	
 }
 
-void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
 {
 	OnPrepareRender(pd3dCommandList);
-	for (auto& object : m_vObjects)
+	for (UINT index = 0; index < m_vObjects.size(); ++index)
 	{
-		if (object == nullptr)
+		CGameObject* pObject = m_vObjects[index];
+
+		if (pObject == nullptr)
 			continue;
-		object->Render(pd3dCommandList);
+
+		UINT cbvIndex = m_CurrFrameResourceIndex * (UINT)m_vObjects.size() + index;
+		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+		cbvHandle.Offset(cbvIndex, g_CbvSrvUavDescriptorSize);
+
+		pd3dCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);// object는 1번
+
+		pObject->Render(pd3dCommandList);
 	}
 
-	++m_CurrFrameResource->Fence;
+	m_CurrFrameResource->Fence = nFenceValue;
+}
+
+void CShader::ResetCmd(ID3D12GraphicsCommandList * pd3dCommandList)
+{
+	ThrowIfFailed(m_CurrFrameResource->CmdListAlloc.Get()->Reset());
+	ThrowIfFailed(pd3dCommandList->Reset(m_CurrFrameResource->CmdListAlloc.Get(), NULL));
 }
 
 CObjectsShader::CObjectsShader()
@@ -552,6 +561,6 @@ void CObjectsShader::ReleaseUploadBuffers()
 
 void CObjectsShader::Render(UINT frameResourceIndex, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
-	CShader::Render(pd3dCommandList, pCamera);
+	CShader::Render(pd3dCommandList, pCamera, 0);
 	for (int j = 0; j < m_nObjects; j++) { if (m_ppObjects[j]) { m_ppObjects[j]->Render(pd3dCommandList); } }
 }

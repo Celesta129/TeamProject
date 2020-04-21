@@ -1,10 +1,9 @@
 #pragma once
 #include "stdafx.h"
-
 #include "Mesh.h"
+#include "Component.h"
 
-
-class ModelMesh : public MMesh
+class ModelMesh : public CMesh
 {
 public:
 	ModelMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, mesh& meshData);
@@ -12,18 +11,19 @@ public:
 	}
 };
 
-class LoadModel
+
+class LoadModel : public CComponent
 {
 private:
 	const aiScene* m_pScene;	//¸ðµ¨
 	vector<mesh> m_Meshes;		// ¸Þ½¬
 	vector<shared_ptr<ModelMesh>> m_ModelMeshes;	//¸Þ½¬ Á¤º¸ ¸®¼Ò½º
-	vector<pair<string, aiBone>> m_Bones;		// »À
+	vector<pair<string, Bone>> m_Bones;		// »À
 
 
 	UINT                     m_posSize;
-	UINT m_numVertices;
-	UINT m_numMaterial;
+	UINT					m_numVertices;
+	UINT					m_numMaterial;
 	UINT                     m_numBones;
 
 public:
@@ -35,12 +35,18 @@ public:
 	void InitMesh(UINT index, const aiMesh* pMesh);
 	void InitBones(UINT index, const aiMesh* pMesh);
 
-	void SetMeshs(ID3D12Device* pd3dDevice, ID3D12CommandList* pd3dCommandList);
+	void SetMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void SetTextureIndex(UINT meshIndex, UINT textureIndex) { m_Meshes[meshIndex].SetMeshesTextureIndex(textureIndex); }
 	
 
+	shared_ptr<ModelMesh>*          getMeshes() { return m_ModelMeshes.data(); }
+	mesh*                  getMesh(UINT index) { return &m_Meshes[index]; }
+	UINT                  getNumMesh() const { return (UINT)m_Meshes.size(); }
+	vector<pair<string, Bone>>* GetBones() { return &m_Bones; }
+	UINT                  getNumVertices() const { return m_numVertices; }
 
 
-	//ModelMesh** GetMeshs() { return m_ModelMeshes.Data(); }		// ????
-	UINT GetNumMesh() const { return (UINT)m_Meshes.size(); }
+public:
+	virtual CComponent* Clone();
+
 };

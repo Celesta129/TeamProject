@@ -21,16 +21,20 @@ CCamera::~CCamera()
 
 void CCamera::Update(float fTimeElapsed)
 {
-	CTransform* pTarget_Transfrom = nullptr;
+	
 
 	// Convert Spherical to Cartesian coordinates.
 	m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
 	m_xmf3Position.z = m_fRadius * sinf(m_fPhi)*sinf(m_fTheta);
 	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);
+	
+	if (m_pTarget == nullptr)
+		return;
 
+	CTransform* pTarget_Transfrom = nullptr;
 	if (m_pTarget)
 	{
-		pTarget_Transfrom = &(((RenderItem*)m_pTarget->Get_Component(L"RenderItem"))->m_Transform);
+		pTarget_Transfrom = (CTransform*)m_pTarget->Get_Component(L"Component_Transform");
 
 		if (pTarget_Transfrom)
 		{

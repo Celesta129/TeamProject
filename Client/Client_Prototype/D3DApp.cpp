@@ -97,7 +97,6 @@ int CD3DApp::Run()
 			}
 		}
 	}
-
 	return (int)msg.wParam;
 }
 

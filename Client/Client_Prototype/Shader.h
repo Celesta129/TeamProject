@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Base.h"
 #include "GameObject.h"
 #include "FrameResource.h"
 
@@ -8,7 +9,7 @@
 class CTimer;
 class CCamera;
 
-class CShader
+class CShader : public CBase
 {
 public:
 	CShader();
@@ -16,9 +17,7 @@ public:
 private:
 	int m_nReferences = 0;
 public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
+	
 	void Update(const CTimer& timer,  ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera);
 	bool Push_Object(CGameObject* pObject);
 
@@ -44,7 +43,6 @@ public:
 		*pd3dCommandList);
 	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
-	
 	virtual void UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList *pd3dCommandList, CCamera* pCamera);
 	virtual void ReleaseShaderVariables();
 	
@@ -54,8 +52,9 @@ public:
 	virtual void BuildObjects(void);
 	
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
+	void ResetCmd(ID3D12GraphicsCommandList* pd3dCommandList);
 protected:
 	vector<CGameObject*>	m_vObjects;
 	UINT m_nObjects = 0;

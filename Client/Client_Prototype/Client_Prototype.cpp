@@ -24,15 +24,17 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	CComponent_Manager::GetInstance();
-
+	CGameFramework_Client GameFramework(hInstance);
+	
 	try {
-		CGameFramework_Client GameFramework(hInstance);
 		if (!GameFramework.Initialize())
 			return 0;
 
 		return GameFramework.Run();
 	}
 	catch(DxException& e){
+		HRESULT hr = GameFramework.GetDevice()->GetDeviceRemovedReason();
+		int count = GameFramework.rendercount;
 		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
 		return 0;
 	}
@@ -48,7 +50,9 @@ CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 
 CGameFramework_Client::~CGameFramework_Client()
 {
-	if(m_pScene) delete m_pScene;
+	if (m_pScene) {
+		m_pScene->ReleaseScene();
+	}
 	CComponent_Manager::DestroyInstance();
 }
 
@@ -59,7 +63,7 @@ bool CGameFramework_Client::Initialize()
 	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
 	m_pScene = new CScene(m_d3dDevice, m_GraphicsCommandList);
-	if (!m_pScene->Initialize(m_CbvSrvUavDescriptorSize)) 
+	if (!m_pScene->Initialize()) 
 	{
 		return false;
 	}
@@ -88,7 +92,7 @@ void CGameFramework_Client::OnResize()
 		m_pScene->OnResize(AspectRatio());
 }
 
-void CGameFramework_Client::Update(CTimer & const gt)
+void CGameFramework_Client::Update(const CTimer & gt)
 {
 	float fTimeElapsed = gt.DeltaTime();
 	
@@ -105,15 +109,16 @@ void CGameFramework_Client::Update(CTimer & const gt)
 	//UpdateMainPassCB(gt);
 }
 
-void CGameFramework_Client::Draw(CTimer & const gt)
+void CGameFramework_Client::Draw(const CTimer & gt)
 {
 	//auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
 
 	// 커맨드리스트 리셋
-	ThrowIfFailed(m_CommandAllocator->Reset());
-	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(),NULL));
+	m_pScene->ResetCmdList(m_GraphicsCommandList.Get());
+	//ThrowIfFailed(m_CommandAllocator->Reset());
+	//ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(),NULL));
 
-	// 뷰포트와 씨저렉트 설정. 이 작업은 커맨드리스트가 리셋된 후에 반드시 해야함.
+	// 뷰포트와 씨저렉트 설정. 이 작업은 반드시 커맨드리스트가 리셋된 후에  해야함.
 	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
 	m_GraphicsCommandList->RSSetScissorRects(1, &m_ScissorRect);
 
@@ -140,7 +145,7 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	passCbvHandle.Offset(passCbvIndex, m_CbvSrvUavDescriptorSize);
 	m_GraphicsCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);*/
 
-	m_pScene->Render(m_GraphicsCommandList.Get());
+	m_pScene->Render(m_GraphicsCommandList.Get(), ++m_nFenceValue);
 
 	// 리소스 사용에 대한 상태전이 지정
 	m_GraphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -153,12 +158,15 @@ void CGameFramework_Client::Draw(CTimer & const gt)
 	ID3D12CommandList* cmdsLists[] = { m_GraphicsCommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
+	
+	rendercount++;
 	// 백/프론트 버퍼 교체
 	ThrowIfFailed(m_dxgiSwapChain->Present(0, 0));
 	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_iSwapChainBufferCount;
 
 
 	//mCurrFrameResource->Fence = ++m_nFenceValue;
+
 	// Add an instruction to the command queue to set a new fence point. 
    // Because we are on the GPU timeline, the new fence point won't be 
    // set until the GPU finishes processing all the commands prior to this Signal().
@@ -257,58 +265,6 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 	}
 }
 
-void CGameFramework_Client::UpdateCamera(const CTimer & gt)
-{
-	m_CurrentCamera.Update(gt.DeltaTime());
-
-	CGameObject* pTarget = nullptr;
-	if(!m_OpaqueObjects.empty())
-		pTarget = m_OpaqueObjects[0];
-	if (pTarget == nullptr)
-		return;
-
-	RenderItem* pRenderItem = pTarget->GetRenderItem();
-	XMFLOAT4X4 TargetWorld = pRenderItem->World;
-
-	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + TargetWorld.m[3][0];
-	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetWorld.m[3][2];
-	mEyePos.y = mRadius * cosf(mPhi) + TargetWorld.m[3][1];
-
-	//pRenderItem->m_Transform.Get_Pos()
-	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
-	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
-	XMVECTOR target = XMVectorZero(); //targetPosVector
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&mView, view);
-}
-
-void CGameFramework_Client::UpdateObjectCBs(const CTimer & gt)
-{
-	auto currObjectCB = mCurrFrameResource->ObjectCB.get();
-
-	for (auto& e : m_vObjects)
-	{
-		RenderItem* pRenderItem = (RenderItem*)e->Get_Component(L"RenderItem");
-		
-		// Only update the cbuffer data if the constants have changed.  
-		// This needs to be tracked per frame resource.
-		if (pRenderItem->NumFramesDirty > 0)
-		{
-			XMMATRIX world = XMLoadFloat4x4(&pRenderItem->m_Transform.Get_World());
-			ObjectConstants objConstants;
-			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
-
-			currObjectCB->CopyData(pRenderItem->ObjCBIndex, objConstants);
-
-			// Next FrameResource need to be updated too.
-			pRenderItem->NumFramesDirty--;
-		}
-	}
-}
 
 void CGameFramework_Client::UpdateMainPassCB(const CTimer & gt)
 {
@@ -752,7 +708,7 @@ void CGameFramework_Client::BuildCamera(void)
 void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)
 {
 	
-	m_pScene->Render(cmdList);
+	//m_pScene->Render(cmdList);
 
 	//cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());
 	//cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());

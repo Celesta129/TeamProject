@@ -1,17 +1,13 @@
 #pragma once
 #include "stdafx.h"
+#include "Base.h"
 
-class CComponent
+class CComponent : public CBase
 {
 public:
 	CComponent();
 	virtual ~CComponent();
 
-public:
-	void Addref(void) { m_nReference++; }
-	UINT release(void);
-private:
-	UINT m_nReference = 0;
 public:
 	virtual CComponent* Clone(void) = 0;		// Clone 구현시 new Component(this)와 return this; 구분할것. 즉, 새로 복사-생성해서 넘길것과 자신의 포인터만 넘길 컴포넌트를 구분해야함.
 												// 이렇게 구현하려면 정확히는 레퍼런스 카운팅을 해서 Release 함수를 만들어야겠지만 시간상 생략함. 

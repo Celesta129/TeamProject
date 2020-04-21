@@ -20,23 +20,21 @@ public:
 	~CGameFramework_Client();
 
 	virtual bool Initialize() override;
-
+	int rendercount = 0;
 private:
 	virtual void FlushCommandQueue(void);
 
 private:
 
 	virtual void OnResize() override;
-	virtual void Update(CTimer& const gt)override;
-	virtual void Draw(CTimer& const gt)override;
+	virtual void Update(const CTimer& gt)override;
+	virtual void Draw(const CTimer& gt)override;
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y)override;
 	virtual void OnMouseUp(WPARAM btnState, int x, int y)override;
 	virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
 	void OnKeyboardInput(const CTimer& gt);
-	void UpdateCamera(const CTimer& gt);
-	void UpdateObjectCBs(const CTimer& gt);
 	void UpdateMainPassCB(const CTimer& gt);
 
 	void BuildDescriptorHeaps();

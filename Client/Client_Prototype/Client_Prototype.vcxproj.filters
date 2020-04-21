@@ -68,6 +68,12 @@
     <Filter Include="02.Utility\07.Scene">
       <UniqueIdentifier>{de144304-3b46-4881-9cc1-056472a0307d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject">
+      <UniqueIdentifier>{56a64f00-1f7b-4f0a-a143-419e7f4b12f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\00.SuperClass">
+      <UniqueIdentifier>{016f4a59-422e-40f4-9be0-c3755340a1f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -150,6 +156,12 @@
       <Filter>02.Utility\07.Scene</Filter>
     </ClInclude>
     <ClInclude Include="Extern.h" />
+    <ClInclude Include="ModelObject.h">
+      <Filter>02.Utility\03.Object\01.ModelObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Base.h">
+      <Filter>02.Utility\00.SuperClass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -214,6 +226,12 @@
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>02.Utility\07.Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelObject.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Base.cpp">
+      <Filter>02.Utility\00.SuperClass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

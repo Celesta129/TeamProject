@@ -6,6 +6,7 @@
 #include "../Common/GeometryGenerator.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "ModelObject.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
@@ -15,27 +16,11 @@ CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> p
 
 CScene::~CScene()
 {
-	for (auto shader : m_vShaders)
-	{
-		shader->Release();
-	}
-	m_vShaders.clear();
+	ReleaseScene();
 
-	for (auto camera : m_vCameras)
-	{
-		if (camera)
-			delete camera;
-	}
-
-	if (m_pCurrentCamera)
-		delete m_pCurrentCamera;
-
-
-	if (m_pBoxMesh)
-		delete m_pBoxMesh;
 }
 
-bool CScene::Initialize(UINT CbvSrvUavDescriptorSize)
+HRESULT CScene::Initialize()
 {
 	m_pComponent_Manager = CComponent_Manager::GetInstance();
 	
@@ -56,9 +41,9 @@ void CScene::BuildShaders()
 	pShader->Initialize(m_d3dDevice.Get(),m_GraphicsCommandList.Get());
 	m_vShaders.push_back(pShader);
 
-
-	pObject = new CGameObject();
-	pObject->Initialize();
+	
+	pObject = new CModelObject;
+	((CModelObject*)pObject)->Initialize(L"Component_Model_idle_Anim", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 
@@ -90,11 +75,19 @@ void CScene::ReleaseObjects()
 	
 }
 
+void CScene::ResetCmdList(ID3D12GraphicsCommandList * pd3dCommandList)
+{
+	for (auto& shader : m_vShaders)
+	{
+		shader->ResetCmd(pd3dCommandList);
+	}
+}
+
 void CScene::AnimateObjects(float fTimeElapsed)
 {
 	for (auto shader : m_vShaders)
 	{
-		//
+		// 
 	}
 }
 
@@ -108,13 +101,18 @@ void CScene::UpdateCamera(const float & fTimeElapsed)
 	if (pTarget == nullptr)
 		return;
 
-	RenderItem* pRenderItem = pTarget->GetRenderItem();
-	XMFLOAT4X4 TargetWorld = pRenderItem->World;
+	CTransform* pTransform = (CTransform*)pTarget->Get_Component(L"Component_Transform");
+	if (pTransform == nullptr) {
+		_MSG_BOX("CScene::UpdateCamera - 타겟이 Transform Component가 없습니다.");
+		return;
+	}
+
+	XMFLOAT3 TargetPos = pTransform->Get_Pos();
 
 	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + TargetWorld.m[3][0];
-	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetWorld.m[3][2];
-	mEyePos.y = mRadius * cosf(mPhi) + TargetWorld.m[3][1];
+	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + TargetPos.x;
+	mEyePos.y = mRadius * cosf(mPhi) + TargetPos.y;
+	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetPos.z;
 
 	//pRenderItem->m_Transform.Get_Pos()
 	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
@@ -144,12 +142,12 @@ void CScene::Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsComm
 	
 }
 
-void CScene::Render(ID3D12GraphicsCommandList * cmdList)
+void CScene::Render(ID3D12GraphicsCommandList * cmdList, UINT64 nFenceValue)
 {
 
 	for (auto shader : m_vShaders)
 	{
-		shader->Render(cmdList, nullptr);
+		shader->Render(cmdList, nullptr, nFenceValue);
 	}
 }
 
@@ -165,22 +163,47 @@ void CScene::OnResize(float fAspectRatio)
 	m_pCurrentCamera->Update(0);
 }
 
-
-void CScene::BuildDescriptorHeaps()
+void CScene::ReleaseScene(void)
 {
+	ReleaseShaders();
+	ReleaseCameras();
+
 }
 
-void CScene::BuildConstantBufferViews(UINT CbvSrvUavDescriptorSize)
+void CScene::ReleaseShaders(void)
 {
-	
+	for (auto shader : m_vShaders)
+	{
+		shader->Release();
+	}
+	m_vShaders.clear();
+}
+
+void CScene::ReleaseCameras(void)
+{
+	for (auto camera : m_vCameras)
+	{
+		if (camera)
+			delete camera;
+	}
+
+	if (m_pCurrentCamera)
+		delete m_pCurrentCamera;
+
 }
 
 void CScene::BuildComponents(void)
 {
 	CComponent* pComponent = nullptr;
 
+	pComponent = new CTransform;
+	CComponent_Manager::GetInstance()->Add_Component(L"Component_Transform", pComponent);
+
 	pComponent = new RenderItem;
-	CComponent_Manager::GetInstance()->Add_Component(L"RenderItem", pComponent);
+	CComponent_Manager::GetInstance()->Add_Component(L"Component_RenderItem", pComponent);
+
+	pComponent = new LoadModel("resources/idle_Anim.FBX");
+	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_idle_Anim", pComponent);
 }
 
 void CScene::BuildRootSignature(void)
@@ -225,7 +248,7 @@ void CScene::BuildCamera(void)
 	if (m_vObjects[0] == nullptr)
 		return;
 
-	if (m_vObjects[0]->Get_Component(L"RenderItem") == nullptr)
+	if (m_vObjects[0]->Get_Component(L"Component_Transform") == nullptr)
 		return;
 
 

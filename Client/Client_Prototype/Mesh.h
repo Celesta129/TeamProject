@@ -14,93 +14,43 @@ inline XMMATRIX aiMatrixToXMMatrix(const aiMatrix4x4& offset)
 {
 	return XMMATRIX(&offset.a1);
 }
-struct VertexData
-{
-	XMFLOAT3   m_pos;
-	XMFLOAT3   m_normal;
-	XMFLOAT3   m_tan;
-	XMFLOAT2   m_tex;
-	XMUINT4    m_bornIndex;
-	XMFLOAT3   m_weights;
-	UINT      m_nTextureNum = 0;
-
-	VertexData() {}
-	VertexData(XMFLOAT3& pos, XMFLOAT3& normal, XMFLOAT3& tan, XMFLOAT2& tex, UINT texindex) : m_pos(pos), m_normal(normal), m_tan(tan), m_tex(tex), m_nTextureNum(texindex)
-	{
-		m_weights = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_bornIndex = XMUINT4(0, 0, 0, 0);
-	}
-	void AddBoneData(UINT index, float weight) {
-		if (m_weights.x == 0.0f) {
-			m_bornIndex.x = index;
-			m_weights.x = weight;
-		}
-		else if (m_weights.y == 0.0f) {
-			m_bornIndex.y = index;
-			m_weights.y = weight;
-		}
-		else if (m_weights.z == 0.0f) {
-			m_bornIndex.z = index;
-			m_weights.z = weight;
-		}
-		else {
-			m_bornIndex.w = index;
-		}
-	}
-};
-struct Bone
-{
-	XMMATRIX   BoneOffset;
-	XMMATRIX FinalTransformation;
-
-	Bone() {
-		BoneOffset = XMMatrixIdentity();
-		FinalTransformation = XMMatrixIdentity();
-	}
-};
-
-struct mesh
-{
-	vector<VertexData>      m_vertices;
-	vector<int>            m_indices;
-	UINT               m_materialIndex;
-
-	mesh() { m_materialIndex = 0; }
-	~mesh() {
-		//cout << "mesh ¼Ò¸êÀÚ" << endl;
-		m_vertices.clear();
-		m_indices.clear();
-	}
-	void SetMeshesTextureIndex(UINT index) {
-		for (auto& d : m_vertices)
-			d.m_nTextureNum = index;
-	}
-
-};
 
 
-class CMesh : public CComponent
+class CMesh 
 {
 public:
 	CMesh();
-	CMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
-	CMesh(const CMesh&);
-	virtual ~CMesh() {
-		m_vertices.clear();
-		m_indices.clear();
-	};
+	virtual ~CMesh();
+protected:
+	ComPtr<ID3D12Resource>			m_pd3dVertexBuffer = NULL;
+	ComPtr<ID3D12Resource>			m_pd3dVertexUploadBuffer = NULL;
 
+	ComPtr<ID3D12Resource>			m_pd3dIndexBuffer = NULL;
+	ComPtr<ID3D12Resource>			m_pd3dIndexUploadBuffer = NULL;
+
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
+
+	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	UINT							m_nSlot = 0;
+	UINT							m_nVertices = 0;
+	UINT							m_nStride = 0;
+	UINT							m_nOffset = 0;
+
+	UINT							m_nIndices = 0;
+	UINT							m_nStartIndex = 0;
+	int								m_nBaseVertex = 0;
 public:
-	vector<VertexData>      m_vertices;
-	vector<int>            m_indices;
-	UINT               m_materialIndex = 0;
+	void CopyMesh(shared_ptr<CMesh> pMesh);
+	virtual void ReleaseUploadBuffers(void);
 
-	void SetMeshesTextureIndex(UINT index)
-	{
-		for (auto& d : m_vertices)
-			d.m_nTextureNum = index;
-	}
+	BoundingOrientedBox				m_xmOOBB;
+	//virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, UINT nInstanceCount = 1);
 
+protected:
+	unique_ptr<MeshGeometry> m_MeshGeo;
 public:
 	virtual void BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
 
@@ -108,12 +58,6 @@ public:
 		return m_MeshGeo.get();
 	};
 
-public:
-	void Render(ID3D12GraphicsCommandList *pd3dCommandList);
-
-	virtual CComponent* Clone();
-protected:
-	unique_ptr<MeshGeometry> m_MeshGeo;
 };
 
 class CBoxMesh : public CMesh 
