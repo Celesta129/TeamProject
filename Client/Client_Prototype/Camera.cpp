@@ -5,8 +5,9 @@
 
 CCamera::CCamera()
 {
-	//m_xmf3Position = XMFLOAT3(0.f, sqrtf(750.f), sqrtf(750.f));
-	m_xmf3Position = XMFLOAT3(0.f, sqrtf(5.f), sqrtf(5.f));
+	m_xmf3Position = XMFLOAT3(0.f, -0.1f, -0.1f);
+	//m_xmf3Position = XMFLOAT3(0.f, sqrtf(5.f), sqrtf(5.f));
+	
 }
 
 CCamera::CCamera(CCamera * pCamera)
@@ -40,9 +41,9 @@ void CCamera::Update(float fTimeElapsed)
 
 		if (pTarget_Transfrom)
 		{
-			/*m_xmf3Position.x += pTarget_Transfrom->Get_Pos().x;
+			m_xmf3Position.x += pTarget_Transfrom->Get_Pos().x;
 			m_xmf3Position.z += pTarget_Transfrom->Get_Pos().z;
-			m_xmf3Position.y += pTarget_Transfrom->Get_Pos().y;*/
+			m_xmf3Position.y += pTarget_Transfrom->Get_Pos().y;
 		}
 	}
 
@@ -52,8 +53,8 @@ void CCamera::Update(float fTimeElapsed)
 	if (pTarget_Transfrom == nullptr)
 	{
 		target = XMVectorSet(m_xmf3Position.x,
-			m_xmf3Position.y + m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta),
-			m_xmf3Position.z + -(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
+			m_xmf3Position.y,// +-(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
+			m_xmf3Position.z,// +-(m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta)),
 			1.f);
 	}
 	else
@@ -61,10 +62,7 @@ void CCamera::Update(float fTimeElapsed)
 							pTarget_Transfrom->Get_Pos().y, 
 							pTarget_Transfrom->Get_Pos().z,
 							1.f);
-	target = XMVectorSet(m_xmf3Position.x,
-		m_xmf3Position.y + -(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
-		m_xmf3Position.z + (m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta)),
-		1.f);
+	//target = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y + m_fRadius , m_xmf3Position.z , 1.f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	GenerateViewMatrix(pos, target, up);

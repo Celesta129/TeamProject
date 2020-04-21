@@ -52,32 +52,42 @@ void CScene::BuildShaders()
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
-	float fSpeed = 3.f;
-	
+	float fSpeed = 100.f;
+	XMFLOAT3 xmf3Move = XMFLOAT3(0.f,0.f,0.f); 
 
 	if (GetAsyncKeyState('A') & 0x8000)
 	{
-		XMFLOAT3 xmf3Move = XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f);
-		//m_pCurrentCamera->Move(xmf3Move);
-
-		CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
-		pTransform->MovePos(&xmf3Move);
-		m_vObjects[0]->DirtyFrames();	// 값을 Update에서 갱신해야한다.
+		xmf3Move = XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f);
+	
+		//CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+		//pTransform->MovePos(&xmf3Move);
+		//m_vObjects[0]->DirtyFrames();	// 값을 Update에서 갱신해야한다.
 
 	}
 	if (GetAsyncKeyState('D') & 0x8000)
 	{
-		m_pCurrentCamera->Move(XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f));
-	
+		xmf3Move = XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f);
+		
 	}
 	if (GetAsyncKeyState('W') & 0x8000)
 	{
-		m_pCurrentCamera->Move(XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f));
+		xmf3Move = XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f);
+		
 	}
 	if (GetAsyncKeyState('S') & 0x8000)
 	{
-		m_pCurrentCamera->Move(XMFLOAT3(0.f, -fSpeed * fTimeElapsed, 0.f));
+		xmf3Move = XMFLOAT3(0.f, -fSpeed * fTimeElapsed, 0.f);
 	}
+	if (GetAsyncKeyState('Q') & 0x8000)
+	{
+		xmf3Move = XMFLOAT3(0.f, 0.f, -fSpeed * fTimeElapsed);
+	}
+	if (GetAsyncKeyState('E') & 0x8000)
+	{
+		xmf3Move = XMFLOAT3(0.f, 0.f, fSpeed * fTimeElapsed);
+	}
+	m_pCurrentCamera->Move(xmf3Move);
+
 	return false;
 }
 

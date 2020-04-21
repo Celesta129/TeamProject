@@ -206,37 +206,6 @@ void CShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int inde
 	ThrowIfFailed(pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(m_pPSOs[index].GetAddressOf())));
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
-	//D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoDesc;
-
-	////
-	//// PSO for opaque objects.
-	////
-	//ZeroMemory(&PsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-	//PsoDesc.InputLayout = CreateInputLayout();
-	//PsoDesc.pRootSignature = m_RootSignature->Get();
-
-	//ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
-	//PsoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	//PsoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
-
-	//PsoDesc.RasterizerState = CreateRasterizerState(); //CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	//PsoDesc.BlendState = CreateBlendState();// CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	//PsoDesc.DepthStencilState = CreateDepthStencilState();//CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	//PsoDesc.SampleMask = UINT_MAX;
-	//PsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//PsoDesc.NumRenderTargets = m_nNumRenderTarget;
-	//for(UINT i = 0; i < m_nNumRenderTarget; ++i)
-	//	PsoDesc.RTVFormats[i] = m_Format;
-	//PsoDesc.SampleDesc.Count = 1;
-	///*PsoDesc.SampleDesc.Count = m_b4xMsaaState ? 4 : 1;
-	//PsoDesc.SampleDesc.Quality = m_b4xMsaaState ? (m_n4xMsaaQuality - 1) : 0;*/
-
-	//PsoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
-
-	//ThrowIfFailed(pd3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
-
-	//if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
-	//if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
 
 void CShader::CreateFrameResources(ID3D12Device * pd3dDevice)
@@ -399,9 +368,9 @@ void CShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3
 	m_nObjects = MAX_OBJECT;
 	m_vObjects = vector<CGameObject*>(m_nObjects);
 
-	CreateDescriptorHeaps(pDevice);		//CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, m_nObjects, 1);
+	CreateDescriptorHeaps(pDevice);		
 	CreateShaderVariables(pDevice, pd3dCommandList);
-	CreateFrameResources(pDevice); //CreateConstantBufferViews(pd3dDevice, pd3dCommandList, m_nObjects, m_ObjectCB->Resource(), D3DUtil::CalcConstantBufferByteSize(sizeof(CB_GAMEOBJECT_INFO)));	
+	CreateFrameResources(pDevice); 	
 	CreateConstantBufferViews(pDevice);
 
 	CreateRootSignature(pDevice);

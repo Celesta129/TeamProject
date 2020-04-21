@@ -35,7 +35,7 @@ protected:
 
 	float m_fTheta = 0.25f*XM_PI;
 	float m_fPhi = 0.2f*XM_PI;
-	float m_fRadius = 5300.0f;
+	float m_fRadius = 800.0f;
 
 	// 플레이어가 바라볼 위치벡터. 3인칭에서 사용
 	XMFLOAT3 m_xmf3LookAtWorld;
