@@ -15,7 +15,7 @@ HRESULT CModelObject::Initialize(void)
 	HRESULT hr = E_FAIL;
 	if(FAILED(hr = CGameObject::Initialize()))
 		return hr;
-	if(FAILED(hr = Insert_Component_ToMap(L"Component_Model_idle_Anim")))
+	if(FAILED(hr = Insert_Component_ToMap(L"Component_Model_Floor")))
 		return hr;
 
 	return S_OK;

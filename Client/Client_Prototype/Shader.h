@@ -41,6 +41,7 @@ public:
 		*pd3dGraphicsRootSignature);
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
+	virtual void CreateConstantBufferViews(ID3D12Device* pDevice);
 	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
 	virtual void UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList *pd3dCommandList, CCamera* pCamera);
@@ -71,7 +72,7 @@ protected:
 	DXGI_FORMAT	m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	UINT m_nNumRenderTarget = 1;
 
-	vector<unique_ptr<FrameResource>> m_vFrameresources;
+	vector<unique_ptr<FrameResource>> m_vFrameResources;
 	UINT m_CurrFrameResourceIndex = 0;
 	FrameResource* m_CurrFrameResource = nullptr;
 

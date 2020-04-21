@@ -43,7 +43,7 @@ void CScene::BuildShaders()
 
 	
 	pObject = new CModelObject;
-	((CModelObject*)pObject)->Initialize(L"Component_Model_idle_Anim", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	((CModelObject*)pObject)->Initialize(L"Component_Model_Floor", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 
@@ -52,6 +52,14 @@ void CScene::BuildShaders()
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
+	float fSpeed = 3.f;
+	if (GetAsyncKeyState('A') & 0x8000)
+	{
+		CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+
+		pTransform->MovePos(&XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f));
+		m_vObjects[0]->DirtyFrames();
+	}
 	return false;
 }
 
@@ -110,12 +118,10 @@ void CScene::UpdateCamera(const float & fTimeElapsed)
 	XMFLOAT3 TargetPos = pTransform->Get_Pos();
 
 	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) + TargetPos.x;
+	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) +TargetPos.x;
 	mEyePos.y = mRadius * cosf(mPhi) + TargetPos.y;
 	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetPos.z;
 
-	//pRenderItem->m_Transform.Get_Pos()
-	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
 	XMVECTOR target = XMVectorZero(); //targetPosVector
@@ -202,8 +208,8 @@ void CScene::BuildComponents(void)
 	pComponent = new RenderItem;
 	CComponent_Manager::GetInstance()->Add_Component(L"Component_RenderItem", pComponent);
 
-	pComponent = new LoadModel("resources/idle_Anim.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_idle_Anim", pComponent);
+	pComponent = new LoadModel("resources/floor_playground_test1.FBX");
+	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_Floor", pComponent);
 }
 
 void CScene::BuildRootSignature(void)

@@ -1,9 +1,4 @@
-cbuffer cbPerObject : register(b0)
-{
-	float4x4 gWorld;
-};
-
-cbuffer cbPass : register(b1)
+cbuffer cbPass : register(b0)
 {
 	float4x4 gView;
 	float4x4 gInvView;
@@ -19,6 +14,11 @@ cbuffer cbPass : register(b1)
 	float gFarZ;
 	float gTotalTime;
 	float gDeltaTime;
+};
+
+cbuffer cbPerObject : register(b1)
+{
+	float4x4 gWorld;
 };
 
 struct VertexIn
@@ -42,7 +42,7 @@ VertexOut VS(VertexIn vin)
 	vout.PosH = mul(posW, gViewProj);
 
 	// Just pass vertex color into the pixel shader.
-	vout.Color = vin.Color;
+	vout.Color = float4(0.f, 0.f, 0.f, 1.f); //vin.Color;
 
 	return vout;
 }

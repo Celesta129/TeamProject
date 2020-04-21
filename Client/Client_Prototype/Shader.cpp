@@ -22,7 +22,7 @@ CShader::~CShader()
 void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera)
 {
 	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
-	m_CurrFrameResource = m_vFrameresources[m_CurrFrameResourceIndex].get();
+	m_CurrFrameResource = m_vFrameResources[m_CurrFrameResourceIndex].get();
 
 	//gpu가 현재 프레임 자원의 명령을 다 처리했는지 확인.
 	// 다직 다 처리하지않았으면 gpu가 이 펜스지점까지 명령들을 처리할때까지 기다린다.
@@ -74,11 +74,11 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 
-	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	//d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	//d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
@@ -159,10 +159,18 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	::D3DCompileFromFile(pszFileName, NULL, NULL, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, NULL);
+	ComPtr<ID3DBlob> errors;
+
+	::D3DCompileFromFile(pszFileName, NULL, NULL, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &errors);
+	if (errors != nullptr)
+	{
+		OutputDebugStringA((char*)errors->GetBufferPointer());
+	}
+
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+
 	return(d3dShaderByteCode);
 }
 
@@ -235,7 +243,7 @@ void CShader::CreateFrameResources(ID3D12Device * pd3dDevice)
 {
 	for (int i = 0; i < NUM_FRAME_RESOURCE; ++i)
 	{
-		m_vFrameresources.push_back(std::make_unique<FrameResource>(pd3dDevice,
+		m_vFrameResources.push_back(std::make_unique<FrameResource>(pd3dDevice,
 			1, (UINT)m_vObjects.size()));
 	}
 }
@@ -266,8 +274,8 @@ void CShader::CreateDescriptorHeaps(ID3D12Device* pd3dDevice)
 void CShader::CreateRootSignature(ID3D12Device * pd3dDevice)
 {
 	CD3DX12_DESCRIPTOR_RANGE cbvTable[2];
-	cbvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);		// for PassCB
-	cbvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);		// for ObjectCB
+	cbvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);		// for PassCB :register(b0)
+	cbvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);		// for ObjectCB : :register(b1)
 
 	// Root parameter can be a table, root descriptor or root constants.
 	CD3DX12_ROOT_PARAMETER slotRootParameter[2];
@@ -332,6 +340,57 @@ void CShader::CreateShaderVariables(ID3D12Device * pd3dDevice, ID3D12GraphicsCom
 
 }
 
+void CShader::CreateConstantBufferViews(ID3D12Device* pDevice)
+{
+	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	UINT objCount = (UINT)m_vObjects.size();
+
+	// Need a CBV descriptor for each object for each frame resource.
+	for (int frameIndex = 0; frameIndex < NUM_FRAME_RESOURCE; ++frameIndex)
+	{
+		auto objectCB = m_vFrameResources[frameIndex]->ObjectCB->Resource();
+		for (UINT i = 0; i < objCount; ++i)
+		{
+			D3D12_GPU_VIRTUAL_ADDRESS cbAddress = objectCB->GetGPUVirtualAddress();
+
+			// Offset to the ith object constant buffer in the buffer.
+			cbAddress += i * objCBByteSize;
+
+			// Offset to the object cbv in the descriptor heap.
+			int heapIndex = frameIndex * objCount + i;
+			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(heapIndex, g_CbvSrvUavDescriptorSize);
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+			cbvDesc.BufferLocation = cbAddress;
+			cbvDesc.SizeInBytes = objCBByteSize;	// 256바이트의 정수배로 정렬되어야한다.
+
+			pDevice->CreateConstantBufferView(&cbvDesc, handle);
+		}
+	}
+
+	UINT passCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
+
+	// Last three descriptors are the pass CBVs for each frame resource.
+	for (int frameIndex = 0; frameIndex < NUM_FRAME_RESOURCE; ++frameIndex)
+	{
+		auto passCB = m_vFrameResources[frameIndex]->PassCB->Resource();
+		D3D12_GPU_VIRTUAL_ADDRESS cbAddress = passCB->GetGPUVirtualAddress();
+
+		// Offset to the pass cbv in the descriptor heap.
+		int heapIndex = mPassCbvOffset + frameIndex;
+		auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetCPUDescriptorHandleForHeapStart());
+		handle.Offset(heapIndex, g_CbvSrvUavDescriptorSize);
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+		cbvDesc.BufferLocation = cbAddress;
+		cbvDesc.SizeInBytes = passCBByteSize;
+
+		pDevice->CreateConstantBufferView(&cbvDesc, handle);
+	}
+}
+
 void CShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
 	
@@ -343,6 +402,7 @@ void CShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3
 	CreateDescriptorHeaps(pDevice);		//CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, m_nObjects, 1);
 	CreateShaderVariables(pDevice, pd3dCommandList);
 	CreateFrameResources(pDevice); //CreateConstantBufferViews(pd3dDevice, pd3dCommandList, m_nObjects, m_ObjectCB->Resource(), D3DUtil::CalcConstantBufferByteSize(sizeof(CB_GAMEOBJECT_INFO)));	
+	CreateConstantBufferViews(pDevice);
 
 	CreateRootSignature(pDevice);
 	CreatePSO(pDevice, 1, PSO_OBJECT);
@@ -416,23 +476,19 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
 	
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
-	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps); //pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
 
-	pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
-
-	int passCbvIndex = mPassCbvOffset * m_CurrFrameResourceIndex;
-	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
-	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
-	pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// Pass는 0번
-
-
-	if (m_RootSignature[PSO_OBJECT])
+	//pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
+	if (m_RootSignature[PSO_OBJECT])		// 루트서명을 Set하는 순간 모든 바인딩이 사라진다. 여기서부터 새 루트서명이 기대하는 자원을 묶기 시작한다.
 		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[PSO_OBJECT].Get());
 
 	if (m_pPSOs[PSO_OBJECT])
 		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
 
-	pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
+	int passCbvIndex = mPassCbvOffset + m_CurrFrameResourceIndex;
+	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// 서술자 테이블을 파이프라인에 묶는다. // Pass RootDescriptor는 0번
 
 	
 }
@@ -451,7 +507,7 @@ void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCam
 		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
 		cbvHandle.Offset(cbvIndex, g_CbvSrvUavDescriptorSize);
 
-		pd3dCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);// object는 1번
+		pd3dCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);// Object RootDescriptor는 1번
 
 		pObject->Render(pd3dCommandList);
 	}

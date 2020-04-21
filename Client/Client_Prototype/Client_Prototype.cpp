@@ -227,13 +227,16 @@ void CGameFramework_Client::OnMouseMove(WPARAM btnState, int x, int y)
 
 void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 {
+	if (m_pScene)
+		m_pScene->OnKeyboardInput(gt.DeltaTime());
+
 	if (GetAsyncKeyState('1') & 0x8000)
 		mIsWireframe = true;
 	else
 		mIsWireframe = false;
 
 
-	float fSpeed = 3.f;
+	/*float fSpeed = 3.f;
 	if (GetAsyncKeyState('A') & 0x8000)
 	{
 		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
@@ -262,7 +265,7 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, -fSpeed * gt.DeltaTime()));
 		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
-	}
+	}*/
 }
 
 
