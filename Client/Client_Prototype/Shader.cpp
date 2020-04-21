@@ -77,8 +77,8 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 	//d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
-	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
@@ -413,7 +413,7 @@ void CShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3
 void CShader::UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera* pCamera)
 {
 	UpdateObjectCBs(timer);
-	UpdateMainPassCB(timer, pCamera);
+	UpdateMainPassCB(pCamera);
 }
 
 void CShader::ReleaseShaderVariables()
@@ -421,7 +421,7 @@ void CShader::ReleaseShaderVariables()
 
 }
 
-void CShader::UpdateMainPassCB(const CTimer& timer, CCamera* pCamera)
+void CShader::UpdateMainPassCB(CCamera* pCamera)
 {
 	XMMATRIX view = XMLoadFloat4x4(&pCamera->GetViewMatrix());
 	XMMATRIX proj = XMLoadFloat4x4(&pCamera->GetProjectionMatrix());
@@ -442,8 +442,8 @@ void CShader::UpdateMainPassCB(const CTimer& timer, CCamera* pCamera)
 	mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / gClientWidth, 1.0f / gClientHeight);
 	mMainPassCB.NearZ = 1.0f;
 	mMainPassCB.FarZ = 1000.0f;
-	mMainPassCB.TotalTime = timer.TotalTime();
-	mMainPassCB.DeltaTime = timer.DeltaTime();
+	//mMainPassCB.TotalTime = timer.TotalTime();
+	//mMainPassCB.DeltaTime = timer.DeltaTime();
 
 	auto currPassCB = m_CurrFrameResource->PassCB.get();
 	currPassCB->CopyData(0, mMainPassCB);

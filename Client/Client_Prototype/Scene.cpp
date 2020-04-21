@@ -43,7 +43,7 @@ void CScene::BuildShaders()
 
 	
 	pObject = new CModelObject;
-	((CModelObject*)pObject)->Initialize(L"Component_Model_Floor", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	((CModelObject*)pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 
@@ -53,12 +53,30 @@ void CScene::BuildShaders()
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
 	float fSpeed = 3.f;
+	
+
 	if (GetAsyncKeyState('A') & 0x8000)
 	{
-		CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+		XMFLOAT3 xmf3Move = XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f);
+		//m_pCurrentCamera->Move(xmf3Move);
 
-		pTransform->MovePos(&XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f));
-		m_vObjects[0]->DirtyFrames();
+		CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+		pTransform->MovePos(&xmf3Move);
+		m_vObjects[0]->DirtyFrames();	// 값을 Update에서 갱신해야한다.
+
+	}
+	if (GetAsyncKeyState('D') & 0x8000)
+	{
+		m_pCurrentCamera->Move(XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f));
+	
+	}
+	if (GetAsyncKeyState('W') & 0x8000)
+	{
+		m_pCurrentCamera->Move(XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f));
+	}
+	if (GetAsyncKeyState('S') & 0x8000)
+	{
+		m_pCurrentCamera->Move(XMFLOAT3(0.f, -fSpeed * fTimeElapsed, 0.f));
 	}
 	return false;
 }
@@ -103,32 +121,6 @@ void CScene::UpdateCamera(const float & fTimeElapsed)
 {
 	m_pCurrentCamera->Update(fTimeElapsed);
 
-	CGameObject* pTarget = nullptr;
-	if (!m_vObjects.empty())
-		pTarget = m_vObjects[0];
-	if (pTarget == nullptr)
-		return;
-
-	CTransform* pTransform = (CTransform*)pTarget->Get_Component(L"Component_Transform");
-	if (pTransform == nullptr) {
-		_MSG_BOX("CScene::UpdateCamera - 타겟이 Transform Component가 없습니다.");
-		return;
-	}
-
-	XMFLOAT3 TargetPos = pTransform->Get_Pos();
-
-	// Convert Spherical to Cartesian coordinates.
-	mEyePos.x = mRadius * sinf(mPhi)*cosf(mTheta) +TargetPos.x;
-	mEyePos.y = mRadius * cosf(mPhi) + TargetPos.y;
-	mEyePos.z = mRadius * sinf(mPhi)*sinf(mTheta) + TargetPos.z;
-
-	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
-	XMVECTOR target = XMVectorZero(); //targetPosVector
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&mView, view);
 }
 
 void CScene::Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList)
@@ -208,8 +200,8 @@ void CScene::BuildComponents(void)
 	pComponent = new RenderItem;
 	CComponent_Manager::GetInstance()->Add_Component(L"Component_RenderItem", pComponent);
 
-	pComponent = new LoadModel("resources/floor_playground_test1.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_Floor", pComponent);
+	pComponent = new LoadModel("resources/idle_Anim.FBX");
+	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_idle", pComponent);
 }
 
 void CScene::BuildRootSignature(void)

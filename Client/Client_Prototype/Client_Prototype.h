@@ -35,15 +35,9 @@ private:
 	virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
 
 	void OnKeyboardInput(const CTimer& gt);
-	void UpdateMainPassCB(const CTimer& gt);
 
-	void BuildDescriptorHeaps();
-	void BuildConstantBufferViews();
-	void BuildRootSignature();
-	void BuildShadersAndInputLayout();
 	void BuildShapeGeometry();
 	void BuildPSOs();
-	void BuildFrameResources();
 	void BuildRenderItems();
 
 	void BuildComponent(void);

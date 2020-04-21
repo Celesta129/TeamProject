@@ -21,13 +21,15 @@ CCamera::~CCamera()
 
 void CCamera::Update(float fTimeElapsed)
 {
-	
-
 	// Convert Spherical to Cartesian coordinates.
-	m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
+	/*m_xmf3Position.x = m_fRadius * sinf(m_fPhi)*cosf(m_fTheta);
 	m_xmf3Position.z = m_fRadius * sinf(m_fPhi)*sinf(m_fTheta);
-	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);
+	m_xmf3Position.y = m_fRadius * cosf(m_fPhi);*/
 	
+	//m_xmf3Position.x = 0.f; 
+	//m_xmf3Position.z = -(m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta));
+	//m_xmf3Position.y = m_fRadius * sinf(m_fTheta) + m_fRadius * -sinf(m_fTheta);
+
 	if (m_pTarget == nullptr)
 		return;
 
@@ -38,24 +40,31 @@ void CCamera::Update(float fTimeElapsed)
 
 		if (pTarget_Transfrom)
 		{
-			m_xmf3Position.x += pTarget_Transfrom->Get_Pos().x;
+			/*m_xmf3Position.x += pTarget_Transfrom->Get_Pos().x;
 			m_xmf3Position.z += pTarget_Transfrom->Get_Pos().z;
-			m_xmf3Position.y += pTarget_Transfrom->Get_Pos().y;
+			m_xmf3Position.y += pTarget_Transfrom->Get_Pos().y;*/
 		}
 	}
-
-	//XMVECTOR targetPosVector = XMVectorSet(mOpaqueRitems[0]->World.m[3][0], mOpaqueRitems[0]->World.m[3][1], mOpaqueRitems[0]->World.m[3][2], 1.f);
 
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z, 1.0f);
 	XMVECTOR target;
 	if (pTarget_Transfrom == nullptr)
-		target = XMVectorZero();
+	{
+		target = XMVectorSet(m_xmf3Position.x,
+			m_xmf3Position.y + m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta),
+			m_xmf3Position.z + -(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
+			1.f);
+	}
 	else
 		target = XMVectorSet(pTarget_Transfrom->Get_Pos().x, 
 							pTarget_Transfrom->Get_Pos().y, 
 							pTarget_Transfrom->Get_Pos().z,
 							1.f);
+	target = XMVectorSet(m_xmf3Position.x,
+		m_xmf3Position.y + -(m_fRadius * cosf(m_fTheta) + m_fRadius * sinf(m_fTheta)),
+		m_xmf3Position.z + (m_fRadius * sinf(m_fTheta) + m_fRadius * cosf(m_fTheta)),
+		1.f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	GenerateViewMatrix(pos, target, up);
