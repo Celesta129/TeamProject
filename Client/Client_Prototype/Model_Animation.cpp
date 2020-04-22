@@ -1,16 +1,6 @@
 #include "Model_Animation.h"
 
 
-
-Model_Animation::Model_Animation()
-{
-}
-
-
-Model_Animation::~Model_Animation()
-{
-}
-
 LoadAnimation::LoadAnimation(string filename, float trigger, float skip)
 {
 	m_pScene = aiImportFile(filename.c_str(), (aiProcessPreset_TargetRealtime_Quality | aiProcess_ConvertToLeftHanded) & ~aiProcess_FindInvalidData);
@@ -22,7 +12,7 @@ LoadAnimation::LoadAnimation(string filename, float trigger, float skip)
 		start_time = (float)m_pAnim->mChannels[0]->mPositionKeys[0].mTime;
 		//프레임 시작 시점은 좌표 이동 프레임을 기준으로 맞춤
 		end_time = (float)m_pAnim->mChannels[0]->mPositionKeys[m_pAnim->mChannels[0]->mNumPositionKeys - 1].mTime - 1.0f;
-		//프레임 종료 시점에서 1.0 만큼 빼줘야 프레임이 안겹침
+		//프레임 종료 시점에서 1.0 만큼 빼줘야 프레임이 안겹침	-> 왜?
 
 		//cout << filename << " start Time : " << start_time << endl;
 		//cout << filename << " end Time : " << end_time << endl;
@@ -75,93 +65,94 @@ LoadAnimation::~LoadAnimation()
 	}
 }
 
-UINT LoadAnimation::BoneTransform(UINT & index, float ftime, vector<XMFLOAT4>& transforms)
+UINT LoadAnimation::BoneTransform(UINT & index, float fTime, vector<XMFLOAT4X4>& transforms)
 {
-	//if (stop_anim)
-	//	return LOOP_STOP;
-	//XMMATRIX Identity = XMMatrixIdentity();
+	if (stop_anim)
+		return LOOP_STOP;
+	XMMATRIX Identity = XMMatrixIdentity();
 
-	//if (!m_pScene) {
-	//	//애니메이션 파일을 로드못 했을 경우 수행
-	//	for (UINT i = 0; i < m_NumBones; ++i) {
-	//		XMStoreFloat4x4(&transforms[i], Identity);
-	//	}
-	//	return LOOP_IN;
-	//}
+	if (!m_pScene) {
+		//애니메이션 파일을 로드못 했을 경우 수행
+		for (UINT i = 0; i < m_NumBones; ++i) {
+			XMStoreFloat4x4(&transforms[i], Identity);
+		}
+		return LOOP_IN;
+	}
 
 	////루트노드부터 계층구조를 훝어가며 변환 수행 및 뼈에 최종변환 계산
-	//ReadNodeHeirarchy(now_time, m_pScene->mRootNode, Identity);
+	ReadNodeHeirarchy(now_time, m_pScene->mRootNode, Identity);
 
-	//for (int i = 0; i < m_NumBones; ++i) {
-	//	//뼈의 최종변환을 반환
-	//	XMStoreFloat4x4(&transforms[i], m_Bones[i].second.FinalTransformation);
+	for (int i = 0; i < m_NumBones; ++i) {
+		//뼈의 최종변환을 반환
+		XMStoreFloat4x4(&transforms[i], m_Bones[i].second.FinalTransformation);
 
-	//	if (m_Bones[i].first == "Bip001 L Hand") {
-	//		//XMVECTOR tmp = p.second.BoneOffset.r[3];
-	//		//cout << "Left Hand BondeOffset: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
-	//		//
-	//		//tmp = p.second.FinalTransformation.r[3];
-	//		//cout << "Left Hand FinalTransformation: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
+		//if (m_Bones[i].first == "Bip001 L Hand") {
+		//	//XMVECTOR tmp = p.second.BoneOffset.r[3];
+		//	//cout << "Left Hand BondeOffset: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
+		//	//
+		//	//tmp = p.second.FinalTransformation.r[3];
+		//	//cout << "Left Hand FinalTransformation: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
 
-	//		XMMATRIX tmp[2];
-	//		tmp[0] = m_Bones[14].second.FinalTransformation;
-	//		tmp[1] = m_Bones[16].second.FinalTransformation;
+		//	XMMATRIX tmp[2];
+		//	tmp[0] = m_Bones[14].second.FinalTransformation;
+		//	tmp[1] = m_Bones[16].second.FinalTransformation;
 
-	//		XMFLOAT4 pos = XMFLOAT4(0, 0, 0, 1);
-	//		float weights[2] = { 0.25f, 0.75f };
+		//	XMFLOAT4 pos = XMFLOAT4(0, 0, 0, 1);
+		//	float weights[2] = { 0.25f, 0.75f };
 
-	//		//for (int j = 0; j < 4; j++) {
-	//		//	weights[j] = 0.25f;
-	//		//}
+		//	//for (int j = 0; j < 4; j++) {
+		//	//	weights[j] = 0.25f;
+		//	//}
 
-	//	//	XMFLOAT4 temp = XMFLOAT4(33.7235756, 38.8664284, -3.53839922, 1);
-	//		XMFLOAT4 temp = XMFLOAT4(31.7235756, 35.8664284, -3.53839922, 1);
-	//		XMFLOAT4 result;
-	//		for (int j = 0; j < 2; j++)
-	//		{
-	//			result = Matrix4x4::test(temp, tmp[j]);
-	//			pos.x += weights[j] * result.x;
-	//			pos.y += weights[j] * result.y;
-	//			pos.z += weights[j] * result.z;
-	//		}
-	//		//cout << "Left Hand Pos : " << pos.x << "," << pos.y << "," << pos.z << endl;
+		////	XMFLOAT4 temp = XMFLOAT4(33.7235756, 38.8664284, -3.53839922, 1);
+		//	XMFLOAT4 temp = XMFLOAT4(31.7235756, 35.8664284, -3.53839922, 1);
+		//	XMFLOAT4 result;
+		//	for (int j = 0; j < 2; j++)
+		//	{
+		//		result = Matrix4x4::test(temp, tmp[j]);
+		//		pos.x += weights[j] * result.x;
+		//		pos.y += weights[j] * result.y;
+		//		pos.z += weights[j] * result.z;
+		//	}
+		//	//cout << "Left Hand Pos : " << pos.x << "," << pos.y << "," << pos.z << endl;
 
-	//		//tmp2._41 = pos.x;
-	//		//tmp2._42 = pos.y;
-	//		//tmp2._43 = pos.z;
+		//	//tmp2._41 = pos.x;
+		//	//tmp2._42 = pos.y;
+		//	//tmp2._43 = pos.z;
 
-	//		//pos = Matrix4x4::test(pos, WORLDMATRIX);
+		//	//pos = Matrix4x4::test(pos, WORLDMATRIX);
 
-	//		m_handpos = XMFLOAT4(pos.x, pos.y, pos.z, 1);
+		//	m_handpos = XMFLOAT4(pos.x, pos.y, pos.z, 1);
 
-	//		int k = 0;
-	//	}
-	//}
+		//	int k = 0;
+		//}
+	}
 
 	//// 미리 정해진 프레임 내에서 애니메이션 수행
-	//if (index == Anim_Guard || index == Anim_chocolate_Guard || index == Anim_Lollipop_Guard)
-	//{
-	//	;
-	//}
-	//else now_time += m_animSpeed * fTime;
-	//if (now_time > end_time) {
-	//	now_time = start_time;
-	//	if (!animation_loop) {
-	//		index = Anim_Idle;
-	//		animation_loop = true;
-	//	}
-	//	return LOOP_END; //애니메이션이 한 루프 끝남
-	//}
+	now_time += m_fAnimSpeed * fTime;
+	/*if (index == Anim_Guard || index == Anim_chocolate_Guard || index == Anim_Lollipop_Guard)
+	{
+		;
+	}
+	else now_time += m_animSpeed * fTime;*/
+	if (now_time > end_time) {
+		now_time = start_time;
+		if (!animation_Loop) {
+			index = Anim_Idle;
+			animation_Loop = true;
+		}
+		return LOOP_END; //애니메이션이 한 루프 끝남
+	}
 
 	////cout << m_animSpeed << ", " << fTime << endl;
 	////cout << "현재 : " << now_time << ", " << "총 시간 : " << end_time << endl;
 
-	//if (now_time > trigger_time - 1 && now_time < trigger_time + 1) {
-	//	return LOOP_TRIGGER;
-	//}
+	if (now_time > trigger_time - 1 && now_time < trigger_time + 1) {
+		return LOOP_TRIGGER;
+	}
 
-	//if (now_time > posible_skip)
-	//	return LOOP_SKIP; //애니메이션 아직 실행중이고 트리거 실행 후후반부
+	if (now_time > posible_skip)
+		return LOOP_SKIP; //애니메이션 아직 실행중이고 트리거 실행 후후반부
 
 	return LOOP_IN; //애니메이션이 아직 실행중
 }
@@ -339,7 +330,36 @@ void LoadAnimation::SetAnimFrame(float frame)
 	now_time = frame;
 }
 
-CComponent * LoadAnimation::Clone(void)
+Model_Animation::Model_Animation()
+{
+}
+
+Model_Animation::Model_Animation(const string Model_filename, vector<pair<string, float>>* Animation_filename)
+{
+	UINT animCount;
+	UINT index;
+	m_pModel = new LoadModel(Model_filename);
+	m_vAnimStack = new vector<LoadAnimation*>; //애니메이션을 적재할 벡터 생성
+
+	animCount = Animation_filename->size();
+	m_vAnimStack->reserve(animCount);
+
+	for (UINT i = 0; i < animCount; ++i) {
+		LoadAnimation* Anim = new LoadAnimation((Animation_filename->begin() + i)->first, (Animation_filename->begin() + i)->second, 0); //애니메이션을 로딩
+		m_vAnimStack->push_back(Anim); //애니메이션을 벡터에 적재
+	}
+}
+
+
+Model_Animation::~Model_Animation()
+{
+}
+
+void Model_Animation::LoadingModels(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
+{
+}
+
+CComponent * Model_Animation::Clone(void)
 {
 	// 복사생성하는걸로 수정해야할듯.
 	AddRef();

@@ -18,3 +18,10 @@ const UINT LOOP_END = 1;
 const UINT LOOP_TRIGGER = 2;
 const UINT LOOP_STOP = 3;
 const UINT LOOP_SKIP = 4;
+
+//캐릭터 애니메이션
+#define Anim_Idle					0
+#define Anim_Walk					1
+#define Anim_Run					2
+#define Anim_Jump					3
+#define Anim_Guard					4

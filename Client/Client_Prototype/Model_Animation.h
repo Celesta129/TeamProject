@@ -1,7 +1,7 @@
 #pragma once
 #include "LoadModel.h"
 
-class LoadAnimation : public CComponent
+class LoadAnimation
 {
 private:
 	const aiScene* m_pScene;
@@ -59,7 +59,7 @@ public:
 	}
 
 
-	UINT BoneTransform(UINT& index, float ftime, vector<XMFLOAT4>& transforms);
+	UINT BoneTransform(UINT& index, float fTime, vector<XMFLOAT4X4>& transforms);
 	void ReadNodeHeirarchy(float fAnimTime, const aiNode* pNode, const XMMATRIX& ParentTransform);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string& NodeName);
 
@@ -77,14 +77,43 @@ public:
 	float getAnimTime() const { return now_time; }
 
 	//XMFLOAT4 getHandPos() { return m_handpos; }
-public:
-	virtual CComponent* Clone(void);
+
 
 };
-class Model_Animation
+class Model_Animation : public CComponent
 {
 public:
 	Model_Animation();
+	Model_Animation(const string Model_filename, vector<pair<string, float>>* Animation_filename);
 	virtual ~Model_Animation();
+public:
+	void LoadingModels(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	LoadModel* GetModel(void) { return m_pModel; }
+	UINT GetAnimCount(void) { return (UINT)m_vAnimStack->size(); }
+	LoadAnimation** GetAnim(UINT index) {
+		return m_vAnimStack[index].data();
+	}
+	wstring getMat(UINT index) {
+		return wstring(normalMatList[index].begin(), normalMatList[index].end());
+	}
+	bool isMat(UINT index) {
+		if (matList[index] != "null")
+			return true;
+		return false;
+	}
+	bool isNormat(UINT index) {
+		if (normalMatList[index] != "null")
+			return true;
+		return false;
+	}
+protected:
+	LoadModel* m_pModel;
+	vector<LoadAnimation*>* m_vAnimStack;
+	vector<string> matList;
+	vector<string> normalMatList;
+
+
+public:
+	virtual CComponent* Clone(void);
 };
 

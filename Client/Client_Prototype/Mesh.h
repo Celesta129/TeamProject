@@ -3,12 +3,6 @@
 #include "Component.h"
 #include "Vertex.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp\cimport.h"
-#include "assimp\postprocess.h"
-#include "assimp\scene.h"
-
-#pragma comment(lib, "assimp-vc140-mt.lib")
 
 inline XMMATRIX aiMatrixToXMMatrix(const aiMatrix4x4& offset)
 {
