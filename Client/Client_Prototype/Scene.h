@@ -1,14 +1,13 @@
 #pragma once
-#include "../Common/UploadBuffer.h"
+#include "stdafx.h"
 #include "Component_Manager.h"
-#include "FrameResource.h"
-#include "GameObject.h"
 
 class CTimer;
-class CGameObject;
 class CCamera;
 
+class CGameObject;
 class CShader;
+
 class CScene
 {
 public:

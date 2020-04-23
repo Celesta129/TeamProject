@@ -1,6 +1,4 @@
 #include "Mesh.h"
-#include "FrameResource.h"
-
 
 CMesh::CMesh()
 {

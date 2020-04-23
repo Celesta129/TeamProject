@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "Component.h"
 #include "Vertex.h"
 
 
@@ -9,7 +8,7 @@ inline XMMATRIX aiMatrixToXMMatrix(const aiMatrix4x4& offset)
 	return XMMATRIX(&offset.a1);
 }
 
-
+// LoadModel을 하기위한 메쉬버퍼 클래스.
 class CMesh 
 {
 public:

@@ -41,26 +41,14 @@
     <Filter Include="02.Utility\04.Component\01.Transform">
       <UniqueIdentifier>{033e173a-f580-4cbd-b55a-b587f299d145}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\02.RenderItem">
-      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\05.Manager">
       <UniqueIdentifier>{b9cf5362-d0e9-4a36-8aef-2dd9ab8a414b}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.Utility\05.Manager\01.Component_Manager">
       <UniqueIdentifier>{320761a0-4d0d-43fa-bde9-d7301b042663}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\03.Mesh">
-      <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\04.Component\03.Mesh\Vertex">
-      <UniqueIdentifier>{c5503c3b-3636-46be-b633-32be39f2eca2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\04.Component\04.Model">
       <UniqueIdentifier>{7dff71a1-7ac4-4c87-a632-4460e5ab2e56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\04.Component\04.Model\LoadModel">
-      <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.Utility\06.Shader">
       <UniqueIdentifier>{91c5167d-3028-41f9-9356-be7b44126dc4}</UniqueIdentifier>
@@ -79,6 +67,21 @@
     </Filter>
     <Filter Include="02.Utility\06.Shader\AxisShader">
       <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\02.LoadAnimation">
+      <UniqueIdentifier>{a3d75e41-048a-4e4e-8d83-ee76d453b9d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\03.Model_Animation">
+      <UniqueIdentifier>{eb67398d-5162-45af-85e0-d9ddf5a3ae1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\00.Mesh">
+      <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\00.Mesh\Vertex">
+      <UniqueIdentifier>{c5503c3b-3636-46be-b633-32be39f2eca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel">
+      <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -124,9 +127,6 @@
     <ClInclude Include="Timer.h">
       <Filter>02.Utility\01.GameTimer</Filter>
     </ClInclude>
-    <ClInclude Include="RenderItem.h">
-      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>02.Utility\02.Camera</Filter>
     </ClInclude>
@@ -143,17 +143,8 @@
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClInclude>
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="LoadModel.h">
-      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>02.Utility\04.Component\03.Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
-      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
-    </ClInclude>
-    <ClInclude Include="Model_Animation.h">
-      <Filter>02.Utility\04.Component\04.Model</Filter>
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh\Vertex</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>02.Utility\06.Shader</Filter>
@@ -173,6 +164,18 @@
     </ClInclude>
     <ClInclude Include="AxisShader.h">
       <Filter>02.Utility\06.Shader\AxisShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Model_Animation.h">
+      <Filter>02.Utility\04.Component\04.Model\03.Model_Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadModel.h">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadAnimation.h">
+      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -218,20 +221,8 @@
     <ClCompile Include="Component_Manager.cpp">
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClCompile>
-    <ClCompile Include="RenderItem.cpp">
-      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
-    </ClCompile>
-    <ClCompile Include="LoadModel.cpp">
-      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>02.Utility\04.Component\03.Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Vertex.cpp">
-      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
-    </ClCompile>
-    <ClCompile Include="Model_Animation.cpp">
-      <Filter>02.Utility\04.Component\04.Model</Filter>
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh\Vertex</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>02.Utility\06.Shader</Filter>
@@ -250,6 +241,18 @@
     </ClCompile>
     <ClCompile Include="AxisShader.cpp">
       <Filter>02.Utility\06.Shader\AxisShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_Animation.cpp">
+      <Filter>02.Utility\04.Component\04.Model\03.Model_Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadModel.cpp">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadAnimation.cpp">
+      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

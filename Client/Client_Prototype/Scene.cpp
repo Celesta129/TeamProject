@@ -1,14 +1,11 @@
-#include "stdafx.h"
 #include "Scene.h"
-#include "D3DApp.h"
+
+#include "Timer.h"
 #include "Camera.h"
-#include "Mesh.h"
-#include "../Common/GeometryGenerator.h"
 
 #include "ObjectShader.h"
 #include "AxisShader.h"
 
-#include "Camera.h"
 #include "ModelObject.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
@@ -41,6 +38,7 @@ void CScene::BuildShaders()
 	CGameObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
 
+	// For TestObject
 	pShader = new CObjectShader();
 	pShader->Initialize(m_d3dDevice.Get(),m_GraphicsCommandList.Get(), L"Shaders\\color.hlsl");
 	m_vShaders.push_back(pShader);
@@ -52,15 +50,16 @@ void CScene::BuildShaders()
 	pTransform = GET_COMPNENT(CTransform*, m_vObjects[0], L"Component_Transform");
 	pTransform->Rotate(90.f, 0.f, 0.f);
 
-
+	// For Axis
 	pShader = new CAxisShader;
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\Axis.hlsl");
 	m_vShaders.push_back(pShader);
 
 	pObject = new CModelObject;
-	((CModelObject*)pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+
 
 	//pObject = new CModelObject;
 	//((CModelObject*)pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
@@ -312,28 +311,30 @@ void CScene::ReleaseCameras(void)
 
 void CScene::BuildComponents(void)
 {
+	if (m_pComponent_Manager == nullptr)
+		return;
+
 	CComponent* pComponent = nullptr;
 
 	pComponent = new CTransform;
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Transform", pComponent);
-
-	pComponent = new RenderItem;
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_RenderItem", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Transform", pComponent);
 
 	pComponent = new LoadModel("resources/idle_Anim.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_idle", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Model_idle", pComponent);
 
 	pComponent = new LoadModel("resources/xyz.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_xyz", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Model_xyz", pComponent);
 
 	pComponent = new LoadModel("resources/x.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_x", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Model_x", pComponent);
 
 	pComponent = new LoadModel("resources/y.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_y", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Model_y", pComponent);
 
 	pComponent = new LoadModel("resources/z.FBX");
-	CComponent_Manager::GetInstance()->Add_Component(L"Component_Model_z", pComponent);
+	m_pComponent_Manager->Add_Component(L"Component_Model_z", pComponent);
+
+	
 }
 
 void CScene::BuildRootSignature(void)

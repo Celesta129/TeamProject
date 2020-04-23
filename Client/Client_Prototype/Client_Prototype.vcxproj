@@ -172,6 +172,7 @@
     <ClInclude Include="Base.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
+    <ClInclude Include="LoadAnimation.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
@@ -190,7 +191,6 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model_Animation.h" />
-    <ClInclude Include="RenderItem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Struct.h" />
@@ -209,6 +209,7 @@
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
+    <ClCompile Include="LoadAnimation.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
@@ -222,7 +223,6 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="LoadModel.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="RenderItem.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
