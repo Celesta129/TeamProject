@@ -43,6 +43,15 @@ VertexOut VS(VertexIn vin)
 
 
 	vout.Color = vin.Color;
+	if (gWorld[3][0] > 0.0f) {
+		vout.Color.x = 255.f;
+	}
+	if (gWorld[3][1] > 0.0f) {
+		vout.Color.y = 255.f;
+	}
+	if (gWorld[3][2] > 0.0f) {
+		vout.Color.z = 255.f;
+	}
 	// Just pass vertex color into the pixel shader.
 	
 	return vout;

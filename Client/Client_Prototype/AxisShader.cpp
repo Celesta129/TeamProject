@@ -1,13 +1,10 @@
-#include "Shader.h"
-#include "Timer.h"
-#include "Camera.h"
+#include "AxisShader.h"
 
-CShader::CShader()
+CAxisShader::CAxisShader()
 {
 }
 
-
-CShader::~CShader()
+CAxisShader::~CAxisShader()
 {
 	ReleaseShaderVariables();
 	if (m_ppd3dPipelineStates)
@@ -17,54 +14,15 @@ CShader::~CShader()
 				m_ppd3dPipelineStates[i]->Release();
 		delete[] m_ppd3dPipelineStates;
 	}
-	for (UINT index = 0; index < m_vpObjects.size(); ++index)
-	{
-		if (m_vpObjects[index] != nullptr)
-		{
-			delete m_vpObjects[index];
-			m_vpObjects[index] = nullptr;
-		}
-	}
 
 }
 
-void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera)
+void CAxisShader::Update(const CTimer & timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera * pCamera)
 {
-	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
-	m_CurrFrameResource = m_vFrameResources[m_CurrFrameResourceIndex].get();
-
-	//gpu가 현재 프레임 자원의 명령을 다 처리했는지 확인.
-	// 아직 다 처리하지않았으면 gpu가 이 펜스지점까지 명령들을 처리할때까지 기다린다.
-	// 결국 이전 방식과 근본적으로 다른건 없지만 명령 처리할 자원을 3개를 만들어 한 GPU작업이 완료될떄까지 CPU가 놀지않고 다른 명령 제출을 한다는 차이점이있다.
-	
-	if (m_CurrFrameResource->Fence != 0 && pFence->GetCompletedValue() < m_CurrFrameResource->Fence)
-	{
-		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-		ThrowIfFailed(pFence->SetEventOnCompletion(m_CurrFrameResource->Fence, eventHandle));
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
-
-	UpdateShaderVariables(timer, cmdList, pCamera);
-
-	
+	CShader::Update(timer, pFence, cmdList, pCamera);
 }
 
-bool CShader::Push_Object(CGameObject * pObject)
-{
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
-	{
-		CGameObject** m_value_pObject = m_vpObjects[i];
-		if (*m_value_pObject == nullptr)
-		{
-			*m_value_pObject = pObject;
-			return true;
-		}
-	}
-	return false;
-}
-
-D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC CAxisShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -79,7 +37,7 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
+D3D12_RASTERIZER_DESC CAxisShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -106,7 +64,7 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 	return(d3dRasterizerDesc);
 }
 
-D3D12_BLEND_DESC CShader::CreateBlendState()
+D3D12_BLEND_DESC CAxisShader::CreateBlendState()
 {
 	return CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	// 아래는 커스텀코드
@@ -127,7 +85,7 @@ D3D12_BLEND_DESC CShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
+D3D12_DEPTH_STENCIL_DESC CAxisShader::CreateDepthStencilState()
 {
 	return CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	// 아래는 커스텀코드
@@ -150,40 +108,21 @@ D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CAxisShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "VS", "vs_5_1", ppd3dShaderBlob));	
+	wchar_t filename[100] = L"Shaders\\color.hlsl";
+	return(CShader::CompileShaderFromFile(filename, "VS", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CAxisShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "PS", "ps_5_1", ppd3dShaderBlob));
+	wchar_t filename[100] = L"Shaders\\color.hlsl";
+	return(CShader::CompileShaderFromFile(filename, "PS", "ps_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob ** ppd3dShaderBlob)
+void CAxisShader::CreatePipeLineParts(UINT nPSO)
 {
-	UINT nCompileFlags = 0;
-#if defined(_DEBUG)
-	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-	ComPtr<ID3DBlob> errors;
-
-	::D3DCompileFromFile(pszFileName, NULL, NULL, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &errors);
-	if (errors != nullptr)
-	{
-		OutputDebugStringA((char*)errors->GetBufferPointer());
-	}
-
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
-	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
-
-	return(d3dShaderByteCode);
-}
-
-void CShader::CreatePipeLineParts(UINT nPSO)
-{
-	m_nPSO = nPSO;
+	m_nPSO = 1;
 	if (m_nPSO > 0) {
 		m_pPSOs = new ComPtr<ID3D12PipelineState>[m_nPSO];
 		m_RootSignature = new ComPtr<ID3D12RootSignature>[m_nPSO];
@@ -191,7 +130,7 @@ void CShader::CreatePipeLineParts(UINT nPSO)
 	}
 }
 
-void CShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index)
+void CAxisShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	::ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -215,7 +154,7 @@ void CShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int inde
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
 
-void CShader::CreateFrameResources(ID3D12Device * pd3dDevice)
+void CAxisShader::CreateFrameResources(ID3D12Device * pd3dDevice)
 {
 	for (int i = 0; i < NUM_FRAME_RESOURCE; ++i)
 	{
@@ -224,7 +163,7 @@ void CShader::CreateFrameResources(ID3D12Device * pd3dDevice)
 	}
 }
 
-void CShader::CreateDescriptorHeaps(ID3D12Device* pd3dDevice)
+void CAxisShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 {
 	UINT objCount = (UINT)m_vpObjects.size();
 
@@ -241,17 +180,15 @@ void CShader::CreateDescriptorHeaps(ID3D12Device* pd3dDevice)
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(pd3dDevice->CreateDescriptorHeap(&cbvHeapDesc,						
+	ThrowIfFailed(pd3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
 		IID_PPV_ARGS(&m_CbvHeap)));
-
 }
 
-void CShader::CreateRootSignature(ID3D12Device * pd3dDevice)
+void CAxisShader::CreateRootSignature(ID3D12Device * pd3dDevice)
 {
 	CD3DX12_DESCRIPTOR_RANGE cbvTable[2];
 	cbvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, CBV_REGISTER_PASS);		// for PassCB :register(b0)
 	cbvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, CBV_REGISTER_OBJECT);		// for ObjectCB : :register(b1)
-
 
 	// Root parameter can be a table, root descriptor or root constants.
 	CD3DX12_ROOT_PARAMETER slotRootParameter[2];
@@ -259,7 +196,6 @@ void CShader::CreateRootSignature(ID3D12Device * pd3dDevice)
 	// Create root CBVs.
 	slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable[0]);
 	slotRootParameter[1].InitAsDescriptorTable(1, &cbvTable[1]);
-
 
 	// A root signature is an array of root parameters.
 	// numparameters / rootParameter / numStaticSampler / pStaticSamplers / Flag
@@ -281,11 +217,10 @@ void CShader::CreateRootSignature(ID3D12Device * pd3dDevice)
 		0,
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),
-		IID_PPV_ARGS(m_RootSignature[PSO_DEFAULT].GetAddressOf())));
-
+		IID_PPV_ARGS(m_RootSignature[PSO_OBJECT].GetAddressOf())));
 }
 
-void CShader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * pd3dGraphicsRootSignature)
+void CAxisShader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * pd3dGraphicsRootSignature)
 {
 	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -312,12 +247,12 @@ void CShader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * pd3d
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
-void CShader::CreateShaderVariables(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
+void CAxisShader::CreateShaderVariables(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
 
 }
 
-void CShader::CreateConstantBufferViews(ID3D12Device* pDevice)
+void CAxisShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 {
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
@@ -368,45 +303,34 @@ void CShader::CreateConstantBufferViews(ID3D12Device* pDevice)
 	}
 }
 
-void CShader::Initialize_ShaderFileName(const WCHAR* pszShaderFileName)
+void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName)
 {
-	wcscpy_s(m_filename, pszShaderFileName);
+	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
-	m_nObjects = MAX_OBJECT;
-	m_vpObjects = vector<CGameObject**>(m_nObjects);
-	for (auto& ppObject : m_vpObjects)
-	{
-		ppObject = new CGameObject*;
-		*ppObject = nullptr;
-	}
+	CreatePipeLineParts(1);
 
+	CreateDescriptorHeaps(pDevice);
+	CreateShaderVariables(pDevice, pd3dCommandList);
+	CreateFrameResources(pDevice);
+	CreateConstantBufferViews(pDevice);
 
-	//// 아래는 초기화 예시. 
-	//CreatePipeLineParts(1);
-	//CreateDescriptorHeaps(pDevice);		
-	//CreateShaderVariables(pDevice, pd3dCommandList);
-	//CreateFrameResources(pDevice); 	
-	//CreateConstantBufferViews(pDevice);
+	CreateRootSignature(pDevice);
+	CreatePSO(pDevice, 1, PSO_OBJECT);
 
-	//CreateRootSignature(pDevice);
-	//CreatePSO(pDevice, 1, PSO_OBJECT);
-	//// CreatePSO(pD3vice, 1, PSO_INDEX);
-	//// ...
-	//BuildObjects();
+	BuildObjects();
 }
 
-void CShader::UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera* pCamera)
+void CAxisShader::UpdateShaderVariables(const CTimer & timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
 	UpdateObjectCBs(timer);
 	UpdateMainPassCB(pCamera);
 }
 
-void CShader::ReleaseShaderVariables()
+void CAxisShader::ReleaseShaderVariables()
 {
-
 }
 
-void CShader::UpdateMainPassCB(CCamera* pCamera)
+void CAxisShader::UpdateMainPassCB(CCamera * pCamera)
 {
 	XMMATRIX view = XMLoadFloat4x4(&pCamera->GetViewMatrix());
 	XMMATRIX proj = XMLoadFloat4x4(&pCamera->GetProjectionMatrix());
@@ -434,7 +358,7 @@ void CShader::UpdateMainPassCB(CCamera* pCamera)
 	currPassCB->CopyData(0, mMainPassCB);
 }
 
-void CShader::UpdateObjectCBs(const CTimer & timer)
+void CAxisShader::UpdateObjectCBs(const CTimer & timer)
 {
 	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
@@ -452,33 +376,30 @@ void CShader::UpdateObjectCBs(const CTimer & timer)
 	}
 }
 
-void CShader::BuildObjects(void)
+void CAxisShader::BuildObjects(void)
 {
 
 }
 
-void CShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
+void CAxisShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
-	
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps); //pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
 
 	//pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
-	if (m_RootSignature[PSO_DEFAULT])		// 루트서명을 Set하는 순간 모든 바인딩이 사라진다. 여기서부터 새 루트서명이 기대하는 자원을 묶기 시작한다.
-		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[PSO_DEFAULT].Get());
+	if (m_RootSignature[PSO_OBJECT])		// 루트서명을 Set하는 순간 모든 바인딩이 사라진다. 여기서부터 새 루트서명이 기대하는 자원을 묶기 시작한다.
+		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[PSO_OBJECT].Get());
 
-	if (m_pPSOs[PSO_DEFAULT])
-		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_DEFAULT].Get());
+	if (m_pPSOs[PSO_OBJECT])
+		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
 
 	int passCbvIndex = mPassCbvOffset + m_CurrFrameResourceIndex;
 	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
 	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// 서술자 테이블을 파이프라인에 묶는다. // Pass RootDescriptor는 0번
-
-	
 }
 
-void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
+void CAxisShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
 {
 	OnPrepareRender(pd3dCommandList);
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
@@ -498,10 +419,4 @@ void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCam
 	}
 
 	m_CurrFrameResource->Fence = nFenceValue;
-}
-
-void CShader::ResetCmd(ID3D12GraphicsCommandList * pd3dCommandList)
-{
-	ThrowIfFailed(m_CurrFrameResource->CmdListAlloc.Get()->Reset());
-	ThrowIfFailed(pd3dCommandList->Reset(m_CurrFrameResource->CmdListAlloc.Get(), NULL));
 }

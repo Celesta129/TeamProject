@@ -34,3 +34,6 @@ void	CLASSNAME::DestroyInstance(void) {												\
 #define _BEGIN(Namespace) namespace Namespace{
 #define _END }
 #define _USING(Namespace) using namespace Namespace;
+
+
+#define GET_COMPNENT(Class, pObject, String)  (Class)(pObject)->Get_Component(String);

@@ -49,7 +49,7 @@ LoadModel::LoadModel(const string & filename)
 		aiProcess_Triangulate |                        // 3개 이상의 모서리를 가진 다각형 면을 삼각형으로 만듬(나눔)
 		aiProcess_ConvertToLeftHanded |                  // D3D의 왼손좌표계로 변환
 		aiProcess_SortByPType;                        // 단일타입의 프리미티브로 구성된 '깨끗한' 매쉬를 만듬
-
+	
 	m_pScene = aiImportFile(filename.c_str(), flag);
 
 	if (m_pScene) {

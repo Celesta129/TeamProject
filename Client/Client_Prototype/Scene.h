@@ -18,6 +18,9 @@ public:
 	virtual HRESULT Initialize();
 	//씬에서 마우스와 키보드 메시지를 처리한다. 
 	virtual bool OnKeyboardInput(const float& fTimeElapsed);
+	virtual void OnMouseDown(WPARAM btnState, int x, int y, const POINT& lastPoint);
+	virtual void OnMouseMove(WPARAM btnState, int x, int y, const POINT& lastPoint);
+	virtual void OnMouseUp(WPARAM btnState, int x, int y, const POINT& LastPoint);
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
@@ -30,7 +33,7 @@ public:
 	virtual void UpdateCamera(const float& fTimeElapsed);
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList);
 	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT64 nFenceValue);
+	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT64& nFenceValue);
 
 	void ReleaseUploadBuffers();
 
@@ -68,13 +71,7 @@ protected:
 	// -----------for camera--------------------
 	vector<CCamera*> m_vCameras;
 	CCamera* m_pCurrentCamera = nullptr;
-
-	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
-	XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
-	float mTheta = 1.5f*XM_PI;
-	float mPhi = 0.2f*XM_PI;
-	float mRadius = 450.0f;
+	
 	//---------------------------------------------
 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;

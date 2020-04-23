@@ -74,6 +74,12 @@
     <Filter Include="02.Utility\00.SuperClass">
       <UniqueIdentifier>{016f4a59-422e-40f4-9be0-c3755340a1f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\06.Shader\01.ObjectShader">
+      <UniqueIdentifier>{3d72aa4a-fd29-4aae-aa65-ff115391eae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\06.Shader\AxisShader">
+      <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -162,6 +168,12 @@
     <ClInclude Include="Base.h">
       <Filter>02.Utility\00.SuperClass</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectShader.h">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClInclude>
+    <ClInclude Include="AxisShader.h">
+      <Filter>02.Utility\06.Shader\AxisShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -233,6 +245,12 @@
     <ClCompile Include="Base.cpp">
       <Filter>02.Utility\00.SuperClass</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectShader.cpp">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClCompile>
+    <ClCompile Include="AxisShader.cpp">
+      <Filter>02.Utility\06.Shader\AxisShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">
@@ -249,6 +267,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\color.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Axis.hlsl">
       <Filter>03.Shaders</Filter>
     </FxCompile>
   </ItemGroup>

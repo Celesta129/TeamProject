@@ -36,6 +36,13 @@ void CTransform::Set_Scale(XMFLOAT3 * pScale)
 {
 }
 
+void CTransform::Rotate(float fPitch, float fYaw, float fRoll)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch),
+		XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+
 void CTransform::MovePos(XMFLOAT3 * pPos)
 {
 	m_xmf4x4World.m[3][0] += pPos->x;

@@ -1,1 +1,5 @@
 #pragma once
+enum CBV_REGISTER {
+	CBV_REGISTER_PASS,
+	CBV_REGISTER_OBJECT,
+};

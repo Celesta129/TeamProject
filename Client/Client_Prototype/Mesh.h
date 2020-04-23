@@ -43,66 +43,7 @@ public:
 	//virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, UINT nInstanceCount = 1);
 
-protected:
-	unique_ptr<MeshGeometry> m_MeshGeo;
-public:
-	virtual void BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
-
-	MeshGeometry* GetMeshGeo(void) {
-		return m_MeshGeo.get();
-	};
-
 };
-
-class CBoxMesh : public CMesh 
-{
-public:
-	CBoxMesh(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
-	virtual ~CBoxMesh();
-
-	virtual void BuildMeshGeo(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pCommandList);
-};
-
-class MMesh
-{
-public:
-	MMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual ~MMesh();
-
-private:
-	int								m_nReferences = 0;
-
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
-	void ReleaseUploadBuffers();
-
-protected:
-	ComPtr<ID3D12Resource>			m_pd3dVertexBuffer = NULL;
-	ComPtr<ID3D12Resource>			m_pd3dVertexUploadBuffer = NULL;
-
-	ComPtr<ID3D12Resource>			m_pd3dIndexBuffer = NULL;
-	ComPtr<ID3D12Resource>			m_pd3dIndexUploadBuffer = NULL;
-
-	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
-
-	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT							m_nSlot = 0;
-	UINT							m_nVertices = 0;
-	UINT							m_nStride = 0;
-	UINT							m_nOffset = 0;
-
-	UINT							m_nIndices = 0;
-	UINT							m_nStartIndex = 0;
-	int								m_nBaseVertex = 0;
-public:
-	BoundingOrientedBox				m_xmOOBB;
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, UINT nInstanceCount);
-};
-
 
 inline void CalculateTangentArray(UINT vertexCount, vector<VertexData>& vertices, long triangleCount, vector<int>& indeies)
 {

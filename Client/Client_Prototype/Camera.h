@@ -79,8 +79,8 @@ public:
 	void SetTimeLag(float fTimeLag) { m_fTimeLag = fTimeLag; }
 
 	void SetTheta(float dTheta) { m_fTheta = dTheta; };
-	void SetPhi(float dPhi) { m_fPhi = m_fPhi; };
-	void SetRadius(float dRadius) { m_fRadius = m_fRadius; };
+	void SetPhi(float dPhi) { m_fPhi = dPhi; };
+	void SetRadius(float dRadius) { m_fRadius = dRadius; };
 
 	void MoveTheta(float dTheta) { m_fTheta += dTheta; }
 	void MovePhi(float dPhi) { m_fPhi += dPhi; }
