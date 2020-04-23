@@ -87,4 +87,4 @@ struct sc_packet_move {
 	char dashed;
 };
 
-#pragma pack(pop);
+#pragma pack(pop)

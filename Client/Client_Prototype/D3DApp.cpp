@@ -66,6 +66,7 @@ void CD3DApp::Set4xMsaaState(bool value)
 	}
 }
 
+//루프 - 서버로직 붙어야됨
 int CD3DApp::Run()
 {
 	MSG msg = { 0 };

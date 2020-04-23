@@ -53,9 +53,12 @@ CGameFramework_Client::~CGameFramework_Client()
 	if (m_pScene) {
 		m_pScene->ReleaseScene();
 	}
+	if (m_pSocket) m_pSocket->DataCleanup();
+
 	CComponent_Manager::DestroyInstance();
 }
 
+//객체 초기화
 bool CGameFramework_Client::Initialize()
 {
 	if (!CD3DApp::Initialize())
@@ -68,6 +71,7 @@ bool CGameFramework_Client::Initialize()
 		return false;
 	}
 
+	m_pSocket = nullptr;
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
 	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
@@ -225,6 +229,7 @@ void CGameFramework_Client::OnMouseMove(WPARAM btnState, int x, int y)
 	mLastMousePos.y = y;
 }
 
+//임시적으로 obj_type send
 void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 {
 	if (m_pScene)

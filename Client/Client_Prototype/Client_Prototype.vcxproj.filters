@@ -162,6 +162,8 @@
     <ClInclude Include="Base.h">
       <Filter>02.Utility\00.SuperClass</Filter>
     </ClInclude>
+    <ClInclude Include="CSocket.h" />
+    <ClInclude Include="protocol.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -233,6 +235,7 @@
     <ClCompile Include="Base.cpp">
       <Filter>02.Utility\00.SuperClass</Filter>
     </ClCompile>
+    <ClCompile Include="CSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">

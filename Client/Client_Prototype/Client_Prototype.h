@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Scene.h"
+#include "CSocket.h"
 //class CScene;
 class CShader;
 
@@ -21,6 +22,9 @@ public:
 
 	virtual bool Initialize() override;
 	int rendercount = 0;
+
+	//Socket
+	CSocket *m_pSocket;
 private:
 	virtual void FlushCommandQueue(void);
 
