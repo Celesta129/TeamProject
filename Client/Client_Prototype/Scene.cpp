@@ -45,7 +45,6 @@ void CScene::BuildShaders()
 	pShader->Initialize(m_d3dDevice.Get(),m_GraphicsCommandList.Get(), L"Shaders\\color.hlsl");
 	m_vShaders.push_back(pShader);
 
-	
 	pObject = new CModelObject;
 	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
@@ -217,11 +216,14 @@ void CScene::ResetCmdList(ID3D12GraphicsCommandList * pd3dCommandList)
 			// 1. Allocator의 Reset과 달리 어느때나 불러도 상관없다.
 			// 2. 상태가 Open된다. 동시에 인자로 받은 CommandAllocator에 기록을 시작한다.
 			// 해당 Allocator에 기록된 명령들은 안사라진다. 즉, Allocator의 리셋이 동반되어야 우리가 원하는 리셋이 될 것이다.
+			// Allocator의 리셋을 하지 않을경우 기록은 계속했지만 초기화가 안되었기 때문에(추측) 메모리가 무한정 늘어나는 현상이 관찰되었다.
 			// 두번째 인자인 PipelineState가 NULL인 이유에 대해서는 MSDN 참고.
 
-			// 즉 우리가 원하는 셰이더의 순차적 렌더링을 하려면 m_vShaders안의 각 셰이더가 멤버로 갖고있는 프레임 리소스의 CommandAllocator를 셰이더 역순으로 리셋시키고
-			// m_vShader의 0번째 인덱스에 있는 Shader, 즉 첫번째 셰이더의 CommandAllocator를 마지막으로 리셋해준다.
+			// m_vShaders안의 각 셰이더가 멤버로 갖고있는 프레임 리소스의 CommandAllocator를 배열 역순으로 리셋시키는 이유는
+			// m_vShader의 0번째 인덱스에 있는 Shader, 즉 첫번째 셰이더의 CommandAllocator를 마지막으로 리셋, CommandList에 세팅해서 Open시켜 셰이더를 순차적으로 렌더링하기 위함이다. 
+			// 마지막으로 렌더링한 셰이더의 Allocator는 Framework 클래스 단계의 Draw에서 Commandlist를 Close하면서 닫았을 것이다.
 			
+			// index가 0 이상인동안 close를 하게 한 이유는 다음 리셋될 셰이더의 리셋을 보장하기 위함이다.
 			pShader->ResetCmd(pd3dCommandList);
 			if(index > 0)
 				ThrowIfFailed(pd3dCommandList->Close());
@@ -245,7 +247,7 @@ void CScene::UpdateCamera(const float & fTimeElapsed)
 
 }
 
-void CScene::Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList)
+void CScene::Update(const CTimer& timer, ID3D12Fence* pFence)
 {
 	
 	UpdateCamera(timer.DeltaTime());
@@ -257,7 +259,7 @@ void CScene::Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsComm
 	}
 	for (auto& shader : m_vShaders)
 	{
-		shader->Update(timer,  pFence, cmdList,m_pCurrentCamera);
+		shader->Update(timer,  pFence, m_pCurrentCamera);
 	}
 	
 }

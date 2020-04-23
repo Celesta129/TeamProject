@@ -31,7 +31,7 @@ public:
 
 
 	virtual void UpdateCamera(const float& fTimeElapsed);
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList);
+	virtual void Update(const CTimer& timer, ID3D12Fence* pFence);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT64& nFenceValue);
 

@@ -17,12 +17,17 @@ public:
 	CShader();
 	virtual ~CShader();
 public:
-	virtual void Update(const CTimer& timer,  ID3D12Fence* pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera);
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName) = 0;
+
+			void ResetCmd(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
+
 	bool Push_Object(CGameObject* pObject);
 
 public:
 	virtual void CreatePipeLineParts(UINT nPSO);
-	// ----아래 함수들의 정의는 예제코드이다. 상속받은 Shader 코드에서 정의하자.---------
+	// ----아래 함수들의 정의는 예제코드이다. 상속받은 Shader 클래스에서 정의하자.---------
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -33,6 +38,7 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName,
 		LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
 
+protected:
 	virtual void CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index);
 	virtual void CreateFrameResources(ID3D12Device * pd3dDevice);
 	virtual void CreateDescriptorHeaps(ID3D12Device* pd3dDevice);
@@ -42,20 +48,18 @@ public:
 	virtual void CreateConstantBufferViews(ID3D12Device* pDevice);
 
 	void Initialize_ShaderFileName(const WCHAR* pszShaderFileName);
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName) = 0;
-	
-	virtual void UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList *pd3dCommandList, CCamera* pCamera);
+
+	virtual void UpdateShaderVariables(const CTimer& timer,  CCamera* pCamera);
 	virtual void ReleaseShaderVariables();
-	
+
 	virtual void UpdateMainPassCB(CCamera* pCamera);
 	virtual void UpdateObjectCBs(const CTimer& timer);
-	
-	virtual void BuildObjects(void);
-	
-	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
-	void ResetCmd(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(void);
+
+	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
+
+
 protected:
 	vector<CGameObject**>	m_vpObjects;
 	UINT m_nObjects = 0;

@@ -17,9 +17,10 @@ CObjectShader::~CObjectShader()
 	
 }
 
-void CObjectShader::Update(const CTimer & timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera * pCamera)
+void CObjectShader::Update(const CTimer & timer, ID3D12Fence * pFence,  CCamera * pCamera)
 {
-	CShader::Update(timer, pFence, cmdList, pCamera);
+	CShader::Update(timer, pFence, pCamera);
+	UpdateShaderVariables(timer, pCamera);
 }
 
 D3D12_INPUT_LAYOUT_DESC CObjectShader::CreateInputLayout()
@@ -108,16 +109,6 @@ D3D12_DEPTH_STENCIL_DESC CObjectShader::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_SHADER_BYTECODE CObjectShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob)
-{
-	return(CShader::CompileShaderFromFile(m_filename, "VS", "vs_5_1", ppd3dShaderBlob));
-}
-
-D3D12_SHADER_BYTECODE CObjectShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob)
-{
-
-	return(CShader::CompileShaderFromFile(m_filename, "PS", "ps_5_1", ppd3dShaderBlob));
-}
 
 void CObjectShader::CreatePipeLineParts(UINT nPSO)
 {
@@ -318,7 +309,7 @@ void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList
 	BuildObjects();
 }
 
-void CObjectShader::UpdateShaderVariables(const CTimer & timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+void CObjectShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
 	UpdateObjectCBs(timer);
 	UpdateMainPassCB(pCamera);

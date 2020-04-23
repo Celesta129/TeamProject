@@ -95,7 +95,7 @@ void CGameFramework_Client::Update(const CTimer & gt)
 	
 	OnKeyboardInput(gt);
 	
-	m_pScene->Update(gt, m_Fence.Get(), m_GraphicsCommandList.Get());
+	m_pScene->Update(gt, m_Fence.Get());
 
 }
 

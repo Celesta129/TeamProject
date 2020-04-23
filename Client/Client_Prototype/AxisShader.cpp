@@ -17,9 +17,10 @@ CAxisShader::~CAxisShader()
 
 }
 
-void CAxisShader::Update(const CTimer & timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera * pCamera)
+void CAxisShader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
 {
-	CShader::Update(timer, pFence, cmdList, pCamera);
+	CShader::Update(timer, pFence, pCamera);
+	UpdateShaderVariables(timer, pCamera);
 }
 
 D3D12_INPUT_LAYOUT_DESC CAxisShader::CreateInputLayout()
@@ -106,18 +107,6 @@ D3D12_DEPTH_STENCIL_DESC CAxisShader::CreateDepthStencilState()
 	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
 	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 	return(d3dDepthStencilDesc);
-}
-
-D3D12_SHADER_BYTECODE CAxisShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob)
-{
-	wchar_t filename[100] = L"Shaders\\color.hlsl";
-	return(CShader::CompileShaderFromFile(filename, "VS", "vs_5_1", ppd3dShaderBlob));
-}
-
-D3D12_SHADER_BYTECODE CAxisShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob)
-{
-	wchar_t filename[100] = L"Shaders\\color.hlsl";
-	return(CShader::CompileShaderFromFile(filename, "PS", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CAxisShader::CreatePipeLineParts(UINT nPSO)
@@ -320,7 +309,7 @@ void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList *
 	BuildObjects();
 }
 
-void CAxisShader::UpdateShaderVariables(const CTimer & timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+void CAxisShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
 	UpdateObjectCBs(timer);
 	UpdateMainPassCB(pCamera);

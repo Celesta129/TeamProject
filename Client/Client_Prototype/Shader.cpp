@@ -28,7 +28,7 @@ CShader::~CShader()
 
 }
 
-void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCommandList * cmdList, CCamera* pCamera)
+void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, CCamera* pCamera)
 {
 	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
 	m_CurrFrameResource = m_vFrameResources[m_CurrFrameResourceIndex].get();
@@ -45,7 +45,7 @@ void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, ID3D12GraphicsCo
 		CloseHandle(eventHandle);
 	}
 
-	UpdateShaderVariables(timer, cmdList, pCamera);
+	// UpdateShaderVariables(timer, pCamera);
 
 	
 }
@@ -395,7 +395,7 @@ void CShader::Initialize_ShaderFileName(const WCHAR* pszShaderFileName)
 	//BuildObjects();
 }
 
-void CShader::UpdateShaderVariables(const CTimer& timer, ID3D12GraphicsCommandList * pd3dCommandList, CCamera* pCamera)
+void CShader::UpdateShaderVariables(const CTimer& timer, CCamera* pCamera)
 {
 	UpdateObjectCBs(timer);
 	UpdateMainPassCB(pCamera);
