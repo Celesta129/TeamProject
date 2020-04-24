@@ -7,6 +7,8 @@
 #include "Component_Manager.h"
 #include "Scene.h"
 
+#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+
 #define MAX_LOADSTRING 100
 
 UINT g_CbvSrvUavDescriptorSize;
@@ -30,6 +32,23 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 		if (!GameFramework.Initialize())
 			return 0;
 
+		//sever접속
+		char temp_ip[15];
+		char temp_id[15];
+		cout << "Input id : ";
+		cin >> temp_id;
+		cout << "Input ip : ";
+		cin >> temp_ip;
+		GameFramework.m_pSocket = new CSocket(temp_id, temp_ip);
+		if (GameFramework.m_pSocket->init()) {
+			cs_packet_connect p_connect;
+			strcpy_s(p_connect.id, GameFramework.m_pSocket->m_pid);
+			p_connect.type = CS_LOGIN;
+			p_connect.size = sizeof(cs_packet_connect);
+
+			send(GameFramework.m_pSocket->clientSocket, (char*)&p_connect, sizeof(cs_packet_connect), 0);
+		}
+			
 		return GameFramework.Run();
 	}
 	catch(DxException& e){
@@ -572,4 +591,59 @@ void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, 
 
 
 	//cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
+}
+
+void CGameFramework_Client::processPacket(char* buf)
+{
+	switch (buf[1])
+	{
+	case SC_CONNECTED:
+	{
+		sc_packet_login_ok* p_login = reinterpret_cast<sc_packet_login_ok*> (buf);
+		m_client_id = p_login->id;
+		//player객체 추가
+	}
+		break;
+	case SC_ENTER:
+	{
+		sc_packet_enter* p_enter = reinterpret_cast<sc_packet_enter*>(buf);
+		int other_id = p_enter->id;
+
+		if (other_id == m_client_id) {
+			//플레이어 캐릭터 초기위치 입력
+		}
+		else {
+			//다른플레이어 초기 위치값 입력
+		}
+	}
+		break;
+	case SC_LEAVE: {
+		sc_packet_leave* p_leave = reinterpret_cast<sc_packet_leave*>(buf);
+		int other_id = p_leave->id;
+		if (other_id == m_client_id) {
+			//캐릭터 제거
+		}
+		else {
+			//다른플레이어 제거
+		}
+	}
+		break;
+	case SC_MOVEMENT:
+	{
+		sc_packet_move* p_movement = reinterpret_cast<sc_packet_move*>(buf);
+		int other_id = p_movement->id;
+		if (other_id == m_client_id)
+		{
+			//플레이어 객체 이동
+		}
+		else
+		{
+			//다른플레이어 이동
+		}
+	}
+		break;
+	default:
+		printf("Unknown PACKET type [%d]\n", buf[1]);
+		break;
+	}
 }

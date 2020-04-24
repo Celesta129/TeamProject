@@ -22,7 +22,7 @@ public:
 
 	void DataCleanup();
 
-	void init();
+	bool init();
 	void sendPacket(char type, char key, char state, char id);
 };
 

@@ -26,17 +26,19 @@ void CSocket::DataCleanup()
 	WSACleanup();
 }
 
-void CSocket::init()
+bool CSocket::init()
 {
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
-		cout << "Error - Invalid socket\n";
+		cout << "Error - Fail to WSAStartupt\n";
+		return false;
 	}
 
 	clientSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (clientSocket == INVALID_SOCKET)
 	{
 		cout << "Error - Invalid socket\n";
+		return false;
 	}
 
 	int option = TRUE;
@@ -44,7 +46,7 @@ void CSocket::init()
 
 	ZeroMemory(&serverAddr, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
-	//serveraddr.sin_addr.s_addr = inet_addr(serverip);
+	//serverAddr.sin_addr.s_addr = inet_addr(serverip);
 	//serverAddr.sin_addr.s_addr = inet_addr("218.37.39.194");
 	//char addr[30];
 	//cout << "ipÁÖ¼Ò:";
@@ -54,7 +56,9 @@ void CSocket::init()
 	if (connect(clientSocket, (SOCKADDR *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 	{
 		cout << "Error - Invalid socket\n";
+		return false;
 	}
+	return true;
 }
 
 void CSocket::sendPacket(char type, char key, char state, char id)

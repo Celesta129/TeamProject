@@ -25,6 +25,9 @@ public:
 
 	//Socket
 	CSocket *m_pSocket;
+	int m_client_id = -1;
+
+	void processPacket(char* buf);
 private:
 	virtual void FlushCommandQueue(void);
 

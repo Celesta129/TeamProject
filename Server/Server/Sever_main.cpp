@@ -98,7 +98,7 @@ void send_leave_packet(int user_id, int o_id) {
 	sc_packet_leave p;
 	p.id = o_id;
 	p.size = sizeof(p);
-	p.type = SC_DISCONNECTED;
+	p.type = SC_LEAVE;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);

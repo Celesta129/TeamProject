@@ -22,9 +22,8 @@ constexpr int CS_DASH = 16;
 
 //Server to clients type
 constexpr int SC_CONNECTED = 1;
-constexpr int SC_DISCONNECTED = 2;
-constexpr int SC_ENTER = 3;
-constexpr int SC_LEAVE = 4;
+constexpr int SC_ENTER = 2;
+constexpr int SC_LEAVE = 3;
 
 
 constexpr int SC_MOVEMENT = 11;
