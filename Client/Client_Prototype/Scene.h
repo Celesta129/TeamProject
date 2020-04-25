@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
+#include "Base.h"
 #include "Component_Manager.h"
+
 
 class CTimer;
 class CCamera;
@@ -8,7 +10,7 @@ class CCamera;
 class CGameObject;
 class CShader;
 
-class CScene
+class CScene : public CBase
 {
 public:
 	CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList);
@@ -24,8 +26,7 @@ public:
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseObjects();
-
+	
 	virtual void ResetCmdList(ID3D12GraphicsCommandList* pd3dCommandList);
 
 
@@ -40,9 +41,11 @@ public:
 
 	// ------------for release-------------------
 	virtual void ReleaseScene(void);
+	virtual int Free(void);
 protected:
 	virtual void ReleaseShaders(void);
 	virtual void ReleaseCameras(void);
+	virtual void ReleaseObjects(void);
 	//-------------------------------------------
 protected:
 	virtual void BuildComponents(void);
@@ -62,7 +65,6 @@ protected:
 protected:
 	ComPtr<ID3D12Device> m_d3dDevice;
 	ComPtr<ID3D12GraphicsCommandList> m_GraphicsCommandList;
-	ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 protected:
 	vector<CGameObject*> m_vObjects;
@@ -73,7 +75,6 @@ protected:
 	
 	//---------------------------------------------
 
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
 	vector<CShader*> m_vShaders;
 
 protected:

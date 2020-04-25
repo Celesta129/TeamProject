@@ -34,9 +34,6 @@ private:
 
 	void OnKeyboardInput(const CTimer& gt);
 
-	void BuildComponent(void);
-	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems);
-
 private:
 	CScene* m_pScene = nullptr;
 
@@ -48,10 +45,6 @@ private:
 	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
 	PassConstants mMainPassCB;
-
-	UINT mPassCbvOffset = 0;
-
-	bool mIsWireframe = false;
 
 	POINT m_LastMousePos;
 };

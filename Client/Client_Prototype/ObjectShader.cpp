@@ -110,15 +110,6 @@ D3D12_DEPTH_STENCIL_DESC CObjectShader::CreateDepthStencilState()
 }
 
 
-void CObjectShader::CreatePipeLineParts(UINT nPSO)
-{
-	m_nPSO = 1;
-	if (m_nPSO > 0) {
-		m_pPSOs = new ComPtr<ID3D12PipelineState>[m_nPSO];
-		m_RootSignature = new ComPtr<ID3D12RootSignature>[m_nPSO];
-
-	}
-}
 
 void CObjectShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index)
 {
@@ -171,7 +162,9 @@ void CObjectShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(pd3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
-		IID_PPV_ARGS(&m_CbvHeap)));
+		IID_PPV_ARGS(&m_CbvSrvDescriptorHeap)));
+
+
 }
 
 void CObjectShader::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -261,7 +254,7 @@ void CObjectShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 
 			// Offset to the object cbv in the descriptor heap.
 			int heapIndex = frameIndex * objCount + i;
-			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetCPUDescriptorHandleForHeapStart());
+			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 			handle.Offset(heapIndex, g_CbvSrvUavDescriptorSize);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
@@ -282,7 +275,7 @@ void CObjectShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 
 		// Offset to the pass cbv in the descriptor heap.
 		int heapIndex = mPassCbvOffset + frameIndex;
-		auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetCPUDescriptorHandleForHeapStart());
+		auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_CbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		handle.Offset(heapIndex, g_CbvSrvUavDescriptorSize);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
@@ -297,7 +290,7 @@ void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList
 {	
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
-	CreatePipeLineParts(1);
+	CreatePipeLineParts(PSO_END);
 
 	CreateDescriptorHeaps(pDevice);
 	CreateShaderVariables(pDevice, pd3dCommandList);
@@ -372,7 +365,7 @@ void CObjectShader::BuildObjects(void)
 
 void CObjectShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvSrvDescriptorHeap.Get() };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps); //pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
 
 	//pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
@@ -383,7 +376,7 @@ void CObjectShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
 
 	int passCbvIndex = mPassCbvOffset + m_CurrFrameResourceIndex;
-	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+	auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	passCbvHandle.Offset(passCbvIndex, g_CbvSrvUavDescriptorSize);
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// 서술자 테이블을 파이프라인에 묶는다. // Pass RootDescriptor는 0번
 }
@@ -399,9 +392,12 @@ void CObjectShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera 
 			continue;
 
 		UINT cbvIndex = m_CurrFrameResourceIndex * (UINT)m_vpObjects.size() + index;
-		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvHeap->GetGPUDescriptorHandleForHeapStart());
+		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 		cbvHandle.Offset(cbvIndex, g_CbvSrvUavDescriptorSize);
 
+		D3D12_GPU_VIRTUAL_ADDRESS whereView = m_CurrFrameResource->ObjectCB.get()->Resource()->GetGPUVirtualAddress() + cbvIndex;
+
+		//pd3dCommandList->SetGraphicsRootConstantBufferView(1, whereView);
 		pd3dCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);// Object RootDescriptor는 1번
 
 		pObject->Render(pd3dCommandList);

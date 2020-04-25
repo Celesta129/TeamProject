@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
+#include "Base.h"
 #include "../Common/UploadBuffer.h"
 #include "LoadModel.h"
 #include "FrameResource.h"		// For include struct ObjectConstant
 
 class CComponent_Manager;
 
-class CGameObject
+class CGameObject : public CBase
 {
 public:
 	CGameObject();
@@ -14,12 +15,11 @@ public:
 
 public:
 	virtual HRESULT Initialize(void);
-	virtual void Release(void);
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
-	
+	virtual int Free(void);
 public:
 	virtual ObjectConstants GetObjectConstants(void);	// 각 오브젝트들의 CB에 업로드할 자료를 반환한다.
 														// 다만 ObjectConstant는 클래스마다 변할수도 있으니 자식 클래스에서 필요에 따라 수정된 구조체를 정의한 다음 

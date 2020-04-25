@@ -2,8 +2,6 @@
 //
 #include "stdafx.h"
 #include "Client_Prototype.h"
-#include "../Common/GeometryGenerator.h"
-#include "Camera.h"
 #include "Component_Manager.h"
 #include "Scene.h"
 
@@ -45,14 +43,13 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 	:CD3DApp(hInstance)
 {
+
 }
 
 CGameFramework_Client::~CGameFramework_Client()
 {
-	if (m_pScene) {
-		m_pScene->ReleaseScene();
-	}
-	CComponent_Manager::DestroyInstance();
+	Safe_Release(m_pScene);
+	int refCount = CComponent_Manager::DestroyInstance();
 }
 
 bool CGameFramework_Client::Initialize()
@@ -103,13 +100,11 @@ void CGameFramework_Client::Draw(const CTimer & gt)
 {
 	
 	// 커맨드리스트 리셋
-	m_pScene->ResetCmdList(m_GraphicsCommandList.Get());
-
-	// ResetCmdList 설계 결함 : 호출 후 닫혀버린다. 따라서 다시 열어준다.
-	// ThrowIfFailed(m_GraphicsCommandList->Reset(NULL, NULL));
-
-	//ThrowIfFailed(m_CommandAllocator->Reset());
-	//ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(),NULL));
+	if (m_pScene)
+		m_pScene->ResetCmdList(m_GraphicsCommandList.Get());
+	else
+		return;
+	//ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
 	// 뷰포트와 씨저렉트 설정. 이 작업은 반드시 커맨드리스트가 리셋된 후에  해야함.
 	m_GraphicsCommandList->RSSetViewports(1, &m_ViewPort);
@@ -145,9 +140,6 @@ void CGameFramework_Client::Draw(const CTimer & gt)
 	// 백/프론트 버퍼 교체
 	ThrowIfFailed(m_dxgiSwapChain->Present(0, 0));
 	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_iSwapChainBufferCount;
-
-
-	//mCurrFrameResource->Fence = ++m_nFenceValue;
 
 	// Add an instruction to the command queue to set a new fence point. 
    // Because we are on the GPU timeline, the new fence point won't be 
@@ -192,19 +184,4 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 {
 	if (m_pScene)
 		m_pScene->OnKeyboardInput(gt.DeltaTime());
-
-	if (GetAsyncKeyState('1') & 0x8000)
-		mIsWireframe = true;
-	else
-		mIsWireframe = false;
-}
-
-
-void CGameFramework_Client::BuildComponent(void)
-{
-	
-}
-
-void CGameFramework_Client::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<CGameObject*>& ritems)
-{
 }

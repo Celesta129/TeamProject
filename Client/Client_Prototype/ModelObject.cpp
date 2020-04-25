@@ -45,7 +45,7 @@ HRESULT CModelObject::Initialize(const wstring& tag, ID3D12Device * pd3dDevice, 
 		for (UINT i = 0; i < m_nMeshes; i++)
 			m_ppMeshes[i] = nullptr;
 	}
-	m_model->SetMeshes(pd3dDevice, pd3dCommandList);
+	//m_model->SetMeshes(pd3dDevice, pd3dCommandList);
 
 	for (UINT i = 0; i < m_nMeshes; ++i) {
 		if (i > 0)
@@ -71,11 +71,6 @@ void CModelObject::Update(float fTimeElapsed)
 void CModelObject::Render(ID3D12GraphicsCommandList * pCommandList)
 {
 	CGameObject::Render(pCommandList);
-
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(1, m_d3dCbvGPUDescriptorHandle);
-
-	////if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
-	//if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 
 	if (!m_ppMeshes.empty())
 	{

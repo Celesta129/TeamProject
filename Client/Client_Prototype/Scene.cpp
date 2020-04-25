@@ -11,18 +11,18 @@
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
 {
+	m_pComponent_Manager = CComponent_Manager::GetInstance();
+	m_pComponent_Manager->AddRef();
+
 }
 
 
 CScene::~CScene()
 {
-	ReleaseScene();
-
 }
 
 HRESULT CScene::Initialize()
 {
-	m_pComponent_Manager = CComponent_Manager::GetInstance();
 	
 	BuildComponents();
 	//BuildObject();
@@ -200,7 +200,10 @@ void CScene::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList *
 
 void CScene::ReleaseObjects()
 {
-	
+	for (auto& pObject : m_vObjects) 
+	{
+		int refCnt = Safe_Release(pObject);
+	}
 }
 
 void CScene::ResetCmdList(ID3D12GraphicsCommandList * pd3dCommandList)
@@ -287,11 +290,24 @@ void CScene::ReleaseScene(void)
 
 }
 
+int CScene::Free(void)
+{
+	ReleaseScene();
+
+	for (auto& pObject : m_vObjects)
+	{
+		int refCnt = Safe_Release(pObject);
+	}
+
+	Safe_Release(m_pComponent_Manager);
+	return 0;
+}
+
 void CScene::ReleaseShaders(void)
 {
 	for (auto shader : m_vShaders)
 	{
-		shader->Release();
+		Safe_Release(shader);
 	}
 	m_vShaders.clear();
 }
@@ -319,19 +335,19 @@ void CScene::BuildComponents(void)
 	pComponent = new CTransform;
 	m_pComponent_Manager->Add_Component(L"Component_Transform", pComponent);
 
-	pComponent = new LoadModel("resources/idle_Anim.FBX");
+	pComponent = new LoadModel("resources/idle_Anim.FBX",m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_idle", pComponent);
 
-	pComponent = new LoadModel("resources/xyz.FBX");
+	pComponent = new LoadModel("resources/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_xyz", pComponent);
 
-	pComponent = new LoadModel("resources/x.FBX");
+	pComponent = new LoadModel("resources/x.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_x", pComponent);
 
-	pComponent = new LoadModel("resources/y.FBX");
+	pComponent = new LoadModel("resources/y.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_y", pComponent);
 
-	pComponent = new LoadModel("resources/z.FBX");
+	pComponent = new LoadModel("resources/z.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_z", pComponent);
 
 	

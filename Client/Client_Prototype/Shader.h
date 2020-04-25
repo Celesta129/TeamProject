@@ -5,9 +5,6 @@
 #include "FrameResource.h"
 #include "Camera.h"
 
-#define PSO_DEFAULT 0
-#define PSO_END 1
-
 class CTimer;
 class CCamera;
 
@@ -25,8 +22,10 @@ public:
 
 	bool Push_Object(CGameObject* pObject);
 
-public:
-	virtual void CreatePipeLineParts(UINT nPSO);
+
+	virtual int Free(void);
+protected:
+	void CreatePipeLineParts(UINT nPSO);
 	// ----아래 함수들의 정의는 예제코드이다. 상속받은 Shader 클래스에서 정의하자.---------
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
@@ -58,7 +57,11 @@ protected:
 	virtual void BuildObjects(void);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
-
+private:
+	enum PSO_INDEX {
+		PSO_DEFAULT,
+		PSO_END
+	};
 
 protected:
 	vector<CGameObject**>	m_vpObjects;
@@ -66,8 +69,7 @@ protected:
 	
 protected:
 	ComPtr<ID3D12RootSignature>* m_RootSignature = nullptr;
-	ComPtr<ID3D12DescriptorHeap> m_CbvHeap = nullptr;
-	//ComPtr<ID3D12DescriptorHeap> m_CbvSrvDescriptorHeap = nullptr;
+	ComPtr<ID3D12DescriptorHeap> m_CbvSrvDescriptorHeap = nullptr;
 
 	ComPtr<ID3D12PipelineState>* m_pPSOs;		UINT m_nPSO = 0;
 

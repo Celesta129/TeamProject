@@ -33,7 +33,7 @@ ModelMesh::ModelMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3d
 }
 
 
-LoadModel::LoadModel(const string & filename)
+LoadModel::LoadModel(const string & filename, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT flag = aiProcess_JoinIdenticalVertices |         // 동일한 꼭지점 결합, 인덱싱 최적화
 		aiProcess_ValidateDataStructure |               // 로더의 출력을 검증
@@ -58,6 +58,8 @@ LoadModel::LoadModel(const string & filename)
 		InitScene();
 
 		m_ModelMeshes.resize(m_Meshes.size());
+
+		SetMeshes(pd3dDevice, pd3dCommandList);
 	}
 }
 
@@ -73,28 +75,18 @@ LoadModel::LoadModel(const LoadModel & T)
 
 LoadModel::~LoadModel()
 {
-	if (m_Meshes.size() > 0) {
-		vector<mesh> a;
-		m_Meshes.swap(a);
-		a.clear();
-		m_Meshes.clear();
-		//	cout << "LoadModel m_meshes.clear()" << endl;
-	}
-	if (m_pScene) {
-		m_pScene->~aiScene();
-	}
 }
 
 void LoadModel::InitScene()
 {
-	for (UINT i = 0; i < m_Meshes.size(); ++i) {
-		const aiMesh* pMesh = m_pScene->mMeshes[i];
-		InitMesh(i, pMesh);
+	for (UINT index = 0; index < m_Meshes.size(); ++index) {
+		const aiMesh* pMesh = m_pScene->mMeshes[index];
+		InitMesh(index, pMesh);
 
 		if (pMesh->HasBones()) 
-			InitBones(i, pMesh);
+			InitBones(index, pMesh);
 
-		m_numVertices += (UINT)m_Meshes[i].m_vertices.size();
+		m_numVertices += (UINT)m_Meshes[index].m_vertices.size();
 	}
 	m_numBones = (UINT)m_Bones.size();
 	
@@ -179,17 +171,31 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 void LoadModel::SetMeshes(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
 	for (UINT i = 0; i < m_ModelMeshes.size(); ++i) {
-		shared_ptr<ModelMesh> tmp(new ModelMesh(pd3dDevice, pd3dCommandList, m_Meshes[i]));
-		m_ModelMeshes[i] = tmp;
+		
+		if (m_ModelMeshes[i] != nullptr)
+			m_ModelMeshes[i].reset();	// 삭제 비스무리한거임. 어쨌든 삭제코드
+		
+		m_ModelMeshes[i] = make_shared<ModelMesh>(pd3dDevice, pd3dCommandList, m_Meshes[i]);
 	}
 }
 
 CComponent * LoadModel::Clone()
 {
-	// Clone한다고 새로 만들지 않는다. 자신의 포인터를 넘겨준다.(복사 방지)
-
-	LoadModel* pComponent = this;
-	AddRef();
+	// Clone할시 복사해서 새로 넘겨준다.
+	LoadModel* pComponent = new LoadModel(*this);
 	
 	return pComponent;
+}
+
+int LoadModel::Free(void)
+{
+	if (m_Meshes.size() > 0) {
+		m_Meshes.clear();
+		//	cout << "LoadModel m_meshes.clear()" << endl;
+	}
+	if (m_pScene) {
+		delete m_pScene;
+	}
+
+	return 0;
 }

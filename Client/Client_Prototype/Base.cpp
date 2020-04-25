@@ -11,8 +11,18 @@ CBase::~CBase()
 {
 }
 
+int CBase::AddRef()
+{
+	return ++m_nReference;
+}
+
 int CBase::Release()
 {
-	if (--m_nReference <= 0) delete this;
-	return m_nReference;
+	int result = --m_nReference;
+
+	if (result <= 0) {
+		Free();
+		delete this;
+	} 
+	return result;
 }

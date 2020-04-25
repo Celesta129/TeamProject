@@ -4,7 +4,9 @@
 
 CGameObject::CGameObject()
 {
-	
+	// 컴포넌트매니저의 포인터를 획득
+	m_pComponent_Manager = CComponent_Manager::GetInstance();
+	m_pComponent_Manager->AddRef();
 }
 
 
@@ -15,23 +17,12 @@ CGameObject::~CGameObject()
 
 HRESULT CGameObject::Initialize(void)
 {
-	// 컴포넌트매니저의 포인터를 획득
-	m_pComponent_Manager = CComponent_Manager::GetInstance();
 	// Object는 기본적으로 Transform을 멤버로 갖게 있게 설계했다. 취향껏 바꾸자.
 	
 	if (FAILED(Insert_Component_ToMap(L"Component_Transform")))
 		return E_FAIL;
 	
 	return S_OK;
-}
-
-void CGameObject::Release(void)
-{
-	for (auto& e : m_mapComponent)
-	{
-		e.second->Release();
-	}
-	m_mapComponent.clear();
 }
 
 void CGameObject::Update(float fTimeElapsed)
@@ -41,24 +32,20 @@ void CGameObject::Update(float fTimeElapsed)
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pCommandList)
 {
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(1, m_d3dCbvGPUDescriptorHandle);
+	
+}
 
-	////if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
-	//if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+int CGameObject::Free(void)
+{
+	Safe_Release(m_pComponent_Manager);
 
-	// m_pMesh -> render define
-	/*pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dVertexBufferView);
-
-	if (m_pd3dIndexBuffer)
+	for (auto& e : m_mapComponent)
 	{
-		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
-		pd3dCommandList->DrawIndexedInstanced(m_nIndices, nInstances, 0, 0, 0);
+		int refCnt = Safe_Release(e.second);
 	}
-	else
-	{
-		pd3dCommandList->DrawInstanced(m_nVertices, nInstances, m_nOffset, 0);
-	}*/
+	m_mapComponent.clear();
+
+	return 0;
 }
 
 ObjectConstants CGameObject::GetObjectConstants(void)

@@ -24,15 +24,7 @@ void CComponent_Manager::Clear_Component(void)
 {
 	for (auto& e : m_mapComponent)
 	{
-		if (e.second != nullptr)
-		{
-			UINT ref = e.second->Release();
-
-			if (ref <= 0)
-			{
-				e.second = nullptr;
-			}
-		}
+		Safe_Release(e.second);
 	}
 	m_mapComponent.clear();
 }
@@ -47,7 +39,16 @@ CComponent * CComponent_Manager::Find_Component(const wstring & tag)
 	return iter->second;
 }
 
-void CComponent_Manager::Release(void)
+int CComponent_Manager::Free(void)
 {
-	Clear_Component();
+	int	RefCnt = 0;
+
+	for (auto& Pair : m_mapComponent)
+	{
+		if (RefCnt = Safe_Release(Pair.second))
+			return RefCnt;
+	}
+	m_mapComponent.clear();
+
+	return RefCnt;
 }

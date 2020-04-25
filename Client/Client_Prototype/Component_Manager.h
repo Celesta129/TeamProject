@@ -21,9 +21,9 @@ public:
 
 private:
 	CComponent* Find_Component(const wstring& tag);
-
-	void Release(void);
 private:
 	map<const wstring, CComponent*> m_mapComponent;
+
+	virtual int Free(void);
 };
 

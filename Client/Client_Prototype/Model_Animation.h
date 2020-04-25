@@ -8,7 +8,7 @@ class Model_Animation : public CComponent
 {
 public:
 	Model_Animation();
-	Model_Animation(const string Model_filename, vector<pair<string, float>>* Animation_filename);
+	Model_Animation(const string Model_filename, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const vector<pair<string, float>>& Animation_filename);
 	virtual ~Model_Animation();
 public:
 	void LoadingModels(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

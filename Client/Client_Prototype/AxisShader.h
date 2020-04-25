@@ -1,9 +1,6 @@
 #pragma once
 #include "Shader.h"
 
-#define PSO_OBJECT 0
-#define PSO_END 1
-
 class CAxisShader :	public CShader
 {
 public:
@@ -11,8 +8,10 @@ public:
 	virtual ~CAxisShader();
 public:
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
-public:
-	virtual void CreatePipeLineParts(UINT nPSO);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
+
+protected:
+
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -39,6 +38,10 @@ public:
 	virtual void BuildObjects(void);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
+private:
+	enum PSO_INDEX {
+		PSO_OBJECT,
+		PSO_END
+	};
 };
 

@@ -1,5 +1,29 @@
 #pragma once
 #define EPSILON 1.0e-10f
+#define NULL_RELEASE -2
+template <typename T>
+int Safe_Release(T& pObject) {
+
+	int result = NULL_RELEASE;
+	
+	if (pObject != nullptr)
+	{
+		result = pObject->Release();
+		if (result < 0)
+			pObject = nullptr;
+	}
+
+	return result;
+}
+template <typename T>
+void Safe_Delete(T& pObject) {
+	if (pObject != nullptr)
+	{
+		delete pObject;
+		pObject = nullptr;
+	}
+
+}
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 

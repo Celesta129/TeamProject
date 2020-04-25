@@ -27,7 +27,7 @@ private:
 	UINT                     m_numBones;
 
 public:
-	LoadModel(const string& filename);
+	LoadModel(const string& filename, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	LoadModel(const LoadModel& T);
 	~LoadModel();
 
@@ -48,5 +48,5 @@ public:
 
 public:
 	virtual CComponent* Clone();
-
+	virtual int Free(void);
 };

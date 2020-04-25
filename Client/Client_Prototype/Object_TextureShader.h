@@ -1,17 +1,22 @@
 #pragma once
 #include "Shader.h"
 
-class CObjectShader : public CShader
+#define ARRAY_SIZE 6
+
+
+class CObject_TextureShader : public CShader
 {
 public:
-	CObjectShader();
-	virtual ~CObjectShader();
+	CObject_TextureShader();
+	~CObject_TextureShader();
 
 public:
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence,  CCamera* pCamera);
+	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
+protected:
+	array<const CD3DX12_STATIC_SAMPLER_DESC, ARRAY_SIZE> GetStaticSamplers();
 
-public:
+protected:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -43,5 +48,15 @@ private:
 		PSO_END
 	};
 
+	enum ROOT_PARAMETER_INDEX {
+		RPI_PassConstant,
+		RPI_ObjectConstant,
+		RPI_MaterialConstant,
+		RPI_Texture
+	};
+
+private:
+	vector<Material> m_vMaterial;
+	int m_iMaterialCbvOffset;
 };
 
