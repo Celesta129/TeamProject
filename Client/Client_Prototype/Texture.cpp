@@ -21,7 +21,9 @@ HRESULT CTexture::Initialize(ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList*
 
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(pd3dDevice,
 		pCommandList, m_pTexture->Filename.c_str(),
-		m_pTexture->Resource, m_pTexture->UploadHeap))
+		m_pTexture->Resource, m_pTexture->UploadHeap));
+
+	return S_OK;
 }
 
 int CTexture::Free()

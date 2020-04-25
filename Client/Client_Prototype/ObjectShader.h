@@ -10,7 +10,7 @@ public:
 public:
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence,  CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
-
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName);
 public:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
@@ -26,7 +26,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 	virtual void CreateConstantBufferViews(ID3D12Device* pDevice);
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName);
+	
 
 	virtual void UpdateShaderVariables(const CTimer& timer, CCamera* pCamera);
 	virtual void ReleaseShaderVariables();

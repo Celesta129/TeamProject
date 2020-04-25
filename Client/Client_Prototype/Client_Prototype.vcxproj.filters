@@ -86,6 +86,9 @@
     <Filter Include="02.Utility\06.Shader\02. AxisShader">
       <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\Model_TextureObject">
+      <UniqueIdentifier>{ca87bfc9-df1b-49fb-8ce5-6b3c83f3fbd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -186,6 +189,9 @@
     <ClInclude Include="Object_TextureShader.h">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClInclude>
+    <ClInclude Include="Model_TextureObject.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -269,6 +275,9 @@
     <ClCompile Include="Object_TextureShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClCompile>
+    <ClCompile Include="Model_TextureObject.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">
@@ -288,6 +297,12 @@
       <Filter>03.Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Axis.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TexObject.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LightingUtil.hlsl">
       <Filter>03.Shaders</Filter>
     </FxCompile>
   </ItemGroup>

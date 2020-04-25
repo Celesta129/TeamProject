@@ -57,7 +57,7 @@ ObjectConstants CGameObject::GetObjectConstants(void)
 
 	XMMATRIX world = XMLoadFloat4x4(&pTransform->Get_World());
 	XMStoreFloat4x4(&result.World, XMMatrixTranspose(world));
-
+	//XMStoreFloat4x4(&result.TexTransform);
 	return result;
 }
 

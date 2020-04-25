@@ -5,8 +5,10 @@
 
 #include "ObjectShader.h"
 #include "AxisShader.h"
+#include "Object_TextureShader.h"
 
 #include "ModelObject.h"
+#include "Model_TextureObject.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
@@ -51,14 +53,25 @@ void CScene::BuildShaders()
 	pTransform->Rotate(90.f, 0.f, 0.f);
 
 	// For Axis
-	pShader = new CAxisShader;
-	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\Axis.hlsl");
+	//pShader = new CAxisShader;
+	//pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\Axis.hlsl");
+	//m_vShaders.push_back(pShader);
+
+	//pObject = new CModelObject;
+	//dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	//m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	//pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+
+	// For TextureObject
+	pShader = new CObject_TextureShader;
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl");
 	m_vShaders.push_back(pShader);
 
-	pObject = new CModelObject;
-	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+	pObject = new CModel_TextureObject;
+	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	
+	pShader->Push_Object(pObject);
+	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(0, 0);
 
 
 	//pObject = new CModelObject;
