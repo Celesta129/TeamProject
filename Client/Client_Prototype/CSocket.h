@@ -11,6 +11,8 @@ public:
 	SOCKET clientSocket;
 	SOCKADDR_IN serverAddr;
 	char buf[MAX_PACKET_SIZE];
+	char packetBuffer[MAX_PACKET_SIZE];
+
 	int packet_size = 0;
 	int saved_size = 0;
 

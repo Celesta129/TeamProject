@@ -62,6 +62,36 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	return 0;
 }
 
+void process_data(CGameFramework_Client &GameFrame)
+{
+	int retval = recv(GameFrame.m_pSocket->clientSocket, GameFrame.m_pSocket->buf, MAX_PACKET_SIZE, 0);
+
+	if (retval == 0 || retval == SOCKET_ERROR)
+	{
+		closesocket(GameFrame.m_pSocket->clientSocket);
+	}
+
+	char* ptr = GameFrame.m_pSocket->buf;
+
+	while (retval > 0) {
+		if (GameFrame.m_pSocket->packet_size == 0) GameFrame.m_pSocket->packet_size = ptr[0];
+		if (GameFrame.m_pSocket->saved_size + retval >= GameFrame.m_pSocket->packet_size) {
+			memcpy(GameFrame.m_pSocket->packetBuffer + GameFrame.m_pSocket->saved_size, ptr, GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size);
+			GameFrame.processPacket(GameFrame.m_pSocket->packetBuffer);
+
+			ptr += GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size;
+			retval -= GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size;
+			GameFrame.m_pSocket->packet_size = 0;
+			GameFrame.m_pSocket->saved_size = 0;
+		}
+		else {
+			memcpy(GameFrame.m_pSocket->packetBuffer + GameFrame.m_pSocket->saved_size, ptr, retval);
+			GameFrame.m_pSocket->saved_size += retval;
+			retval = 0;
+		}
+	}
+}
+
 CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 	:CD3DApp(hInstance)
 {
@@ -91,6 +121,8 @@ bool CGameFramework_Client::Initialize()
 	}
 
 	m_pSocket = nullptr;
+	m_Player = nullptr;
+
 	ThrowIfFailed(m_GraphicsCommandList->Close());
 
 	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
@@ -102,6 +134,41 @@ bool CGameFramework_Client::Initialize()
 
 void CGameFramework_Client::FlushCommandQueue(void)
 {
+}
+
+int CGameFramework_Client::Run()
+{
+	MSG msg = { 0 };
+
+	m_Timer.Reset();
+
+	while (msg.message != WM_QUIT)
+	{
+		// If there are Window messages then process them.
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		// Otherwise, do animation/game stuff.
+		else
+		{
+			m_Timer.Tick();
+
+			if (!m_bAppPaused)
+			{
+				process_data(*this);
+				CalculateFrameStats();
+				Update(m_Timer);
+				Draw(m_Timer);
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
+	}
+	return (int)msg.wParam;
 }
 
 void CGameFramework_Client::OnResize()
@@ -260,36 +327,29 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		mIsWireframe = false;
 
 
-	/*float fSpeed = 3.f;
-	if (GetAsyncKeyState('A') & 0x8000)
+	float fSpeed = 3.f;
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
-		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
-		
-		pRenderItem->MovePos(&XMFLOAT3(-fSpeed * gt.DeltaTime(), 0.f, 0.f));
-		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
-	}
-	else if (GetAsyncKeyState('D') & 0x8000)
-	{
-		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+		//RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+		//pRenderItem->MovePos(&XMFLOAT3(-fSpeed * gt.DeltaTime(), 0.f, 0.f));
+		//pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
 
-		pRenderItem->MovePos(&XMFLOAT3(fSpeed * gt.DeltaTime(), 0.f, 0.f));
-		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
+		m_pSocket->sendPacket(CS_MOVE, CS_LEFT, true, 0);
+	}
+	else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+		m_pSocket->sendPacket(CS_MOVE, CS_RIGHT, true, 0);
 	}
 
-	if (GetAsyncKeyState('W') & 0x8000)
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
 	{
-		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
-
-		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, fSpeed * gt.DeltaTime()));
-		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
+		m_pSocket->sendPacket(CS_MOVE, CS_UP, true, 0);
 	}
-	else if (GetAsyncKeyState('S') & 0x8000)
+	else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
 	{
-		RenderItem* pRenderItem = (RenderItem*)m_OpaqueObjects[0]->Get_Component(L"RenderItem");
+		m_pSocket->sendPacket(CS_MOVE, CS_DOWN, true, 0);
+	}
 
-		pRenderItem->MovePos(&XMFLOAT3(0.f, 0.f, -fSpeed * gt.DeltaTime()));
-		pRenderItem->NumFramesDirty = NUM_FRAME_RESOURCE;
-	}*/
 }
 
 

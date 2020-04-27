@@ -30,11 +30,12 @@ public:
 	CPlayer *m_Player;
 
 	void processPacket(char* buf);
+	virtual int Run() override;
+
 private:
 	virtual void FlushCommandQueue(void);
 
 private:
-
 	virtual void OnResize() override;
 	virtual void Update(const CTimer& gt)override;
 	virtual void Draw(const CTimer& gt)override;

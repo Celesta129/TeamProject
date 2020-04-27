@@ -47,7 +47,9 @@ void CScene::BuildShaders()
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 
-
+	for (int i = 0; i < MAX_USER; ++i) {
+		m_player[i] = new CPlayer();
+	}
 }
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)

@@ -31,7 +31,7 @@ public:
 	DXGI_FORMAT GetDepthStencilFormat(void) {
 		return m_DepthStencilFormat;
 	}
-	int Run();
+	virtual int Run();
 	//for debug
 	ComPtr<ID3D12Device> GetDevice() { return m_d3dDevice; };
 
