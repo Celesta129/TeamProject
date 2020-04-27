@@ -304,7 +304,7 @@ void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList
 
 void CObjectShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
-	UpdateObjectCBs(timer);
+	UpdateObjectCBs();
 	UpdateMainPassCB(pCamera);
 }
 
@@ -347,7 +347,7 @@ void CObjectShader::UpdateMainPassCB(CCamera * pCamera)
 	currPassCB->CopyData(0, mMainPassCB);
 }
 
-void CObjectShader::UpdateObjectCBs(const CTimer & timer)
+void CObjectShader::UpdateObjectCBs()
 {
 	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)

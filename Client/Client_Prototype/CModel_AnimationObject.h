@@ -1,10 +1,11 @@
 #pragma once
-#include "ModelObject.h"
-class CModel_TextureObject : public CModelObject
+#include "Model_TextureObject.h"
+class CModel_AnimationObject :	public CModel_TextureObject
 {
 public:
-	CModel_TextureObject();
-	virtual ~CModel_TextureObject();
+	CModel_AnimationObject();
+	virtual ~CModel_AnimationObject();
+
 
 public:
 	virtual HRESULT Initialize(void);
@@ -16,10 +17,5 @@ public:
 	void setMat(Material* pMaterial) { m_pMaterial = pMaterial; };
 	Material* getMat(void) { return m_pMaterial; }
 	Material* m_pMaterial = nullptr;
-
-
-
-private:
-	void Animate(const float fTimeElapsed);
 };
 

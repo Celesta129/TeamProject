@@ -303,7 +303,7 @@ void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList *
 
 void CAxisShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
-	UpdateObjectCBs(timer);
+	UpdateObjectCBs();
 	UpdateMainPassCB(pCamera);
 }
 
@@ -339,7 +339,7 @@ void CAxisShader::UpdateMainPassCB(CCamera * pCamera)
 	currPassCB->CopyData(0, mMainPassCB);
 }
 
-void CAxisShader::UpdateObjectCBs(const CTimer & timer)
+void CAxisShader::UpdateObjectCBs()
 {
 	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)

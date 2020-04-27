@@ -130,17 +130,17 @@ D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "VS", "vs_5_1", ppd3dShaderBlob));	
+	return(CShader::CompileShaderFromFile(m_filename, "VS", "vs_5_1", ppd3dShaderBlob, defines));
 }
 
-D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "PS", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(m_filename, "PS", "ps_5_1", ppd3dShaderBlob, defines));
 }
 
-D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob ** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -148,7 +148,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR
 #endif
 	ComPtr<ID3DBlob> errors;
 
-	::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &errors);
+	::D3DCompileFromFile(pszFileName, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &errors);
 	if (errors != nullptr)
 	{
 		OutputDebugStringA((char*)errors->GetBufferPointer());
@@ -396,7 +396,7 @@ void CShader::Initialize_ShaderFileName(const WCHAR* pszShaderFileName)
 
 void CShader::UpdateShaderVariables(const CTimer& timer, CCamera* pCamera)
 {
-	UpdateObjectCBs(timer);
+	UpdateObjectCBs();
 	UpdateMainPassCB(pCamera);
 }
 
@@ -433,7 +433,7 @@ void CShader::UpdateMainPassCB(CCamera* pCamera)
 	currPassCB->CopyData(0, mMainPassCB);
 }
 
-void CShader::UpdateObjectCBs(const CTimer & timer)
+void CShader::UpdateObjectCBs()
 {
 	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)

@@ -27,6 +27,8 @@ HRESULT CModel_TextureObject::Initialize(const wstring & modelTag, ID3D12Device 
 void CModel_TextureObject::Update(float fTimeElapsed)
 {
 	CGameObject::Update(fTimeElapsed);
+
+	Animate(fTimeElapsed);
 }
 
 void CModel_TextureObject::Render(ID3D12GraphicsCommandList * pCommandList)
@@ -40,5 +42,14 @@ void CModel_TextureObject::Render(ID3D12GraphicsCommandList * pCommandList)
 			if (m_ppMeshes[i])
 				m_ppMeshes[i]->Render(pCommandList);
 		}
+	}
+}
+
+void CModel_TextureObject::Animate(const float fTimeElapsed)
+{
+	if (m_model->HasAnimation()) 
+	{
+		m_model->BornTransform(0, fTimeElapsed);
+		DirtyFrames();
 	}
 }

@@ -33,7 +33,7 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 	virtual void UpdateMainPassCB(CCamera* pCamera);
-	virtual void UpdateObjectCBs(const CTimer& timer);
+	virtual void UpdateObjectCBs();
 
 	virtual void BuildObjects(void);
 

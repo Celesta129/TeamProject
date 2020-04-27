@@ -60,17 +60,44 @@ LoadModel::LoadModel(const string & filename, ID3D12Device* pd3dDevice, ID3D12Gr
 		m_ModelMeshes.resize(m_Meshes.size());
 
 		SetMeshes(pd3dDevice, pd3dCommandList);
+		//
+		//m_vpBonesMatrix.resize(m_Bones.size());		// 뼈 변환정보 초기화
+		//for (auto& p : m_vpBonesMatrix) {
+
+		//	XMStoreFloat4x4(&*p, XMMatrixIdentity());
+		//}
+
+		InitAnimation();
 	}
 }
 
 LoadModel::LoadModel(const LoadModel & T)
 {
+	m_pScene = T.m_pScene;
+
 	m_Meshes = T.m_Meshes;
 	m_ModelMeshes = T.m_ModelMeshes;
 	m_Bones = T.m_Bones;
 
 	m_numVertices = T.m_numVertices;
 	m_numBones = T.m_numBones;
+
+	m_vAnimation = T.m_vAnimation;
+	m_vBonesMatrix = T.m_vBonesMatrix;
+
+	m_posSize = T.m_posSize;
+	m_numVertices = T.m_numVertices;
+	m_numMaterial = T.m_numMaterial;
+	m_numBones = T.m_numBones;
+	m_GlobalInverse = T.m_GlobalInverse;
+	
+	m_bAnimationLoop = T.m_bAnimationLoop;
+	m_fAnimSpeed = T.m_fAnimSpeed;
+	m_fStart_time = T.m_fStart_time; //프레임 시작 시간
+	m_fEnd_time = T.m_fEnd_time;  //프레임 종료 시간
+	m_fTrigger_time = T.m_fTrigger_time;	//프레임 중간 시간.트리거용도로 사용
+	m_fNow_time = T.m_fNow_time;  //현재 프레임
+	m_fPosible_skip = T.m_fPosible_skip; //애니메이션을 강제 종료하고 다음 애니메이션 실행 가능한 프레임
 }
 
 LoadModel::~LoadModel()
@@ -156,6 +183,10 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 			Bone bone;
 			bone.BoneOffset = aiMatrixToXMMatrix(pBone->mOffsetMatrix);
 			m_Bones.emplace_back(make_pair(pBone->mName.data, bone));
+
+			XMFLOAT4X4 bornMatrix;
+			XMStoreFloat4x4(&bornMatrix, bone.FinalTransformation);
+			m_vBonesMatrix.push_back(bornMatrix);
 		}
 
 
@@ -164,6 +195,24 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 			float weight = pBone->mWeights[b].mWeight;
 			m_Meshes[index].m_vertices[vertexID].AddBoneData(BoneIndex, weight);
 
+		}
+	}
+}
+
+void LoadModel::InitAnimation(void)
+{
+	if (m_pScene) {
+		m_GlobalInverse = XMMatrixIdentity();
+		for (UINT index = 0; index < m_pScene->mNumAnimations; ++index)
+		{
+			aiAnimation* pAnimation = *(m_pScene->mAnimations + index);
+			m_vAnimation.push_back(pAnimation);
+			m_fStart_time = 0.f;
+			//프레임 시작 시점은 좌표 이동 프레임을 기준으로 맞춤
+			m_fEnd_time = pAnimation->mDuration;
+			
+			//프레임 종료 시점에서 1.0 만큼 빼줘야 프레임이 안겹침
+			m_fAnimSpeed = pAnimation->mTicksPerSecond;
 		}
 	}
 }
@@ -177,6 +226,215 @@ void LoadModel::SetMeshes(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList *
 		
 		m_ModelMeshes[i] = make_shared<ModelMesh>(pd3dDevice, pd3dCommandList, m_Meshes[i]);
 	}
+}
+
+void LoadModel::SetAnimTime(const float & fTime)
+{
+	if (m_fEnd_time <= fTime)
+		m_fNow_time = m_fEnd_time;
+	else
+		m_fNow_time = fTime;
+}
+
+UINT LoadModel::BornTransform(const UINT & Animindex, const float fTimeElapsed)
+{
+	
+	XMMATRIX Identity = XMMatrixIdentity();
+	if (!m_pScene) {
+		//애니메이션 파일을 로드못 했을 경우 수행
+		for (UINT i = 0; i < m_numBones; ++i) {
+			XMStoreFloat4x4(&m_vBonesMatrix[i], Identity);
+		}
+		return LOOP_IN;
+	}
+	ReadNodeHeirarchy(Animindex, m_fNow_time, m_pScene->mRootNode, Identity);
+
+	for (UINT bornIndex = 0; bornIndex < m_numBones; ++bornIndex)
+	{
+		XMStoreFloat4x4(&m_vBonesMatrix[bornIndex], m_Bones[bornIndex].second.FinalTransformation);
+	}
+
+	m_fNow_time += m_fAnimSpeed * fTimeElapsed;
+	if (m_fNow_time > m_fEnd_time) {
+		m_fNow_time = m_fStart_time;
+		
+		return LOOP_END; //애니메이션이 한 루프 끝남
+	}
+
+	if (m_fNow_time > m_fTrigger_time - 1 && m_fNow_time < m_fTrigger_time + 1) {
+		// 현재 시간이 트리거의 1초 내외라면
+
+		return LOOP_TRIGGER;
+	}
+
+	if (m_fNow_time > m_fPosible_skip)
+		return LOOP_SKIP; //애니메이션 아직 실행중이고 트리거 실행 후후반부
+
+	return LOOP_IN; //애니메이션이 아직 실행중
+}
+
+void LoadModel::ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, const aiNode * pNode, const XMMATRIX & ParentTransform)
+{
+	const aiAnimation* pAnim = m_vAnimation[Animindex];
+
+	XMMATRIX NodeTransformation = aiMatrixToXMMatrix(pNode->mTransformation);
+
+	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnim, pNode->mName.data);
+	
+	if (pNodeAnim) {
+		aiVector3D s;
+		CalcInterpolatedScaling(s, AnimationTime, pNodeAnim);
+		XMMATRIX ScalingM = XMMatrixScaling(s.x, s.y, s.z);
+
+
+		aiQuaternion q;
+		CalcInterpolatedRotation(q, AnimationTime, pNodeAnim);
+		XMMATRIX RotationM = XMMatrixRotationQuaternion(XMVectorSet(q.x, q.y, q.z, q.w));
+
+
+		aiVector3D t;
+		CalcInterpolatedPosition(t, AnimationTime, pNodeAnim);
+		XMMATRIX TranslationM = XMMatrixTranslation(t.x, t.y, t.z);
+
+
+		NodeTransformation = ScalingM * RotationM * TranslationM; //스케일 * 회전 * 이동 변환
+		NodeTransformation = XMMatrixTranspose(NodeTransformation);
+		//transpos 안시켜주면 모델 깨짐
+	}
+	//부모노드에 변환값 중첩해서 곱하기
+	XMMATRIX GlobalTransformation = ParentTransform * NodeTransformation;
+	//현재노드가 뼈 노드이면 변환정보를 뼈에 적용
+	for (auto& p : m_Bones) {
+		if (p.first == pNode->mName.data) {
+			p.second.FinalTransformation =
+				m_GlobalInverse * GlobalTransformation * p.second.BoneOffset;
+
+			/*if (p.first == "Bip001 L Hand") {
+				XMVECTOR tmp = p.second.BoneOffset.r[3];
+				cout << "Left Hand BondeOffset: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
+
+				tmp = p.second.FinalTransformation.r[3];
+				cout << "Left Hand FinalTransformation: " << tmp.m128_f32[0] << "," << tmp.m128_f32[1] << "," << tmp.m128_f32[2] << endl;
+			}*/
+
+			break;
+		}
+	}
+	for (UINT i = 0; i < pNode->mNumChildren; ++i) {
+		//계층구조를 이룸. 자식노드 탐색 및 변환
+		ReadNodeHeirarchy(Animindex, AnimationTime, pNode->mChildren[i], GlobalTransformation);
+	}
+	
+}
+
+const aiNodeAnim * LoadModel::FindNodeAnim(const aiAnimation * pAnimation, const string & NodeName)
+{
+	for (UINT i = 0; i < pAnimation->mNumChannels; ++i) {
+		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+
+		if (pNodeAnim->mNodeName.data == NodeName)
+			return pNodeAnim;
+	}
+	return nullptr;
+}
+
+void LoadModel::CalcInterpolatedScaling(aiVector3D & Out, float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	if (pNodeAnim->mNumScalingKeys == 1) {
+		Out = pNodeAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	UINT ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+	UINT NextScalingIndex = ScalingIndex + 1;
+
+	assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+
+	float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+
+	const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+void LoadModel::CalcInterpolatedRotation(aiQuaternion & Out, float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	if (pNodeAnim->mNumRotationKeys == 1) {
+		Out = pNodeAnim->mRotationKeys[0].mValue;
+		return;
+	}
+
+	UINT RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+	UINT NextRotationIndex = (RotationIndex + 1);
+
+	assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+
+	float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+
+	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+	Out = Out.Normalize();
+}
+
+void LoadModel::CalcInterpolatedPosition(aiVector3D & Out, float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	if (pNodeAnim->mNumPositionKeys == 1) {
+		Out = pNodeAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	UINT PositionIndex = FindPosition(AnimationTime, pNodeAnim);
+	UINT NextPositionIndex = (PositionIndex + 1);
+
+
+	assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
+
+
+	float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+
+	const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+UINT LoadModel::FindScaling(float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	assert(pNodeAnim->mNumScalingKeys > 0);
+
+	for (UINT i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+UINT LoadModel::FindRotation(float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	assert(pNodeAnim->mNumRotationKeys > 0);
+
+	for (UINT i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+UINT LoadModel::FindPosition(float AnimationTime, const aiNodeAnim * pNodeAnim)
+{
+	for (UINT i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+	return 0;
 }
 
 CComponent * LoadModel::Clone()

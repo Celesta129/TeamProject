@@ -31,11 +31,11 @@ protected:
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob **ppd3dShaderBlob);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob **ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob **ppd3dShaderBlob, const D3D_SHADER_MACRO* defines = NULL);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob **ppd3dShaderBlob, const D3D_SHADER_MACRO* defines = NULL);
 	// ----------------------------------------------------------------------------------
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName,
-		LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
+		LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob, const D3D_SHADER_MACRO* defines = NULL);
 
 protected:
 	virtual void CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index);
@@ -52,7 +52,7 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 	virtual void UpdateMainPassCB(CCamera* pCamera);
-	virtual void UpdateObjectCBs(const CTimer& timer);
+	virtual void UpdateObjectCBs();
 
 	virtual void BuildObjects(void);
 

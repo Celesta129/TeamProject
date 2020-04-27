@@ -41,16 +41,11 @@ void CScene::BuildShaders()
 	CTransform* pTransform = nullptr;
 
 	// For TestObject
-	pShader = new CObjectShader();
+	/*pShader = new CObjectShader();
 	pShader->Initialize(m_d3dDevice.Get(),m_GraphicsCommandList.Get(), L"Shaders\\color.hlsl");
-	m_vShaders.push_back(pShader);
+	m_vShaders.push_back(pShader);*/
 
-	pObject = new CModelObject;
-	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-	pTransform = GET_COMPNENT(CTransform*, m_vObjects[0], L"Component_Transform");
-	pTransform->Rotate(90.f, 0.f, 0.f);
+	
 
 	// For Axis
 	//pShader = new CAxisShader;
@@ -67,11 +62,19 @@ void CScene::BuildShaders()
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl");
 	m_vShaders.push_back(pShader);
 
+
 	pObject = new CModel_TextureObject;
-	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	
-	pShader->Push_Object(pObject);
+	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+	pTransform = GET_COMPNENT(CTransform*, pObject, L"Component_Transform");
+	//pTransform->Rotate(90.f, 0.f, 0.f);
+
 	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(0, 0);
+	/*pObject = new CModel_TextureObject;
+	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get())*/;
+	// 전체 오브젝트 관리 벡터에 넣는다.
+	
 
 
 	//pObject = new CModelObject;
@@ -122,13 +125,35 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 	}
 	if (GetAsyncKeyState('X') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(fSpeed * fTimeElapsed, fSpeed * fTimeElapsed, fSpeed * fTimeElapsed);
-		if (m_vObjects[1]) {
+		xmf3Move = XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f);
+		if (m_vObjects[0]) {
 
-			CTransform* pTransform = (CTransform*)m_vObjects[1]->Get_Component(L"Component_Transform");
+			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
 			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
 			//pTransform->
-			m_vObjects[1]->DirtyFrames();
+			m_vObjects[0]->DirtyFrames();
+		}
+	}
+	if (GetAsyncKeyState('Y') & 0x8000)
+	{
+		xmf3Move = XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f);
+		if (m_vObjects[0]) {
+
+			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
+			//pTransform->
+			m_vObjects[0]->DirtyFrames();
+		}
+	}
+	if (GetAsyncKeyState('Z') & 0x8000)
+	{
+		xmf3Move = XMFLOAT3(0.f, 0.f, fSpeed * fTimeElapsed);
+		if (m_vObjects[0]) {
+
+			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
+			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
+			//pTransform->
+			m_vObjects[0]->DirtyFrames();
 		}
 	}
 	
@@ -348,7 +373,7 @@ void CScene::BuildComponents(void)
 	pComponent = new CTransform;
 	m_pComponent_Manager->Add_Component(L"Component_Transform", pComponent);
 
-	pComponent = new LoadModel("resources/idle_Anim.FBX",m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new LoadModel("resources/run_Anim.FBX",m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_idle", pComponent);
 
 	pComponent = new LoadModel("resources/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());

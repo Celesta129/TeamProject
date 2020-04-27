@@ -94,3 +94,14 @@ void CModelObject::SetMesh(int nIndex, const shared_ptr<CMesh>& pMesh)
 		m_ppMeshes[nIndex]->CopyMesh(pMesh);
 	}
 }
+
+SkinnedConstants CModelObject::GetSkinnedConstants(void)
+{
+	SkinnedConstants result = SkinnedConstants();
+	if (m_model) {
+		copy(begin(m_model->getBonesTransform()),
+			end(m_model->getBonesTransform()),
+			&result.BoneTransforms[0]);
+	}
+	return result;
+}

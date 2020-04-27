@@ -3,6 +3,7 @@
 
 #include "LoadModel.h"
 #include "LoadAnimation.h"
+#include "Model_TextureObject.h"
 
 class Model_Animation : public CComponent
 {
@@ -40,4 +41,3 @@ protected:
 public:
 	virtual CComponent* Clone(void);
 };
-

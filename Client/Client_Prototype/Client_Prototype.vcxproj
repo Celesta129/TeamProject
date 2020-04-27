@@ -172,6 +172,7 @@
     <ClInclude Include="Base.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
+    <ClInclude Include="CModel_AnimationObject.h" />
     <ClInclude Include="LoadAnimation.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="Component.h" />
@@ -192,7 +193,6 @@
     <ClInclude Include="Macros.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model_Animation.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Struct.h" />
@@ -212,6 +212,7 @@
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />
+    <ClCompile Include="CModel_AnimationObject.cpp" />
     <ClCompile Include="LoadAnimation.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -221,7 +222,6 @@
     <ClCompile Include="Object_TextureShader.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Model_Animation.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="D3DApp.cpp" />
