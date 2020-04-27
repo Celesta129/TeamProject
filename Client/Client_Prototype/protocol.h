@@ -4,6 +4,7 @@ constexpr int MAX_PACKET_SIZE = 1024;
 
 constexpr int SERVER_PORT = 9000;
 constexpr int MAX_USER = 8;
+constexpr int MAX_NAME_LEN = 15;
 
 //Client to Sever type
 constexpr int CS_LOGIN = 1;

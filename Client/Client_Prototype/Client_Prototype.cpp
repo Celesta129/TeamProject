@@ -34,7 +34,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
 		//sever접속
 		char temp_ip[15];
-		char temp_id[15];
+		char temp_id[MAX_NAME_LEN];
 		cout << "Input id : ";
 		cin >> temp_id;
 		cout << "Input ip : ";
@@ -601,20 +601,21 @@ void CGameFramework_Client::processPacket(char* buf)
 	{
 		sc_packet_login_ok* p_login = reinterpret_cast<sc_packet_login_ok*> (buf);
 		m_client_id = p_login->id;
+		float tempx = p_login->posX, tempy = p_login->posY , tempz = p_login->posZ;
 		//player객체 추가
+		m_Player = m_pScene->getplayer(m_client_id);
+		m_pScene->getplayer(m_client_id)->SetPos(tempx, tempy, tempz);
+		cout << m_client_id << " : (" << tempx << ", " << tempy << ", " << tempz << ")\n";
 	}
 		break;
 	case SC_ENTER:
 	{
 		sc_packet_enter* p_enter = reinterpret_cast<sc_packet_enter*>(buf);
 		int other_id = p_enter->id;
+		float tempx = p_enter->posX, tempy = p_enter->posY, tempz = p_enter->posZ;
 
-		if (other_id == m_client_id) {
-			//플레이어 캐릭터 초기위치 입력
-		}
-		else {
-			//다른플레이어 초기 위치값 입력
-		}
+		m_pScene->getplayer(other_id)->SetPos(tempx, tempy, tempz);
+		cout << m_client_id << " : (" << tempx << ", " << tempy << ", " << tempz << ")\n";
 	}
 		break;
 	case SC_LEAVE: {
@@ -632,14 +633,13 @@ void CGameFramework_Client::processPacket(char* buf)
 	{
 		sc_packet_move* p_movement = reinterpret_cast<sc_packet_move*>(buf);
 		int other_id = p_movement->id;
-		if (other_id == m_client_id)
-		{
-			//플레이어 객체 이동
-		}
-		else
-		{
-			//다른플레이어 이동
-		}
+		
+		m_pScene->getplayer(other_id)->SetPos(p_movement->x, p_movement->y, p_movement->z);
+		m_pScene->getplayer(other_id)->SetVelocity(p_movement->vx, p_movement->vy, p_movement->vz);
+		m_pScene->getplayer(other_id)->SetAnimation_index(p_movement->ani_index);
+
+		cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
+		
 	}
 		break;
 	default:

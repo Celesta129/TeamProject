@@ -176,6 +176,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="Extern.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Model_Animation.cpp" />

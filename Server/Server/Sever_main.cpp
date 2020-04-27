@@ -27,6 +27,7 @@ public:
 	volatile bool m_connected;
 
 	char playerX, playerY, playerZ;
+	char player_id[MAX_NAME_LEN];
 	
 
 	SOCKETINFO() {
@@ -147,6 +148,7 @@ void do_move(int user_id, int direction) {
 	clients[user_id].playerX = x;
 	clients[user_id].playerY = y;
 	clients[user_id].playerZ = z;
+	printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY);
 	for (auto& cl : clients) {
 		if (true == cl.m_connected)
 			send_move_packet(cl.m_id, user_id);
@@ -158,6 +160,9 @@ void process_packet(int user_id, char* buf) {
 	{
 	case CS_LOGIN: {
 		cs_packet_connect* packet = reinterpret_cast<cs_packet_connect*>(buf);
+
+		strcpy_s(clients[user_id].player_id, packet->id);
+		printf("%s(%d) 접속완료 \n", clients[user_id].player_id, user_id);
 
 		send_connected_packet(user_id);
 
@@ -311,6 +316,7 @@ int main()
 
 			//로그인 정보 수신
 			WSARecv(client_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
+			printf("\n");
 
 			//접속 완료후 accept 대기
 			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

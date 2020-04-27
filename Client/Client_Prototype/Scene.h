@@ -3,6 +3,8 @@
 #include "Component_Manager.h"
 #include "FrameResource.h"
 #include "GameObject.h"
+#include "protocol.h"
+#include "Player.h"
 
 class CTimer;
 class CGameObject;
@@ -12,6 +14,9 @@ class CShader;
 class CScene
 {
 public:
+	CPlayer *m_player[MAX_USER];
+	CPlayer* getplayer(int user_id) { return m_player[user_id]; }
+
 	CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList);
 	virtual ~CScene();
 

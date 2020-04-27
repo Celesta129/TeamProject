@@ -69,24 +69,24 @@ void CSocket::sendPacket(char type, char key, char state, char id)
 		cs_packet_connect p_connect;
 		p_connect.type = CS_LOGIN;
 		p_connect.size = sizeof(cs_packet_connect);
-		int t_id = GetCurrentProcessId();
-		sprintf_s(p_connect.id, "P%03d", t_id % 1000);
 		send(clientSocket, (char*)& p_connect, sizeof(cs_packet_connect), 0);
 	}
 		break;
-	case CS_DISCONNECT:
+	case CS_DISCONNECT: {
 		cs_packet_disconnect p_disconnect;
 		p_disconnect.type = CS_DISCONNECT;
 		p_disconnect.size = sizeof(cs_packet_disconnect);
 		send(clientSocket, (char*)& p_disconnect, sizeof(cs_packet_disconnect), 0);
+	}
 		break;
-	case CS_MOVE:
+	case CS_MOVE: {
 		cs_packet_move p_move;
 		p_move.type = CS_MOVE;
 		p_move.size = sizeof(cs_packet_move);
 		p_move.keydown = state;
 		p_move.direction = key;
 		send(clientSocket, (char*)& p_move, sizeof(cs_packet_move), 0);
+	}
 		break;
 	default:
 		cout << "Error in SendPacket, Invalid Key Input or Type \n";
