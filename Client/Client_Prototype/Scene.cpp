@@ -40,127 +40,77 @@ void CScene::BuildShaders()
 	CGameObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
 
-	// For TestObject
-	/*pShader = new CObjectShader();
-	pShader->Initialize(m_d3dDevice.Get(),m_GraphicsCommandList.Get(), L"Shaders\\color.hlsl");
-	m_vShaders.push_back(pShader);*/
-
 	
-
-	// For Axis
-	//pShader = new CAxisShader;
-	//pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\Axis.hlsl");
-	//m_vShaders.push_back(pShader);
-
-	//pObject = new CModelObject;
-	//dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	//m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	//pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-
 	// For TextureObject
 	pShader = new CObject_TextureShader;
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl");
 	m_vShaders.push_back(pShader);
 
 
-	pObject = new CModel_TextureObject;
-	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-	pTransform = GET_COMPNENT(CTransform*, pObject, L"Component_Transform");
-	//pTransform->Rotate(90.f, 0.f, 0.f);
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		pObject = new CModel_TextureObject;
+		if(i % 3 == 0)
+			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+		else if(i % 3 == 1)
+			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_run", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+		else
+			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_attack", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+		m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+		
+		dynamic_cast<CObject_TextureShader*>(pShader)->setMat(i, 0);
 
-	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(0, 0);
-	/*pObject = new CModel_TextureObject;
-	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_xyz", m_d3dDevice.Get(), m_GraphicsCommandList.Get())*/;
-	// 전체 오브젝트 관리 벡터에 넣는다.
+		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
+		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
 
-	//pObject = new CModelObject;
-	//((CModelObject*)pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	//m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	//pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-
-	for (int i = 0; i < MAX_USER; ++i) {
 		m_player[i] = new CPlayer();
+		m_player[i]->SetObjectInstance(pObject);
 	}
 }
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
-	float fSpeed = 5.f;
-	XMFLOAT3 xmf3Move = XMFLOAT3(0.f,0.f,0.f); 
-
-	if (GetAsyncKeyState('A') & 0x8000)
+	if (GetAsyncKeyState('1') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(-fSpeed * fTimeElapsed, 0.f, 0.f);
-	
-		m_pCurrentCamera->MoveTheta(fSpeed*fTimeElapsed);
-		//CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
-		//pTransform->MovePos(&xmf3Move);
-		//m_vObjects[0]->DirtyFrames();	// 값을 Update에서 갱신해야한다.
-
+		if (m_vCameras[0])
+			m_pCurrentCamera = m_vCameras[0];
 	}
-	if (GetAsyncKeyState('D') & 0x8000)
+	if (GetAsyncKeyState('2') & 0x8000)
 	{
-		m_pCurrentCamera->MoveTheta(-fSpeed*fTimeElapsed);
-		xmf3Move = XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f);
-		
+		if (m_vCameras[1])
+			m_pCurrentCamera = m_vCameras[1];
 	}
-	if (GetAsyncKeyState('W') & 0x8000)
+	if (GetAsyncKeyState('3') & 0x8000)
 	{
-		m_pCurrentCamera->MovePhi(fSpeed * fTimeElapsed);
-		xmf3Move = XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f);
-		
+		if (m_vCameras[2])
+			m_pCurrentCamera = m_vCameras[2];
 	}
-	if (GetAsyncKeyState('S') & 0x8000)
+	if (GetAsyncKeyState('4') & 0x8000)
 	{
-		m_pCurrentCamera->MovePhi(-fSpeed * fTimeElapsed);
-		xmf3Move = XMFLOAT3(0.f, -fSpeed * fTimeElapsed, 0.f);
+		if (m_vCameras[3])
+			m_pCurrentCamera = m_vCameras[3];
 	}
-	if (GetAsyncKeyState('Q') & 0x8000)
+	if (GetAsyncKeyState('5') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(0.f, 0.f, -fSpeed * fTimeElapsed);
+		if (m_vCameras[4])
+			m_pCurrentCamera = m_vCameras[4];
 	}
-	if (GetAsyncKeyState('E') & 0x8000)
+	if (GetAsyncKeyState('6') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(0.f, 0.f, fSpeed * fTimeElapsed);
+		if (m_vCameras[5])
+			m_pCurrentCamera = m_vCameras[5];
 	}
-	if (GetAsyncKeyState('X') & 0x8000)
+	if (GetAsyncKeyState('7') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(fSpeed * fTimeElapsed, 0.f, 0.f);
-		if (m_vObjects[0]) {
-
-			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
-			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
-			//pTransform->
-			m_vObjects[0]->DirtyFrames();
-		}
+		if (m_vCameras[6])
+			m_pCurrentCamera = m_vCameras[6];
 	}
-	if (GetAsyncKeyState('Y') & 0x8000)
+	if (GetAsyncKeyState('8') & 0x8000)
 	{
-		xmf3Move = XMFLOAT3(0.f, fSpeed * fTimeElapsed, 0.f);
-		if (m_vObjects[0]) {
-
-			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
-			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
-			//pTransform->
-			m_vObjects[0]->DirtyFrames();
-		}
+		if (m_vCameras[7])
+			m_pCurrentCamera = m_vCameras[7];
 	}
-	if (GetAsyncKeyState('Z') & 0x8000)
-	{
-		xmf3Move = XMFLOAT3(0.f, 0.f, fSpeed * fTimeElapsed);
-		if (m_vObjects[0]) {
-
-			CTransform* pTransform = (CTransform*)m_vObjects[0]->Get_Component(L"Component_Transform");
-			pTransform->Rotate(xmf3Move.x, xmf3Move.y, xmf3Move.z);
-			//pTransform->
-			m_vObjects[0]->DirtyFrames();
-		}
-	}
-	
-	//m_pCurrentCamera->Move(xmf3Move);
-
 	return false;
 }
 
@@ -231,11 +181,6 @@ bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return false;
-}
-
-void CScene::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
-{
-
 }
 
 void CScene::ReleaseObjects()
@@ -314,10 +259,6 @@ void CScene::Render(ID3D12GraphicsCommandList * cmdList, UINT64& nFenceValue)
 	}
 }
 
-void CScene::ReleaseUploadBuffers()
-{
-}
-
 void CScene::OnResize(float fAspectRatio)
 {
 	m_pCurrentCamera->Update(0);
@@ -327,17 +268,12 @@ void CScene::ReleaseScene(void)
 {
 	ReleaseShaders();
 	ReleaseCameras();
-
+	ReleaseObjects();
 }
 
 int CScene::Free(void)
 {
 	ReleaseScene();
-
-	for (auto& pObject : m_vObjects)
-	{
-		int refCnt = Safe_Release(pObject);
-	}
 
 	Safe_Release(m_pComponent_Manager);
 	return 0;
@@ -375,71 +311,25 @@ void CScene::BuildComponents(void)
 	pComponent = new CTransform;
 	m_pComponent_Manager->Add_Component(L"Component_Transform", pComponent);
 
-	pComponent = new LoadModel("resources/run_Anim.FBX",m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new LoadModel("resources/idle_Anim.FBX",m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_idle", pComponent);
 
-	pComponent = new LoadModel("resources/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Component_Model_xyz", pComponent);
+	pComponent = new LoadModel("resources/run_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_run", pComponent);
 
-	pComponent = new LoadModel("resources/x.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Component_Model_x", pComponent);
-
-	pComponent = new LoadModel("resources/y.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Component_Model_y", pComponent);
-
-	pComponent = new LoadModel("resources/z.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Component_Model_z", pComponent);
-
+	pComponent = new LoadModel("resources/attack_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_attack", pComponent);
 	
 }
 
-void CScene::BuildRootSignature(void)
-{
-}
-
-void CScene::BuildShadersAndInputLayout(void)
-{
-	
-}
-
-
-void CScene::BuildPSOs(void)
-{
-	
-}
-
-void CScene::BuildFrameResources(void)
-{
-}
-
-void CScene::BuildShapeGeometry(void)
-{
-	
-}
-
-void CScene::BuildRenderItems(void)
-{
-	
-}
-
-void CScene::BuildMesh(void)
-{
-}
 
 void CScene::BuildCamera(void)
 {
-	m_pCurrentCamera = new CCamera();
-	if (m_vObjects.empty())
-		return;
-
-	if (m_vObjects[0] == nullptr)
-		return;
-
-	if (m_vObjects[0]->Get_Component(L"Component_Transform") == nullptr)
-		return;
-
-
-	m_pCurrentCamera->SetTarget(m_vObjects[0]);
+	for (int i = 0; i < MAX_USER; ++i) {
+		m_vCameras.push_back(new CCamera);
+		m_vCameras[i]->SetTarget(m_vObjects[i]);
+	}
+	m_pCurrentCamera = m_vCameras[0];
 }
 
 void CScene::BuildObject(void)

@@ -37,4 +37,4 @@ private:																				\
 #define _USING(Namespace) using namespace Namespace;
 
 
-#define GET_COMPNENT(Class, pObject, String)  (Class)(pObject)->Get_Component(String);
+#define GET_COMPONENT(Class, pObject, String)  (Class)(pObject)->Get_Component(String);
