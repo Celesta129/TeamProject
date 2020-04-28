@@ -83,7 +83,7 @@ LoadModel::LoadModel(const LoadModel & T)
 	m_numBones = T.m_numBones;
 
 	m_vAnimation = T.m_vAnimation;
-	m_vBonesMatrix = T.m_vBonesMatrix;
+	m_vvBonesMatrix = T.m_vvBonesMatrix;
 
 	m_posSize = T.m_posSize;
 	m_numVertices = T.m_numVertices;
@@ -106,6 +106,7 @@ LoadModel::~LoadModel()
 
 void LoadModel::InitScene()
 {
+	m_vvBonesMatrix.resize(1);
 	for (UINT index = 0; index < m_Meshes.size(); ++index) {
 		const aiMesh* pMesh = m_pScene->mMeshes[index];
 		InitMesh(index, pMesh);
@@ -186,7 +187,7 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 
 			XMFLOAT4X4 bornMatrix;
 			XMStoreFloat4x4(&bornMatrix, bone.FinalTransformation);
-			m_vBonesMatrix.push_back(bornMatrix);
+			m_vvBonesMatrix[m_currAnimIndex].push_back(bornMatrix);
 		}
 
 
@@ -236,22 +237,22 @@ void LoadModel::SetAnimTime(const float & fTime)
 		m_fNow_time = fTime;
 }
 
-UINT LoadModel::BornTransform(const UINT & Animindex, const float fTimeElapsed)
+UINT LoadModel::BornTransform(const float fTimeElapsed)
 {
 	
 	XMMATRIX Identity = XMMatrixIdentity();
 	if (!m_pScene) {
 		//애니메이션 파일을 로드못 했을 경우 수행
 		for (UINT i = 0; i < m_numBones; ++i) {
-			XMStoreFloat4x4(&m_vBonesMatrix[i], Identity);
+			XMStoreFloat4x4(&m_vvBonesMatrix[m_currAnimIndex][i], Identity);
 		}
 		return LOOP_IN;
 	}
-	ReadNodeHeirarchy(Animindex, m_fNow_time, m_pScene->mRootNode, Identity);
+	ReadNodeHeirarchy(m_currAnimIndex, m_fNow_time, m_pScene->mRootNode, Identity);
 
 	for (UINT bornIndex = 0; bornIndex < m_numBones; ++bornIndex)
 	{
-		XMStoreFloat4x4(&m_vBonesMatrix[bornIndex], m_Bones[bornIndex].second.FinalTransformation);
+		XMStoreFloat4x4(&m_vvBonesMatrix[m_currAnimIndex][bornIndex], m_Bones[bornIndex].second.FinalTransformation);
 	}
 
 	m_fNow_time += m_fAnimSpeed * fTimeElapsed;
