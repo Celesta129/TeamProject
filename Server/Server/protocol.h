@@ -9,7 +9,7 @@ constexpr int MAX_NAME_LEN = 15;
 //Client to Sever type
 constexpr int CS_LOGIN = 1;
 constexpr int CS_DISCONNECT = 2;
-constexpr int CS_MOVE = 3;
+constexpr int CS_MOVEMENT = 3;
 
 constexpr int CS_UP = 10;
 constexpr int CS_DOWN = 11;

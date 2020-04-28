@@ -273,6 +273,42 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 {
 	if (m_pScene)
 		m_pScene->OnKeyboardInput(gt.DeltaTime());
+
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_LEFT, true, 0);
+	}
+	else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_RIGHT, true, 0);
+	}
+
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_UP, true, 0);
+	}
+	else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_DOWN, true, 0);
+	}
+
+	if (GetAsyncKeyState(VK_LEFT) == 0)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_LEFT, false, 0);
+	}
+	else if (GetAsyncKeyState(VK_RIGHT) == 0)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_RIGHT, false, 0);
+	}
+
+	if (GetAsyncKeyState(VK_UP) == 0)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_UP, false, 0);
+	}
+	else if (GetAsyncKeyState(VK_DOWN) == 0)
+	{
+		m_pSocket->sendPacket(CS_MOVEMENT, CS_DOWN, false, 0);
+	}
 }
 
 void CGameFramework_Client::processPacket(char* buf)

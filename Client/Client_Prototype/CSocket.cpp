@@ -79,9 +79,9 @@ void CSocket::sendPacket(char type, char key, char state, char id)
 		send(clientSocket, (char*)& p_disconnect, sizeof(cs_packet_disconnect), 0);
 	}
 		break;
-	case CS_MOVE: {
+	case CS_MOVEMENT: {
 		cs_packet_move p_move;
-		p_move.type = CS_MOVE;
+		p_move.type = CS_MOVEMENT;
 		p_move.size = sizeof(cs_packet_move);
 		p_move.keydown = state;
 		p_move.direction = key;

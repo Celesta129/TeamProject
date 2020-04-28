@@ -26,7 +26,7 @@ public:
 	char m_packet_buf[MAX_PACKET_SIZE];
 	volatile bool m_connected;
 
-	char playerX, playerY, playerZ;
+	float playerX, playerY, playerZ;
 	char player_id[MAX_NAME_LEN];
 	
 
@@ -110,7 +110,7 @@ void send_move_packet(int user_id, int mover) {
 	sc_packet_login_ok p;
 	p.id = mover;
 	p.size = sizeof(p);
-	p.type = SC_MOVE;
+	p.type = CS_MOVEMENT;
 	p.posX = clients[mover].playerX;
 	p.posY = clients[mover].playerY;
 	p.posZ = clients[mover].playerZ;
@@ -119,41 +119,6 @@ void send_move_packet(int user_id, int mover) {
 	send_packet(user_id, &p);
 }
 
-//이동 -> 수정필요
-void do_move(int user_id, int direction) {
-	int x = clients[user_id].playerX;
-	int y = clients[user_id].playerY;
-	int z = clients[user_id].playerZ;
-	switch (direction)
-	{
-	case CS_UP:
-		if (y > 0)	y-= 50;
-		break;
-	case CS_DOWN:
-		if (y < 1500) y += 50;
-		break;
-	case CS_LEFT:
-		if (x > 0) x-= 50;
-		break;
-	case CS_RIGHT:
-		if (x < 1500) x+= 50;
-		break;
-	default:
-		cout << "UnKnown Direction from Client move packet!\n";
-		DebugBreak;
-		exit(-1);
-		break;
-	}
-
-	clients[user_id].playerX = x;
-	clients[user_id].playerY = y;
-	clients[user_id].playerZ = z;
-	printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY);
-	for (auto& cl : clients) {
-		if (true == cl.m_connected)
-			send_move_packet(cl.m_id, user_id);
-	}
-}
 
 void process_packet(int user_id, char* buf) {
 	switch (buf[1])
@@ -169,9 +134,43 @@ void process_packet(int user_id, char* buf) {
 		enter_game(user_id);
 	}
 		break;
-	case CS_MOVE: {
+	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
-		do_move(user_id, packet->direction);
+		
+		float x = clients[user_id].playerX;
+		float y = clients[user_id].playerY;
+		float z = clients[user_id].playerZ;
+		if (packet->keydown) {
+			switch (packet->direction)
+			{
+			case CS_UP:
+				if (y > 0)	y -= 50;
+				break;
+			case CS_DOWN:
+				if (y < 1500) y += 50;
+				break;
+			case CS_LEFT:
+				if (x > 0) x -= 50;
+				break;
+			case CS_RIGHT:
+				if (x < 1500) x += 50;
+				break;
+			default:
+				cout << "UnKnown Direction from Client move packet!\n";
+				DebugBreak;
+				exit(-1);
+				break;
+			}
+		}
+
+		clients[user_id].playerX = x;
+		clients[user_id].playerY = y;
+		clients[user_id].playerZ = z;
+		printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY);
+		for (auto& cl : clients) {
+			if (true == cl.m_connected)
+				send_move_packet(cl.m_id, user_id);
+		}
 	}
 		break;
 	default:
