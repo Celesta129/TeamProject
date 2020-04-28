@@ -1,6 +1,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include "pch.h"
+#include "Timer.h"
 #include "protocol.h"
 
 
@@ -27,6 +28,9 @@ public:
 	volatile bool m_connected;
 
 	float playerX, playerY, playerZ;
+	float velocityX, velocityY, velocityZ;
+	char m_ani_index;
+	volatile bool m_dashed;
 	char player_id[MAX_NAME_LEN];
 	
 
@@ -42,6 +46,7 @@ public:
 SOCKETINFO clients[MAX_USER];
 int g_curr_user_id = 0;
 HANDLE g_iocp;
+CTimer cTimer;
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -107,13 +112,18 @@ void send_leave_packet(int user_id, int o_id) {
 
 //임시로 login_ok로 보냄
 void send_move_packet(int user_id, int mover) {
-	sc_packet_login_ok p;
+	sc_packet_move p;
 	p.id = mover;
 	p.size = sizeof(p);
 	p.type = CS_MOVEMENT;
-	p.posX = clients[mover].playerX;
-	p.posY = clients[mover].playerY;
-	p.posZ = clients[mover].playerZ;
+	p.ani_index = clients[mover].m_ani_index;
+	p.dashed = clients[mover].m_dashed;
+	p.x = clients[mover].playerX;
+	p.y = clients[mover].playerY;
+	p.z = clients[mover].playerZ;
+	p.vx = clients[mover].velocityX;
+	p.vy = clients[mover].velocityY;
+	p.vz = clients[mover].velocityZ;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);
@@ -144,16 +154,16 @@ void process_packet(int user_id, char* buf) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				if (y > 0)	y -= 50;
+				clients[user_id].velocityY == 1.f;
 				break;
 			case CS_DOWN:
-				if (y < 1500) y += 50;
+				clients[user_id].velocityY == -1.f;
 				break;
 			case CS_LEFT:
-				if (x > 0) x -= 50;
+				clients[user_id].velocityX == -1.f;
 				break;
 			case CS_RIGHT:
-				if (x < 1500) x += 50;
+				clients[user_id].velocityX == 1.f;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -161,6 +171,11 @@ void process_packet(int user_id, char* buf) {
 				exit(-1);
 				break;
 			}
+		}
+		else {
+			clients[user_id].velocityX = 0.f; 
+			clients[user_id].velocityY = 0.f;
+			clients[user_id].velocityZ = 0.f;
 		}
 
 		clients[user_id].playerX = x;
@@ -216,6 +231,13 @@ void recv_packet_construct(int user_id, int io_byte) {
 	}
 }
 
+void main_logic() {
+	cTimer.Reset();
+	while (true) {
+		cTimer.Tick();
+
+	}
+}
 
 int main()
 {
