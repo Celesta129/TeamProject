@@ -19,6 +19,7 @@ public:
 
 	void Set_Scale(XMFLOAT3* pScale);
 
+	void Rotate(float fPitch, float fYaw, float fRoll);
 	void MovePos(XMFLOAT3* pPos);
 	void Set_Pos(XMFLOAT3* pPos);
 

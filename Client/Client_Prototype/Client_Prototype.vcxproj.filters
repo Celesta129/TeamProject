@@ -41,26 +41,14 @@
     <Filter Include="02.Utility\04.Component\01.Transform">
       <UniqueIdentifier>{033e173a-f580-4cbd-b55a-b587f299d145}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\02.RenderItem">
-      <UniqueIdentifier>{d7e5a3c4-da50-478d-b2e2-383a27a7f284}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\05.Manager">
       <UniqueIdentifier>{b9cf5362-d0e9-4a36-8aef-2dd9ab8a414b}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.Utility\05.Manager\01.Component_Manager">
       <UniqueIdentifier>{320761a0-4d0d-43fa-bde9-d7301b042663}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\03.Mesh">
-      <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\04.Component\03.Mesh\Vertex">
-      <UniqueIdentifier>{c5503c3b-3636-46be-b633-32be39f2eca2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\04.Component\04.Model">
       <UniqueIdentifier>{7dff71a1-7ac4-4c87-a632-4460e5ab2e56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\04.Component\04.Model\LoadModel">
-      <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
     </Filter>
     <Filter Include="02.Utility\06.Shader">
       <UniqueIdentifier>{91c5167d-3028-41f9-9356-be7b44126dc4}</UniqueIdentifier>
@@ -73,6 +61,33 @@
     </Filter>
     <Filter Include="02.Utility\00.SuperClass">
       <UniqueIdentifier>{016f4a59-422e-40f4-9be0-c3755340a1f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\06.Shader\01.ObjectShader">
+      <UniqueIdentifier>{3d72aa4a-fd29-4aae-aa65-ff115391eae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\02.LoadAnimation">
+      <UniqueIdentifier>{a3d75e41-048a-4e4e-8d83-ee76d453b9d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\00.Mesh">
+      <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\00.Mesh\Vertex">
+      <UniqueIdentifier>{c5503c3b-3636-46be-b633-32be39f2eca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel">
+      <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\Texture">
+      <UniqueIdentifier>{35ae851b-895f-4f38-b085-4a5b08cd6f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\06.Shader\02. AxisShader">
+      <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\Model_TextureObject">
+      <UniqueIdentifier>{ca87bfc9-df1b-49fb-8ce5-6b3c83f3fbd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\Model_AnimationObject">
+      <UniqueIdentifier>{04961a51-f39c-4e7c-bce1-3a1ab40dc2a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -118,9 +133,6 @@
     <ClInclude Include="Timer.h">
       <Filter>02.Utility\01.GameTimer</Filter>
     </ClInclude>
-    <ClInclude Include="RenderItem.h">
-      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>02.Utility\02.Camera</Filter>
     </ClInclude>
@@ -137,17 +149,8 @@
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClInclude>
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="LoadModel.h">
-      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>02.Utility\04.Component\03.Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
-      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
-    </ClInclude>
-    <ClInclude Include="Model_Animation.h">
-      <Filter>02.Utility\04.Component\04.Model</Filter>
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh\Vertex</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>02.Utility\06.Shader</Filter>
@@ -165,6 +168,33 @@
     <ClInclude Include="CSocket.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="ObjectShader.h">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClInclude>
+    <ClInclude Include="AxisShader.h">
+      <Filter>02.Utility\06.Shader\02. AxisShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadModel.h">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadAnimation.h">
+      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Object_TextureShader.h">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Model_TextureObject.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
+    </ClInclude>
+    <ClInclude Include="CModel_AnimationObject.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -209,20 +239,8 @@
     <ClCompile Include="Component_Manager.cpp">
       <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClCompile>
-    <ClCompile Include="RenderItem.cpp">
-      <Filter>02.Utility\04.Component\02.RenderItem</Filter>
-    </ClCompile>
-    <ClCompile Include="LoadModel.cpp">
-      <Filter>02.Utility\04.Component\04.Model\LoadModel</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>02.Utility\04.Component\03.Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Vertex.cpp">
-      <Filter>02.Utility\04.Component\03.Mesh\Vertex</Filter>
-    </ClCompile>
-    <ClCompile Include="Model_Animation.cpp">
-      <Filter>02.Utility\04.Component\04.Model</Filter>
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh\Vertex</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>02.Utility\06.Shader</Filter>
@@ -238,6 +256,33 @@
     </ClCompile>
     <ClCompile Include="CSocket.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ObjectShader.cpp">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClCompile>
+    <ClCompile Include="AxisShader.cpp">
+      <Filter>02.Utility\06.Shader\02. AxisShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadModel.cpp">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadAnimation.cpp">
+      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Object_TextureShader.cpp">
+      <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Model_TextureObject.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
+    </ClCompile>
+    <ClCompile Include="CModel_AnimationObject.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">
@@ -254,6 +299,15 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\color.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Axis.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TexObject.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LightingUtil.hlsl">
       <Filter>03.Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -46,7 +46,6 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
-#include "../Common/d3dUtil.h"
 using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -57,6 +56,8 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+const int NUM_FRAME_RESOURCE = 3;		// for d3dUtil:: extern const int NUM_FRAMERESOURCE
+#include "../Common/d3dUtil.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp\cimport.h"

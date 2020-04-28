@@ -13,24 +13,28 @@ private:																				\
 			static CLASSNAME* m_pInstance;												\
 		public:																			\
 			static CLASSNAME* GetInstance(void);										\
-			static void DestroyInstance(void);									\
+			static int		  DestroyInstance(void);									\
 
 #define _IMPLEMENT_SINGLETON(CLASSNAME)													\
-CLASSNAME* CLASSNAME::m_pInstance = nullptr;											\
-CLASSNAME* CLASSNAME::GetInstance(void){												\
-	if (m_pInstance == nullptr) {														\
-		m_pInstance = new CLASSNAME;													\
-	}																					\
-	return m_pInstance;																	\
+		CLASSNAME* CLASSNAME::m_pInstance = nullptr;									\
+		CLASSNAME* CLASSNAME::GetInstance(void){										\
+		if (m_pInstance == nullptr) {													\
+			m_pInstance = new CLASSNAME;												\
+		}																				\
+		return m_pInstance;																\
 }																						\
-void	CLASSNAME::DestroyInstance(void) {												\
-	if(m_pInstance != nullptr){															\
-		m_pInstance->Release();															\
-		delete m_pInstance;																\
-	}																					\
-	m_pInstance = nullptr;																\
-}																						\
+		int CLASSNAME::DestroyInstance( void ) {										\
+			int RefCnt = 0;																\
+		if(NULL != m_pInstance)	{														\
+			RefCnt = m_pInstance->Release();											\
+			if(0 > RefCnt) m_pInstance = NULL;											\
+		}																				\
+		return RefCnt;																	\
+	}
 
 #define _BEGIN(Namespace) namespace Namespace{
 #define _END }
 #define _USING(Namespace) using namespace Namespace;
+
+
+#define GET_COMPNENT(Class, pObject, String)  (Class)(pObject)->Get_Component(String);

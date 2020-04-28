@@ -8,8 +8,12 @@
 struct ObjectConstants
 {
 	DirectX::XMFLOAT4X4 World = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
 };
-
+struct SkinnedConstants
+{
+	DirectX::XMFLOAT4X4 BoneTransforms[96];
+};
 struct PassConstants
 {
 	DirectX::XMFLOAT4X4 View = MathHelper::Identity4x4();
@@ -26,12 +30,19 @@ struct PassConstants
 	float FarZ = 0.0f;
 	//float TotalTime = 0.0f;
 	//float DeltaTime = 0.0f;
+	DirectX::XMFLOAT4 AmbientLight = { 0.0f, 0.0f, 0.0f, 1.0f };
+	// Indices [0, NUM_DIR_LIGHTS) are directional lights;
+   // indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
+   // indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
+   // are spot lights for a maximum of MaxLights per object.
+	Light Lights[MaxLights];
 };
 
 struct Vertex
 {
 	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT4 Color;
+	DirectX::XMFLOAT3 Normal;
+	DirectX::XMFLOAT2 TexC;
 };
 
 struct FrameResource
@@ -49,6 +60,8 @@ public:
 	// 프레임마다 상수버퍼를 새로 만들어야한다.
 
 	std::unique_ptr<UploadBuffer<PassConstants>> PassCB = nullptr;
+	std::unique_ptr<UploadBuffer<MaterialConstants>> MaterialCB = nullptr;
+	std::unique_ptr<UploadBuffer<SkinnedConstants>> SkinnedCB = nullptr;
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
 
 	// Fence는 현재 울타리 지점까지의 명령들을 표시하는 값

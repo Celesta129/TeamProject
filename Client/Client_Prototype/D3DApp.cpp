@@ -282,7 +282,7 @@ void CD3DApp::OnResize()
 	// Flush before changing any resources.
 	FlushCommandQueue();
 
-	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));
+	ThrowIfFailed(m_GraphicsCommandList->Reset(m_CommandAllocator.Get(), nullptr));	// 현재 프레임워크가 커맨드얼로케이터가 없음. 이부분을 현재 씬의 얼로케이터로? 앱이 커맨드 얼로케이터 갖고있는거정돈 괜찮을듯. 당연한가?
 
 	// Release the previous resources we will be recreating.
 	for (int i = 0; i < m_iSwapChainBufferCount; ++i)

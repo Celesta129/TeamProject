@@ -16,6 +16,9 @@ public:
 public:
 	void SetMesh(int nIndex, const shared_ptr<CMesh>& pMesh);
 
+public:
+	SkinnedConstants GetSkinnedConstants(void);
+
 protected:
 	LoadModel *m_model = nullptr;
 	UINT m_NumofAnim = 0;
@@ -25,5 +28,6 @@ protected:
 
 	vector<unique_ptr<CMesh>> m_ppMeshes;
 	vector<XMFLOAT4X4> m_Bones;
+
 };
 
