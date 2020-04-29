@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "Timer.h"
 #include "protocol.h"
-
+#include "animation_frame.h"
 
 //global
 #define MAX_BUFFER 1024
@@ -40,13 +40,17 @@ public:
 		ZeroMemory(&m_recv_over.overlapped, sizeof(WSAOVERLAPPED));
 		m_prev_size = 0;
 		m_connected = false;
+
+		m_ani_index = 0;
+		m_dashed = false;
 	}
 };
 
 SOCKETINFO clients[MAX_USER];
 int g_curr_user_id = 0;
 HANDLE g_iocp;
-CTimer cTimer;
+CTimer GameTimer;
+float g_Time;
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -150,20 +154,23 @@ void process_packet(int user_id, char* buf) {
 		float x = clients[user_id].playerX;
 		float y = clients[user_id].playerY;
 		float z = clients[user_id].playerZ;
-		if (packet->keydown) {
+
+		float fSpeed = 3.f;
+
+		if (packet->keydown) {	//run
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].velocityY == 1.f;
+				clients[user_id].velocityZ = fSpeed;
 				break;
 			case CS_DOWN:
-				clients[user_id].velocityY == -1.f;
+				clients[user_id].velocityZ = -fSpeed;
 				break;
 			case CS_LEFT:
-				clients[user_id].velocityX == -1.f;
+				clients[user_id].velocityX = -fSpeed;
 				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX == 1.f;
+				clients[user_id].velocityX = fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -171,17 +178,43 @@ void process_packet(int user_id, char* buf) {
 				exit(-1);
 				break;
 			}
+			clients[user_id].m_ani_index %= Run_frame;
 		}
-		else {
-			clients[user_id].velocityX = 0.f; 
-			clients[user_id].velocityY = 0.f;
-			clients[user_id].velocityZ = 0.f;
+		else {		//idle
+			switch (packet->direction)
+			{
+			case CS_UP:
+			case CS_DOWN:
+				clients[user_id].velocityZ = 0.f;
+				break;
+			case CS_LEFT:
+			case CS_RIGHT:
+				clients[user_id].velocityX = 0.f;
+				break;
+			default:
+				cout << "UnKnown Direction from Client move packet!\n";
+				DebugBreak;
+				exit(-1);
+				break;
+			}
+
+			clients[user_id].m_ani_index %= Idle_frame;
+		}
+
+		x += clients[user_id].velocityX * GameTimer.DeltaTime();
+		y += clients[user_id].velocityY * GameTimer.DeltaTime();
+		z += clients[user_id].velocityZ * GameTimer.DeltaTime();
+
+		g_Time += GameTimer.DeltaTime();
+		if (g_Time > 0.03) {	//애니메이션 1프레임
+			clients[user_id].m_ani_index += 1;
 		}
 
 		clients[user_id].playerX = x;
 		clients[user_id].playerY = y;
 		clients[user_id].playerZ = z;
-		printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY);
+		//printf("%s(%d) : %f, %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY, clients[user_id].playerZ);
+		printf("%d\n", clients[user_id].m_ani_index);
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
 				send_move_packet(cl.m_id, user_id);
@@ -228,14 +261,6 @@ void recv_packet_construct(int user_id, int io_byte) {
 			rest_byte = 0;
 			p += rest_byte;
 		}
-	}
-}
-
-void main_logic() {
-	cTimer.Reset();
-	while (true) {
-		cTimer.Tick();
-
 	}
 }
 
@@ -288,6 +313,8 @@ int main()
 	accept_over.op = OP_ACCEPT;
 	AcceptEx(listen_socket, client_socket, accept_over.messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &accept_over.overlapped);
 
+	GameTimer.Reset();
+
 	while (1) {
 		//io que넣기
 		DWORD io_byte;
@@ -297,6 +324,8 @@ int main()
 
 		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
 		int user_id = static_cast<int>(key);
+
+		GameTimer.Tick();
 
 		switch (exover->op)
 		{
@@ -330,14 +359,14 @@ int main()
 			clients[user_id].m_socket = client_socket;
 
 			//컨텐츠 초기화
+			srand((unsigned int)time(NULL));
 			clients[user_id].playerX = rand() % 1500;
-			clients[user_id].playerY = rand() % 1500;
-			clients[user_id].playerZ = 0;
+			clients[user_id].playerY = 0;
+			clients[user_id].playerZ = rand() % 1500;
 			DWORD flags = 0;
 
 			//로그인 정보 수신
 			WSARecv(client_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
-			printf("\n");
 
 			//접속 완료후 accept 대기
 			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
