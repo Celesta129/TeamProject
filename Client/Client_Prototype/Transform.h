@@ -20,8 +20,8 @@ public:
 	void Set_Scale(XMFLOAT3* pScale);
 
 	void Rotate(float fPitch, float fYaw, float fRoll);
-	void MovePos(XMFLOAT3* pPos);
-	void Set_Pos(XMFLOAT3* pPos);
+	void MovePos(const XMFLOAT3& Pos);
+	void Set_Pos(const XMFLOAT3& Pos);
 
 public:
 	virtual CComponent* Clone(void);

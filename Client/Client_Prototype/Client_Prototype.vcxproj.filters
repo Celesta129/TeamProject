@@ -65,9 +65,6 @@
     <Filter Include="02.Utility\06.Shader\01.ObjectShader">
       <UniqueIdentifier>{3d72aa4a-fd29-4aae-aa65-ff115391eae6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\04.Model\02.LoadAnimation">
-      <UniqueIdentifier>{a3d75e41-048a-4e4e-8d83-ee76d453b9d1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\04.Component\04.Model\00.Mesh">
       <UniqueIdentifier>{e7b126a1-6858-417d-b065-718295729a9c}</UniqueIdentifier>
     </Filter>
@@ -180,9 +177,6 @@
     <ClInclude Include="LoadModel.h">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
     </ClInclude>
-    <ClInclude Include="LoadAnimation.h">
-      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
     </ClInclude>
@@ -227,17 +221,11 @@
     <ClCompile Include="Camera.cpp">
       <Filter>02.Utility\02.Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Component.cpp">
-      <Filter>02.Utility\04.Component</Filter>
-    </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>02.Utility\04.Component\01.Transform</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>02.Utility\03.Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Component_Manager.cpp">
-      <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
     </ClCompile>
     <ClCompile Include="Vertex.cpp">
       <Filter>02.Utility\04.Component\04.Model\00.Mesh\Vertex</Filter>
@@ -248,14 +236,10 @@
     <ClCompile Include="Scene.cpp">
       <Filter>02.Utility\07.Scene</Filter>
     </ClCompile>
-    <ClCompile Include="ModelObject.cpp">
-      <Filter>02.Utility\03.Object\01.ModelObject</Filter>
-    </ClCompile>
     <ClCompile Include="Base.cpp">
       <Filter>02.Utility\00.SuperClass</Filter>
     </ClCompile>
     <ClCompile Include="CSocket.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="ObjectShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClCompile>
@@ -268,9 +252,6 @@
     <ClCompile Include="LoadModel.cpp">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
     </ClCompile>
-    <ClCompile Include="LoadAnimation.cpp">
-      <Filter>02.Utility\04.Component\04.Model\02.LoadAnimation</Filter>
-    </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
     </ClCompile>
@@ -282,6 +263,16 @@
     </ClCompile>
     <ClCompile Include="CModel_AnimationObject.cpp">
       <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Component.cpp">
+      <Filter>02.Utility\04.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Component_Manager.cpp">
+      <Filter>02.Utility\05.Manager\01.Component_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelObject.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

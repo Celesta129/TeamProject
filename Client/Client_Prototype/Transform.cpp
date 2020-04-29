@@ -43,16 +43,16 @@ void CTransform::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
-void CTransform::MovePos(XMFLOAT3 * pPos)
+void CTransform::MovePos(const XMFLOAT3& Pos)
 {
-	m_xmf4x4World.m[3][0] += pPos->x;
-	m_xmf4x4World.m[3][1] += pPos->y;
-	m_xmf4x4World.m[3][2] += pPos->z;
+	m_xmf4x4World.m[3][0] += Pos.x;
+	m_xmf4x4World.m[3][1] += Pos.y;
+	m_xmf4x4World.m[3][2] += Pos.z;
 }
 
-void CTransform::Set_Pos(XMFLOAT3 * pPos)
+void CTransform::Set_Pos(const XMFLOAT3& Pos)
 {
-	memcpy(m_xmf4x4World.m[0], pPos, sizeof(XMFLOAT3));
+	memcpy(m_xmf4x4World.m[3], &Pos, sizeof(XMFLOAT3));
 }
 
 CComponent * CTransform::Clone(void)

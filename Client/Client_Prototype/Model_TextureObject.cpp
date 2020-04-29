@@ -49,7 +49,7 @@ void CModel_TextureObject::Animate(const float fTimeElapsed)
 {
 	if (m_model->HasAnimation()) 
 	{
-		m_model->BornTransform(0, fTimeElapsed);
+		m_model->BornTransform(fTimeElapsed);
 		DirtyFrames();
 	}
 }
