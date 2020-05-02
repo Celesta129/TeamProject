@@ -8,7 +8,6 @@
 #include "Object_TextureShader.h"
 
 #include "ModelObject.h"
-#include "Model_TextureObject.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
 	:m_d3dDevice(pDevice), m_GraphicsCommandList(pCommandList)
@@ -37,7 +36,7 @@ HRESULT CScene::Initialize()
 void CScene::BuildShaders()
 {
 	CShader* pShader = nullptr;
-	CGameObject* pObject = nullptr;
+	CModelObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
 
 	
@@ -49,13 +48,13 @@ void CScene::BuildShaders()
 
 	for (int i = 0; i < MAX_USER; ++i)
 	{
-		pObject = new CModel_TextureObject;
+		pObject = new CModelObject;
 		if(i % 3 == 0)
-			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+			pObject->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 		else if(i % 3 == 1)
-			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_run", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+			pObject->Initialize(L"Component_Model_run", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 		else
-			dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_attack", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+			pObject->Initialize(L"Component_Model_attack", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 		m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 		
@@ -68,8 +67,8 @@ void CScene::BuildShaders()
 		m_player[i]->SetObjectInstance(pObject);
 	}
 
-	pObject = new CModel_TextureObject;
-	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pObject = new CModelObject;
+	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 1);

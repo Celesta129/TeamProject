@@ -297,6 +297,14 @@ UINT LoadModel::BornTransform(const float fTimeElapsed)
 	return LOOP_IN; //애니메이션이 아직 실행중
 }
 
+void LoadModel::Render(ID3D12GraphicsCommandList * pCommandList)
+{
+	for (UINT i = 0; i < m_ModelMeshes.size(); ++i)
+	{
+		m_ModelMeshes[i]->Render(pCommandList);
+	}
+}
+
 
 void LoadModel::ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, const aiNode * pNode, const XMMATRIX & ParentTransform)
 {

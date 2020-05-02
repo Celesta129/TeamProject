@@ -8,7 +8,7 @@
 class CTimer;
 class CCamera;
 
-class CGameObject;
+class CModelObject;
 class CShader;
 
 class CScene : public CBase
@@ -59,7 +59,7 @@ protected:
 	ComPtr<ID3D12GraphicsCommandList> m_GraphicsCommandList;
 
 protected:
-	vector<CGameObject*> m_vObjects;
+	vector<CModelObject*> m_vObjects;
 
 	// -----------for camera--------------------
 	vector<CCamera*> m_vCameras;

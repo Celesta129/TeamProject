@@ -80,12 +80,6 @@
     <Filter Include="02.Utility\06.Shader\02. AxisShader">
       <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\03.Object\01.ModelObject\Model_TextureObject">
-      <UniqueIdentifier>{ca87bfc9-df1b-49fb-8ce5-6b3c83f3fbd7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02.Utility\03.Object\01.ModelObject\Model_AnimationObject">
-      <UniqueIdentifier>{04961a51-f39c-4e7c-bce1-3a1ab40dc2a9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel\Animation">
       <UniqueIdentifier>{04a31cb2-6e46-4d9b-a501-cc1c4dd6b2e9}</UniqueIdentifier>
     </Filter>
@@ -186,12 +180,6 @@
     <ClInclude Include="Object_TextureShader.h">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClInclude>
-    <ClInclude Include="Model_TextureObject.h">
-      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
-    </ClInclude>
-    <ClInclude Include="CModel_AnimationObject.h">
-      <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
-    </ClInclude>
     <ClInclude Include="Animation.h">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel\Animation</Filter>
     </ClInclude>
@@ -263,12 +251,6 @@
     </ClCompile>
     <ClCompile Include="Object_TextureShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
-    </ClCompile>
-    <ClCompile Include="Model_TextureObject.cpp">
-      <Filter>02.Utility\03.Object\01.ModelObject\Model_TextureObject</Filter>
-    </ClCompile>
-    <ClCompile Include="CModel_AnimationObject.cpp">
-      <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Component.cpp">

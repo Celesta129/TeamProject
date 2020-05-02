@@ -44,10 +44,6 @@ public:
 	CComponent* Get_Component(const wstring tag);
 	HRESULT Insert_Component_ToMap(const wstring tag);
 
-	
-protected:
-	LoadModel* m_model;
-
 protected:
 	map<wstring, CComponent*> m_mapComponent;
 	CComponent_Manager* m_pComponent_Manager = nullptr;

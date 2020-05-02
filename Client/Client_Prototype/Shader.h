@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
 #include "Base.h"
-#include "GameObject.h"
+#include "ModelObject.h"
 #include "FrameResource.h"
 #include "Camera.h"
 
 class CTimer;
 class CCamera;
+class CModelObject;
 
 class CShader : public CBase
 {
@@ -20,7 +21,7 @@ public:
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
-	bool Push_Object(CGameObject* pObject);
+	bool Push_Object(CModelObject* pObject);
 
 
 	virtual int Free(void);
@@ -64,7 +65,7 @@ private:
 	};
 
 protected:
-	vector<CGameObject**>	m_vpObjects;
+	vector<CModelObject**>	m_vpObjects;
 	UINT m_nObjects = 0;
 	
 protected:

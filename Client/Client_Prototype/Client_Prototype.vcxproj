@@ -174,14 +174,12 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
     <ClInclude Include="CSocket.h" />
-    <ClInclude Include="CModel_AnimationObject.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="Extern.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />
-    <ClInclude Include="Model_TextureObject.h" />
     <ClInclude Include="ObjectShader.h" />
     <ClInclude Include="Object_TextureShader.h" />
     <ClInclude Include="Scene.h" />
@@ -219,9 +217,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
     <ClCompile Include="CSocket.cpp" />
-    <ClCompile Include="CModel_AnimationObject.cpp" />
     <ClCompile Include="ModelObject.cpp" />
-    <ClCompile Include="Model_TextureObject.cpp" />
     <ClCompile Include="ObjectShader.cpp" />
     <ClCompile Include="Object_TextureShader.cpp" />
     <ClCompile Include="Player.cpp" />

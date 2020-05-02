@@ -3,7 +3,7 @@
 
 #define ARRAY_SIZE 6
 
-
+class CModelObject;
 class CObject_TextureShader : public CShader
 {
 public:
@@ -14,7 +14,7 @@ public:
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName);
-	void setMat(CGameObject* pObject, int matindex);
+	void setMat(CModelObject* pObject, int matindex);
 protected:
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();

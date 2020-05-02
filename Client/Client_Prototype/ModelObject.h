@@ -14,20 +14,24 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:
-	void SetMesh(int nIndex, const shared_ptr<CMesh>& pMesh);
-
-public:
 	SkinnedConstants GetSkinnedConstants(void);
 
+public:
+	void setMat(Material* pMaterial) { m_pMaterial = pMaterial; };
+	void AddModel(LoadModel* pModel);
+	
+	Material* getMat(void) { return m_pMaterial; }
+	
 protected:
-	LoadModel *m_model = nullptr;
+	void Animate(const float fTimeElapsed);
+protected:
+	vector<LoadModel*>m_pModel;
 	UINT m_NumofAnim = 0;
 	UINT m_AnimIndex = -1;
 	float m_Animtime = -1.f;
 	UINT m_nMeshes = 0;
 
-	vector<unique_ptr<CMesh>> m_ppMeshes;
 	vector<XMFLOAT4X4> m_Bones;
-
+	Material* m_pMaterial = nullptr;
 };
 

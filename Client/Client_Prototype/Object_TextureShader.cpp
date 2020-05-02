@@ -1,5 +1,5 @@
 #include "Object_TextureShader.h"
-#include "Model_TextureObject.h"
+#include "ModelObject.h"
 CObject_TextureShader::CObject_TextureShader()
 {
 }
@@ -237,9 +237,9 @@ void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCom
 	BuildObjects();
 }
 
-void CObject_TextureShader::setMat(CGameObject* pObject, int matindex)
+void CObject_TextureShader::setMat(CModelObject* pObject, int matindex)
 {
-	dynamic_cast<CModel_TextureObject*>(pObject)->setMat(m_vMaterial[matindex]);
+	pObject->setMat(m_vMaterial[matindex]);
 }
 
 void CObject_TextureShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
@@ -357,7 +357,7 @@ void CObject_TextureShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, 
 	auto skinnedCB = m_CurrFrameResource->SkinnedCB->Resource();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
 	{
-		CModel_TextureObject* pObject = (CModel_TextureObject*)*(m_vpObjects[index]);
+		CModelObject* pObject = (CModelObject*)*(m_vpObjects[index]);
 
 		if (pObject == nullptr)
 			continue;

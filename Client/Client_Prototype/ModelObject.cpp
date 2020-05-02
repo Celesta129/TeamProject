@@ -29,32 +29,24 @@ HRESULT CModelObject::Initialize(const wstring& tag, ID3D12Device * pd3dDevice, 
 	if (FAILED(hr = Insert_Component_ToMap(tag)))
 		return hr;
 
-	m_model = (LoadModel*)Get_Component(tag);
+	m_pModel.push_back((LoadModel*)Get_Component(tag));
 
 	// m_ani = nullptr;
 	m_NumofAnim = 0;
 	m_AnimIndex = 0;
 	m_Animtime = 0.0f;
-	m_nMeshes = m_model->getNumMesh();
+	m_nMeshes = m_pModel[m_AnimIndex]->getNumMesh();
 
 	//boundingbox = m_model->getBoudingBox();
-	//매쉬 적용
-	if (m_nMeshes > 0)
-	{
-		m_ppMeshes = vector<unique_ptr<CMesh>>(m_nMeshes);
-		for (UINT i = 0; i < m_nMeshes; i++)
-			m_ppMeshes[i] = nullptr;
-	}
-	//m_model->SetMeshes(pd3dDevice, pd3dCommandList);
 
+	//매쉬 적용
 	for (UINT i = 0; i < m_nMeshes; ++i) {
 		if (i > 0)
-			m_model->SetTextureIndex(i, i);
-		SetMesh(i, m_model->getMeshes()[i]);
+			m_pModel[m_AnimIndex]->SetTextureIndex(i, i);
 	}
 
 	//뼈 정보 초기화
-	m_Bones.resize(m_model->GetBones()->size());
+	m_Bones.resize(m_pModel[m_AnimIndex]->GetBones()->size());
 	//cout << "!! : " << m_model->GetBones()->size() << endl;
 	for (auto& p : m_Bones) {
 		XMStoreFloat4x4(&p, XMMatrixIdentity());
@@ -66,43 +58,28 @@ HRESULT CModelObject::Initialize(const wstring& tag, ID3D12Device * pd3dDevice, 
 void CModelObject::Update(float fTimeElapsed)
 {
 	CGameObject::Update(fTimeElapsed);
+	Animate(fTimeElapsed);
 }
 
 void CModelObject::Render(ID3D12GraphicsCommandList * pCommandList)
 {
 	CGameObject::Render(pCommandList);
 
-	if (!m_ppMeshes.empty())
+	if (m_pModel[m_AnimIndex] != nullptr)
 	{
-		for (UINT i = 0; i < m_nMeshes; i++)
-		{
-			if (m_ppMeshes[i])
-				m_ppMeshes[i]->Render(pCommandList);
-		}
+		m_pModel[m_AnimIndex]->Render(pCommandList);
 	}
-}
 
-void CModelObject::SetMesh(int nIndex, const shared_ptr<CMesh>& pMesh)
-{
-	if (!m_ppMeshes.empty())
-	{
-		
-		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex].release();
-		m_ppMeshes[nIndex] = make_unique<CMesh>();
-		// 진짜 너네 이런식으로 안하고 make_unique<CMesh>(*pMesh) 어떻게했냐? 복사생성자를 아예 삭제해버리는데?
-		
-		m_ppMeshes[nIndex]->CopyMesh(pMesh);
-	}
 }
 
 SkinnedConstants CModelObject::GetSkinnedConstants(void)
 {
 	SkinnedConstants result = SkinnedConstants();
-	if (m_model) {
-		if (m_model->getNumBones() > 0)
+	if (m_pModel[m_AnimIndex]) {
+		if (m_pModel[m_AnimIndex]->getNumBones() > 0)
 		{
-			copy(begin(m_model->getBonesTransform()),
-				end(m_model->getBonesTransform()),
+			copy(begin(m_pModel[m_AnimIndex]->getBonesTransform()),
+				end(m_pModel[m_AnimIndex]->getBonesTransform()),
 				&result.BoneTransforms[0]);
 		}
 		else
@@ -111,4 +88,28 @@ SkinnedConstants CModelObject::GetSkinnedConstants(void)
 		}
 	}
 	return result;
+}
+
+void CModelObject::AddModel(LoadModel * pModel)
+{
+	if (!pModel)
+	{
+		m_pModel.push_back(pModel);
+	}
+}
+
+void CModelObject::Animate(const float fTimeElapsed)
+{
+	if (m_pModel[m_AnimIndex]->HasAnimation())
+	{
+		if (m_Animtime > 3.f)
+		{
+			UINT animIndex = (m_pModel[m_AnimIndex]->getCurrAnimIndex() + 1) % m_pModel[m_AnimIndex]->getNumAnimations();
+			if (animIndex != m_pModel[m_AnimIndex]->getCurrAnimIndex())
+				m_pModel[m_AnimIndex]->SetCurrAnimIndex(animIndex);
+		}
+		m_pModel[m_AnimIndex]->BornTransform(fTimeElapsed);
+		DirtyFrames();
+	}
+	m_Animtime += fTimeElapsed;
 }

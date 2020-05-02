@@ -51,6 +51,7 @@ public:
 
 	UINT BornTransform(const float fTimeElapsed);	// 애니메이션 코드
 	
+	void Render(ID3D12GraphicsCommandList * pCommandList);
 public:
 	bool HasAnimation(void) { return !m_vAnimation.empty(); }
 	shared_ptr<ModelMesh>*          getMeshes() { return m_ModelMeshes.data(); }
