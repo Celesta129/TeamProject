@@ -130,14 +130,14 @@ D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
+D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob ** ppd3dShaderBlob, const string& shaderName, const D3D_SHADER_MACRO* defines)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "VS", "vs_5_1", ppd3dShaderBlob, defines));
+	return(CShader::CompileShaderFromFile(m_filename, shaderName.c_str(), "vs_5_1", ppd3dShaderBlob, defines));
 }
 
-D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
+D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob ** ppd3dShaderBlob, const string& shaderName, const D3D_SHADER_MACRO* defines)
 {
-	return(CShader::CompileShaderFromFile(m_filename, "PS", "ps_5_1", ppd3dShaderBlob, defines));
+	return(CShader::CompileShaderFromFile(m_filename, shaderName.c_str(), "ps_5_1", ppd3dShaderBlob, defines));
 }
 
 D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR * pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob ** ppd3dShaderBlob, const D3D_SHADER_MACRO* defines)
@@ -197,8 +197,8 @@ void CShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int inde
 	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
 	psoDesc.InputLayout = CreateInputLayout();
 	psoDesc.pRootSignature = m_RootSignature[index].Get();
-	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob,"VS");
+	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
 	psoDesc.RasterizerState = CreateRasterizerState();
 	psoDesc.BlendState = CreateBlendState();
 	psoDesc.DepthStencilState = CreateDepthStencilState();
@@ -290,8 +290,8 @@ void CShader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * pd3d
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
-	d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob,"VS");
+	d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob,"PS");
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();

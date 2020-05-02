@@ -3,7 +3,7 @@
 
 
 ModelMesh::ModelMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, mesh & meshData)
-	
+
 {
 	m_nVertices = (int)meshData.m_vertices.size();
 	m_nIndices = (int)meshData.m_indices.size();
@@ -49,7 +49,7 @@ LoadModel::LoadModel(const string & filename, ID3D12Device* pd3dDevice, ID3D12Gr
 		aiProcess_Triangulate |                        // 3개 이상의 모서리를 가진 다각형 면을 삼각형으로 만듬(나눔)
 		aiProcess_ConvertToLeftHanded |                  // D3D의 왼손좌표계로 변환
 		aiProcess_SortByPType;                        // 단일타입의 프리미티브로 구성된 '깨끗한' 매쉬를 만듬
-	
+
 	m_pScene = aiImportFile(filename.c_str(), flag);
 
 	if (m_pScene) {
@@ -60,14 +60,14 @@ LoadModel::LoadModel(const string & filename, ID3D12Device* pd3dDevice, ID3D12Gr
 		m_ModelMeshes.resize(m_Meshes.size());
 
 		SetMeshes(pd3dDevice, pd3dCommandList);
-		//
-		//m_vpBonesMatrix.resize(m_Bones.size());		// 뼈 변환정보 초기화
-		//for (auto& p : m_vpBonesMatrix) {
+		
+		m_vBonesMatrix.resize(m_Bones.size());		// 뼈 변환정보 초기화
+		for (auto& p : m_vBonesMatrix) {
 
-		//	XMStoreFloat4x4(&*p, XMMatrixIdentity());
-		//}
+			XMStoreFloat4x4(&p, XMMatrixIdentity());
+		}
 
-		InitAnimation();
+		InitAnimation(m_pScene);
 	}
 }
 
@@ -79,25 +79,18 @@ LoadModel::LoadModel(const LoadModel & T)
 	m_ModelMeshes = T.m_ModelMeshes;
 	m_Bones = T.m_Bones;
 
+	m_vBonesMatrix = T.m_vBonesMatrix;
+
 	m_numVertices = T.m_numVertices;
 	m_numBones = T.m_numBones;
 
 	m_vAnimation = T.m_vAnimation;
-	m_vvBonesMatrix = T.m_vvBonesMatrix;
 
 	m_posSize = T.m_posSize;
 	m_numVertices = T.m_numVertices;
 	m_numMaterial = T.m_numMaterial;
 	m_numBones = T.m_numBones;
 	m_GlobalInverse = T.m_GlobalInverse;
-	
-	m_bAnimationLoop = T.m_bAnimationLoop;
-	m_fAnimSpeed = T.m_fAnimSpeed;
-	m_fStart_time = T.m_fStart_time; //프레임 시작 시간
-	m_fEnd_time = T.m_fEnd_time;  //프레임 종료 시간
-	m_fTrigger_time = T.m_fTrigger_time;	//프레임 중간 시간.트리거용도로 사용
-	m_fNow_time = T.m_fNow_time;  //현재 프레임
-	m_fPosible_skip = T.m_fPosible_skip; //애니메이션을 강제 종료하고 다음 애니메이션 실행 가능한 프레임
 }
 
 LoadModel::~LoadModel()
@@ -106,18 +99,32 @@ LoadModel::~LoadModel()
 
 void LoadModel::InitScene()
 {
-	m_vvBonesMatrix.resize(1);
+	
 	for (UINT index = 0; index < m_Meshes.size(); ++index) {
 		const aiMesh* pMesh = m_pScene->mMeshes[index];
 		InitMesh(index, pMesh);
 
-		if (pMesh->HasBones()) 
+		if (pMesh->HasBones())
 			InitBones(index, pMesh);
 
 		m_numVertices += (UINT)m_Meshes[index].m_vertices.size();
+
+		for (int j = 0; j < pMesh->mNumBones; ++j)
+		{
+			const aiBone* pBone = pMesh->mBones[j];
+			Bone bone;
+			bone.BoneOffset = aiMatrixToXMMatrix(pBone->mOffsetMatrix);
+
+			XMFLOAT4X4 bornMatrix;
+			XMStoreFloat4x4(&bornMatrix, bone.FinalTransformation);
+			m_vBonesMatrix.push_back(bornMatrix);
+
+		}
 	}
 	m_numBones = (UINT)m_Bones.size();
 	
+	
+
 }
 
 void LoadModel::InitMesh(UINT index, const aiMesh * pMesh)
@@ -185,9 +192,7 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 			bone.BoneOffset = aiMatrixToXMMatrix(pBone->mOffsetMatrix);
 			m_Bones.emplace_back(make_pair(pBone->mName.data, bone));
 
-			XMFLOAT4X4 bornMatrix;
-			XMStoreFloat4x4(&bornMatrix, bone.FinalTransformation);
-			m_vvBonesMatrix[m_currAnimIndex].push_back(bornMatrix);
+			
 		}
 
 
@@ -200,20 +205,23 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 	}
 }
 
-void LoadModel::InitAnimation(void)
+void LoadModel::InitAnimation(const aiScene* pScene)
 {
-	if (m_pScene) {
+	if (pScene) {
 		m_GlobalInverse = XMMatrixIdentity();
-		for (UINT index = 0; index < m_pScene->mNumAnimations; ++index)
+		for (UINT index = 0; index < pScene->mNumAnimations; ++index)
 		{
-			aiAnimation* pAnimation = *(m_pScene->mAnimations + index);
-			m_vAnimation.push_back(pAnimation);
-			m_fStart_time = 0.f;
-			//프레임 시작 시점은 좌표 이동 프레임을 기준으로 맞춤
-			m_fEnd_time = pAnimation->mDuration;
+			aiAnimation* paiAnimation = *(pScene->mAnimations + index);
+			CAnimation Anim;
+
+			Anim.SetaiAnim(paiAnimation);
+
+			//
 			
-			//프레임 종료 시점에서 1.0 만큼 빼줘야 프레임이 안겹침
-			m_fAnimSpeed = pAnimation->mTicksPerSecond;
+			//
+			Anim.m_fEnd_time = paiAnimation->mDuration;
+			Anim.m_fAnimSpeed = paiAnimation->mTicksPerSecond;
+			m_vAnimation.push_back(Anim);
 		}
 	}
 }
@@ -221,67 +229,83 @@ void LoadModel::InitAnimation(void)
 void LoadModel::SetMeshes(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
 	for (UINT i = 0; i < m_ModelMeshes.size(); ++i) {
-		
+
 		if (m_ModelMeshes[i] != nullptr)
 			m_ModelMeshes[i].reset();	// 삭제 비스무리한거임. 어쨌든 삭제코드
-		
+
 		m_ModelMeshes[i] = make_shared<ModelMesh>(pd3dDevice, pd3dCommandList, m_Meshes[i]);
 	}
 }
 
 void LoadModel::SetAnimTime(const float & fTime)
 {
-	if (m_fEnd_time <= fTime)
-		m_fNow_time = m_fEnd_time;
+	CAnimation* pAnimation = &m_vAnimation[m_currAnimIndex];
+	if (pAnimation->m_fEnd_time <= fTime)
+		pAnimation->m_fNow_time = pAnimation->m_fEnd_time;
 	else
-		m_fNow_time = fTime;
+		pAnimation->m_fNow_time = fTime;
+}
+
+void LoadModel::SetCurrAnimIndex(UINT AnimIndex)
+{
+	if (m_vAnimation.size() > AnimIndex)
+	{
+		m_currAnimIndex = AnimIndex;
+		m_vAnimation[m_currAnimIndex].m_fNow_time = 0.0f;
+		SetAnimTime(0.0f);
+	}
+	
 }
 
 UINT LoadModel::BornTransform(const float fTimeElapsed)
 {
-	
+
 	XMMATRIX Identity = XMMatrixIdentity();
+	CAnimation* pAnimation = &m_vAnimation[m_currAnimIndex];
+
 	if (!m_pScene) {
 		//애니메이션 파일을 로드못 했을 경우 수행
 		for (UINT i = 0; i < m_numBones; ++i) {
-			XMStoreFloat4x4(&m_vvBonesMatrix[m_currAnimIndex][i], Identity);
+
+			XMStoreFloat4x4(&m_vBonesMatrix[i], Identity);
 		}
 		return LOOP_IN;
 	}
-	ReadNodeHeirarchy(m_currAnimIndex, m_fNow_time, m_pScene->mRootNode, Identity);
+	ReadNodeHeirarchy(m_currAnimIndex, pAnimation->m_fNow_time, m_pScene->mRootNode, Identity);
 
 	for (UINT bornIndex = 0; bornIndex < m_numBones; ++bornIndex)
 	{
-		XMStoreFloat4x4(&m_vvBonesMatrix[m_currAnimIndex][bornIndex], m_Bones[bornIndex].second.FinalTransformation);
+		XMStoreFloat4x4(&m_vBonesMatrix[bornIndex], m_Bones[bornIndex].second.FinalTransformation);
 	}
 
-	m_fNow_time += m_fAnimSpeed * fTimeElapsed;
-	if (m_fNow_time > m_fEnd_time) {
-		m_fNow_time = m_fStart_time;
-		
+	pAnimation->m_fNow_time += pAnimation->m_fAnimSpeed * fTimeElapsed;
+	if (pAnimation->m_fNow_time > pAnimation->m_fEnd_time) {
+		pAnimation->m_fNow_time = pAnimation->m_fStart_time;
+
 		return LOOP_END; //애니메이션이 한 루프 끝남
 	}
 
-	if (m_fNow_time > m_fTrigger_time - 1 && m_fNow_time < m_fTrigger_time + 1) {
+	if (pAnimation->m_fNow_time > pAnimation->m_fTrigger_time - 1 && pAnimation->m_fNow_time < pAnimation->m_fTrigger_time + 1) {
 		// 현재 시간이 트리거의 1초 내외라면
 
 		return LOOP_TRIGGER;
 	}
 
-	if (m_fNow_time > m_fPosible_skip)
+	if (pAnimation->m_fNow_time > pAnimation->m_fPosible_skip)
 		return LOOP_SKIP; //애니메이션 아직 실행중이고 트리거 실행 후후반부
 
 	return LOOP_IN; //애니메이션이 아직 실행중
 }
 
+
 void LoadModel::ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, const aiNode * pNode, const XMMATRIX & ParentTransform)
 {
-	const aiAnimation* pAnim = m_vAnimation[Animindex];
+	const aiAnimation* pAnim = m_vAnimation[Animindex].GetAnim();
 
 	XMMATRIX NodeTransformation = aiMatrixToXMMatrix(pNode->mTransformation);
 
 	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnim, pNode->mName.data);
-	
+
 	if (pNodeAnim) {
 		aiVector3D s;
 		CalcInterpolatedScaling(s, AnimationTime, pNodeAnim);
@@ -325,7 +349,7 @@ void LoadModel::ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, co
 		//계층구조를 이룸. 자식노드 탐색 및 변환
 		ReadNodeHeirarchy(Animindex, AnimationTime, pNode->mChildren[i], GlobalTransformation);
 	}
-	
+
 }
 
 const aiNodeAnim * LoadModel::FindNodeAnim(const aiAnimation * pAnimation, const string & NodeName)
@@ -442,7 +466,7 @@ CComponent * LoadModel::Clone()
 {
 	// Clone할시 복사해서 새로 넘겨준다.
 	LoadModel* pComponent = new LoadModel(*this);
-	
+
 	return pComponent;
 }
 
@@ -453,7 +477,7 @@ int LoadModel::Free(void)
 		//	cout << "LoadModel m_meshes.clear()" << endl;
 	}
 	if (m_pScene) {
-		delete m_pScene;
+		Safe_Delete(m_pScene);
 	}
 
 	return 0;

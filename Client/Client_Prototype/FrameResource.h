@@ -12,6 +12,11 @@ struct ObjectConstants
 };
 struct SkinnedConstants
 {
+	SkinnedConstants() {
+		for (int i = 0; i < 96; ++i) {
+			BoneTransforms[i] = MathHelper::Identity4x4();
+		}
+	}
 	DirectX::XMFLOAT4X4 BoneTransforms[96];
 };
 struct PassConstants

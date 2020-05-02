@@ -86,6 +86,9 @@
     <Filter Include="02.Utility\03.Object\01.ModelObject\Model_AnimationObject">
       <UniqueIdentifier>{04961a51-f39c-4e7c-bce1-3a1ab40dc2a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel\Animation">
+      <UniqueIdentifier>{04a31cb2-6e46-4d9b-a501-cc1c4dd6b2e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -189,6 +192,9 @@
     <ClInclude Include="CModel_AnimationObject.h">
       <Filter>02.Utility\03.Object\01.ModelObject\Model_AnimationObject</Filter>
     </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -273,6 +279,9 @@
     </ClCompile>
     <ClCompile Include="ModelObject.cpp">
       <Filter>02.Utility\03.Object\01.ModelObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>02.Utility\04.Component\04.Model\01.LoadModel\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

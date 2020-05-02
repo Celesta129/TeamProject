@@ -116,8 +116,8 @@ void CAxisShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int 
 	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
 	psoDesc.InputLayout = CreateInputLayout();
 	psoDesc.pRootSignature = m_RootSignature[index].Get();
-	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS");
+	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
 	psoDesc.RasterizerState = CreateRasterizerState();
 	psoDesc.BlendState = CreateBlendState();
 	psoDesc.DepthStencilState = CreateDepthStencilState();
@@ -205,8 +205,8 @@ void CAxisShader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
-	d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob,"VS");
+	d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob,"PS");
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();

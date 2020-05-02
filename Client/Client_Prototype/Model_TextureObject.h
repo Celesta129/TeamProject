@@ -18,6 +18,8 @@ public:
 	Material* m_pMaterial = nullptr;
 
 
+	UINT  m_currAnimIndex = 0;
+	float fTime = 0.0f;
 
 private:
 	void Animate(const float fTimeElapsed);

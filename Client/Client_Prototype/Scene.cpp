@@ -59,7 +59,7 @@ void CScene::BuildShaders()
 		m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
 		
-		dynamic_cast<CObject_TextureShader*>(pShader)->setMat(i, 0);
+		dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 0);
 
 		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
 		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
@@ -67,6 +67,12 @@ void CScene::BuildShaders()
 		m_player[i] = new CPlayer();
 		m_player[i]->SetObjectInstance(pObject);
 	}
+
+	pObject = new CModel_TextureObject;
+	dynamic_cast<CModel_TextureObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 1);
 }
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
@@ -296,9 +302,6 @@ void CScene::ReleaseCameras(void)
 			delete camera;
 	}
 
-	if (m_pCurrentCamera)
-		delete m_pCurrentCamera;
-
 }
 
 void CScene::BuildComponents(void)
@@ -320,6 +323,8 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/attack_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_attack", pComponent);
 	
+	pComponent = new LoadModel("resources/fbx/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_sandbox", pComponent);
 }
 
 

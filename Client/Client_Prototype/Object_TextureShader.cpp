@@ -91,10 +91,10 @@ void CObject_TextureShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTar
 		"SKINNED", "1",
 		NULL, NULL
 	};
-	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, skinnedDefines);
-	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, skinnedDefines);
+	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS", skinnedDefines);
+	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS", skinnedDefines);
 
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.RasterizerState = CreateRasterizerState();
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	psoDesc.SampleMask = UINT_MAX;
@@ -120,11 +120,12 @@ void CObject_TextureShader::CreateFrameResources(ID3D12Device * pd3dDevice)
 
 void CObject_TextureShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 {
+	UINT nNumDescriptor = 2;
 	//
 	// Create the SRV heap.
 	//
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1;
+	srvHeapDesc.NumDescriptors = nNumDescriptor;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_CbvSrvDescriptorHeap)));
@@ -143,6 +144,18 @@ void CObject_TextureShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	srvDesc.Texture2D.MipLevels = bricksTex->GetDesc().MipLevels;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	pd3dDevice->CreateShaderResourceView(bricksTex.Get(), &srvDesc, hDescriptor);
+
+	hDescriptor.Offset(1, g_CbvSrvUavDescriptorSize);
+
+	auto floorTex = m_mapTexture["floorTex"]->Resource;
+	
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = floorTex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = floorTex->GetDesc().MipLevels;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	pd3dDevice->CreateShaderResourceView(floorTex.Get(), &srvDesc, hDescriptor);
 }
 
 void CObject_TextureShader::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -224,9 +237,9 @@ void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCom
 	BuildObjects();
 }
 
-void CObject_TextureShader::setMat(int objindex, int matindex)
+void CObject_TextureShader::setMat(CGameObject* pObject, int matindex)
 {
-	dynamic_cast<CModel_TextureObject*>(*m_vpObjects[objindex])->setMat(m_vMaterial[matindex]);
+	dynamic_cast<CModel_TextureObject*>(pObject)->setMat(m_vMaterial[matindex]);
 }
 
 void CObject_TextureShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
@@ -378,6 +391,15 @@ void CObject_TextureShader::LoadTextures(ID3D12Device* pd3dDevice, ID3D12Graphic
 		bricksTex->Resource, bricksTex->UploadHeap));
 
 	m_mapTexture[bricksTex->Name] = std::move(bricksTex);
+
+	auto floorTex = std::make_unique<Texture>();
+	floorTex->Name = "floorTex";
+	floorTex->Filename = L"resources/dds/SandBox_diffuse.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(pd3dDevice,
+		pd3dCommandList, floorTex->Filename.c_str(),
+		floorTex->Resource, floorTex->UploadHeap));
+
+	m_mapTexture[floorTex->Name] = std::move(floorTex);
 }
 
 array<const CD3DX12_STATIC_SAMPLER_DESC, ARRAY_SIZE> CObject_TextureShader::GetStaticSamplers()
@@ -448,6 +470,16 @@ void CObject_TextureShader::CreateMaterial(void)
 	bricks0->Roughness = 0.1f;
 
 	m_vMaterial.push_back(move(bricks0));
+
+	Material* Floor = new Material;
+	Floor->Name = "Floor";
+	Floor->MatCBIndex = 1;
+	Floor->DiffuseSrvHeapIndex = 1;
+	Floor->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	Floor->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
+	Floor->Roughness = 0.1f;
+
+	m_vMaterial.push_back(move(Floor));
 }
 
 void CObject_TextureShader::UpdateMaterialCB(void)

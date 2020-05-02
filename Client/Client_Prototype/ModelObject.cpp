@@ -99,9 +99,16 @@ SkinnedConstants CModelObject::GetSkinnedConstants(void)
 {
 	SkinnedConstants result = SkinnedConstants();
 	if (m_model) {
-		copy(begin(m_model->getBonesTransform()),
-			end(m_model->getBonesTransform()),
-			&result.BoneTransforms[0]);
+		if (m_model->getNumBones() > 0)
+		{
+			copy(begin(m_model->getBonesTransform()),
+				end(m_model->getBonesTransform()),
+				&result.BoneTransforms[0]);
+		}
+		else
+		{
+
+		}
 	}
 	return result;
 }
