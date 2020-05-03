@@ -49,8 +49,13 @@ void CScene::BuildShaders()
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		pObject = new CModelObject;
-		if(i % 3 == 0)
+		if (i % 3 == 0)
+		{
 			pObject->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+			pObject->AddModel(L"Component_Model_run");
+			pObject->AddModel(L"Component_Model_attack");
+		}
+			
 		else if(i % 3 == 1)
 			pObject->Initialize(L"Component_Model_run", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 		else

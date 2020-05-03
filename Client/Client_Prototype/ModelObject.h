@@ -18,7 +18,7 @@ public:
 
 public:
 	void setMat(Material* pMaterial) { m_pMaterial = pMaterial; };
-	void AddModel(LoadModel* pModel);
+	void AddModel(const wstring& pModel);
 	
 	Material* getMat(void) { return m_pMaterial; }
 	

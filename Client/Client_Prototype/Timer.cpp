@@ -18,23 +18,31 @@ CTimer::~CTimer()
 {
 }
 
-void CTimer::Tick()
+void CTimer::Tick(float fFPS)
 {
 	if (m_bStopped)
 	{
 		m_DeltaTime = 0.0;
 		return;
 	}
+	if (fFPS > 0.f)
+	{
 
-	__int64 currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-	m_CurrTime = currTime;
+		while (m_DeltaTime < 1.f / fFPS )
+		{
+			__int64 currTime;
+			QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+			m_CurrTime = currTime;
 
-	// Time difference between this frame and the previous.
-	m_DeltaTime = (m_CurrTime - m_PrevTime)*m_SecondsPerCount;
+			// Time difference between this frame and the previous.
+			m_DeltaTime = (m_CurrTime - m_PrevTime)*m_SecondsPerCount;
+		}
+
+	}
 
 	// Prepare for next frame.
 	m_PrevTime = m_CurrTime;
+
 
 	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 	// processor goes into a power save mode or we get shuffled to another

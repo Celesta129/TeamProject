@@ -5,6 +5,7 @@
 #include "LoadModel.h"
 #include "FrameResource.h"		// For include struct ObjectConstant
 
+#include "Component_Manager.h"
 class CComponent_Manager;
 
 class CGameObject : public CBase

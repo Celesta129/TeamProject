@@ -1,6 +1,5 @@
 
 #include "GameObject.h"
-#include "Component_Manager.h"
 
 CGameObject::CGameObject()
 {

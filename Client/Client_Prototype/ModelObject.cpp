@@ -90,9 +90,10 @@ SkinnedConstants CModelObject::GetSkinnedConstants(void)
 	return result;
 }
 
-void CModelObject::AddModel(LoadModel * pModel)
+void CModelObject::AddModel(const wstring& pModelTag)
 {
-	if (!pModel)
+	LoadModel* pModel = dynamic_cast<LoadModel*>(m_pComponent_Manager->Clone_Component(pModelTag));
+	if (pModel != nullptr)
 	{
 		m_pModel.push_back(pModel);
 	}
@@ -104,12 +105,18 @@ void CModelObject::Animate(const float fTimeElapsed)
 	{
 		if (m_Animtime > 3.f)
 		{
-			UINT animIndex = (m_pModel[m_AnimIndex]->getCurrAnimIndex() + 1) % m_pModel[m_AnimIndex]->getNumAnimations();
-			if (animIndex != m_pModel[m_AnimIndex]->getCurrAnimIndex())
-				m_pModel[m_AnimIndex]->SetCurrAnimIndex(animIndex);
+			m_AnimIndex++;
+			m_Animtime = 0.0f;
+			if (m_AnimIndex >= m_pModel.size())
+			{
+				m_AnimIndex  = m_AnimIndex % m_pModel.size();
+				m_pModel[m_AnimIndex]->SetAnimTime(0);
+				
+			}
 		}
 		m_pModel[m_AnimIndex]->BornTransform(fTimeElapsed);
 		DirtyFrames();
+
+		m_Animtime += fTimeElapsed;
 	}
-	m_Animtime += fTimeElapsed;
 }

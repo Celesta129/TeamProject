@@ -83,7 +83,7 @@ int CD3DApp::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-			m_Timer.Tick();
+			m_Timer.Tick(60.f);
 
 			if (!m_bAppPaused)
 			{

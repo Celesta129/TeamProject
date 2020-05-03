@@ -122,7 +122,7 @@ bool CGameFramework_Client::Initialize()
 	ID3D12CommandList* cmdLists[] = { m_GraphicsCommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);
 	FlushCommandQueue();
-
+	CTimer asdf;
 	return true;
 }
 
@@ -148,7 +148,7 @@ int CGameFramework_Client::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-			m_Timer.Tick();
+			m_Timer.Tick(60.f);
 
 			if (!m_bAppPaused)
 			{

@@ -174,6 +174,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
     <ClInclude Include="CSocket.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
@@ -217,6 +218,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
     <ClCompile Include="CSocket.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="ObjectShader.cpp" />
     <ClCompile Include="Object_TextureShader.cpp" />
