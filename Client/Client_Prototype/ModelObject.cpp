@@ -15,21 +15,21 @@ HRESULT CModelObject::Initialize(void)
 	HRESULT hr = E_FAIL;
 	if(FAILED(hr = CGameObject::Initialize()))
 		return hr;
-	if(FAILED(hr = Insert_Component_ToMap(L"Component_Model_Floor")))
-		return hr;
 
 	return S_OK;
 }
 
-HRESULT CModelObject::Initialize(const wstring& tag, ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
+HRESULT CModelObject::Initialize(const wstring& modeltag, const wstring& texturetag, ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
 	HRESULT hr = E_FAIL;
 	if (FAILED(hr = CGameObject::Initialize()))
 		return hr;
-	if (FAILED(hr = Insert_Component_ToMap(tag)))
+	if (FAILED(hr = Insert_Component_ToMap(modeltag)))
 		return hr;
-
-	m_pModel.push_back((LoadModel*)Get_Component(tag));
+	if (FAILED(hr = Insert_Component_ToMap(texturetag)))
+		return hr;
+	m_pModel.push_back((LoadModel*)Get_Component(modeltag));
+	pMaterial = (CMaterial*)Get_Component(texturetag);
 
 	// m_ani = nullptr;
 	m_NumofAnim = 0;
@@ -88,6 +88,29 @@ SkinnedConstants CModelObject::GetSkinnedConstants(void)
 		}
 	}
 	return result;
+}
+
+void CModelObject::ChangeAnim(const UINT & index)
+{
+	if (index < m_pModel.size())
+	{
+		m_pModel[m_AnimIndex]->SetAnimTime(0);
+
+		setAnimIndex(index);
+
+		m_pModel[m_AnimIndex]->SetAnimTime(0);
+		m_Animtime = 0.0f;
+	}
+}
+
+void CModelObject::setAnimIndex(const UINT & index)
+{
+	m_AnimIndex = index;
+}
+
+UINT CModelObject::getAnimIndex(void)
+{
+	return m_AnimIndex;
 }
 
 void CModelObject::AddModel(const wstring& pModelTag)

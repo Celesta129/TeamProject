@@ -173,6 +173,7 @@
     <ClInclude Include="Base.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
+    <ClInclude Include="CShader_Test.h" />
     <ClInclude Include="CSocket.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="ModelObject.h" />
@@ -199,7 +200,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Struct.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Typedef.h" />
@@ -217,6 +217,7 @@
     <ClCompile Include="Client_Prototype.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Component_Manager.cpp" />
+    <ClCompile Include="CShader_Test.cpp" />
     <ClCompile Include="CSocket.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelObject.cpp" />
@@ -225,7 +226,6 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="FrameResource.cpp" />
@@ -264,6 +264,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\TexObject.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextureModel.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>

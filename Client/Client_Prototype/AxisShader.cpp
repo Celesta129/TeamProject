@@ -284,7 +284,7 @@ void CAxisShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	}
 }
 
-void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName)
+void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects)
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
@@ -298,7 +298,7 @@ void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList *
 	CreateRootSignature(pDevice);
 	CreatePSO(pDevice, 1, PSO_OBJECT);
 
-	BuildObjects();
+	BuildObjects(vObjects, pDevice, pd3dCommandList);
 }
 
 void CAxisShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
@@ -357,7 +357,7 @@ void CAxisShader::UpdateObjectCBs()
 	}
 }
 
-void CAxisShader::BuildObjects(void)
+void CAxisShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 }

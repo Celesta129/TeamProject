@@ -1,6 +1,8 @@
 #pragma once
 #include "GameObject.h"
+#include "Material.h"
 
+class CMaterial;
 class CModelObject : public CGameObject
 {
 public:
@@ -8,7 +10,7 @@ public:
 	virtual ~CModelObject();
 public:
 	virtual HRESULT Initialize(void);
-	virtual HRESULT Initialize(const wstring& tag, ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual HRESULT Initialize(const wstring& modeltag,const wstring& texturetag, ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
@@ -16,7 +18,15 @@ public:
 public:
 	SkinnedConstants GetSkinnedConstants(void);
 
+	CMaterial* GetMaterial(void) {
+		return pMaterial;
+	};
 public:
+	void ChangeAnim(const UINT& index);
+
+	void setAnimIndex(const UINT& index);
+	UINT getAnimIndex(void);
+
 	void setMat(Material* pMaterial) { m_pMaterial = pMaterial; };
 	void AddModel(const wstring& pModel);
 	
@@ -33,5 +43,7 @@ protected:
 
 	vector<XMFLOAT4X4> m_Bones;
 	Material* m_pMaterial = nullptr;
+
+	CMaterial* pMaterial = nullptr;
 };
 

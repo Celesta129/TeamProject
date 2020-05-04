@@ -15,7 +15,7 @@ public:
 	CShader();
 	virtual ~CShader();
 public:
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName) = 0;
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects) = 0;
 
 			void ResetCmd(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
@@ -55,7 +55,7 @@ protected:
 	virtual void UpdateMainPassCB(CCamera* pCamera);
 	virtual void UpdateObjectCBs();
 
-	virtual void BuildObjects(void);
+	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 private:
@@ -71,6 +71,9 @@ protected:
 protected:
 	ComPtr<ID3D12RootSignature>* m_RootSignature = nullptr;
 	ComPtr<ID3D12DescriptorHeap> m_CbvSrvDescriptorHeap = nullptr;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;		// CBV와 SRV는 같은 DescriptorHeap을 쓰지만 SRV가 있는 Descriptor 핸들로 점프하기위해 저장한다.
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 
 	ComPtr<ID3D12PipelineState>* m_pPSOs;		UINT m_nPSO = 0;
 

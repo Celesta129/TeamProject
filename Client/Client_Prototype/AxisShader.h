@@ -27,7 +27,7 @@ protected:
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 	virtual void CreateConstantBufferViews(ID3D12Device* pDevice);
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName);
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects);
 
 	virtual void UpdateShaderVariables(const CTimer& timer, CCamera* pCamera);
 	virtual void ReleaseShaderVariables();
@@ -35,7 +35,7 @@ protected:
 	virtual void UpdateMainPassCB(CCamera* pCamera);
 	virtual void UpdateObjectCBs();
 
-	virtual void BuildObjects(void);
+	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 private:

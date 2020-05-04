@@ -31,7 +31,7 @@ private:
 	UINT					m_numVertices;
 	UINT					m_numMaterial;
 	UINT                    m_numBones;
-	XMMATRIX				m_GlobalInverse;
+	XMFLOAT4X4				m_GlobalInverse;
 
 	UINT					m_currAnimIndex = 0;		// 사실상 오브젝트에서는 모델 여러개를 사용하는것이지만 일단은 파일 임포트 과정에서 여러개 부를수도 있으니 만들어둔다.
 public:

@@ -74,9 +74,6 @@
     <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel">
       <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\04.Component\04.Model\Texture">
-      <UniqueIdentifier>{35ae851b-895f-4f38-b085-4a5b08cd6f4c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\06.Shader\02. AxisShader">
       <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
     </Filter>
@@ -85,6 +82,9 @@
     </Filter>
     <Filter Include="02.Utility\04.Component\04.Model\Material">
       <UniqueIdentifier>{ec709ae8-bf73-4acc-a49c-10efca757adf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\06.Shader\Shader_Test">
+      <UniqueIdentifier>{5ee01274-7d5c-4e47-81d6-27bbfc475a4e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -177,14 +177,14 @@
     <ClInclude Include="LoadModel.h">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="Object_TextureShader.h">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClInclude>
     <ClInclude Include="Animation.h">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="CShader_Test.h">
+      <Filter>02.Utility\06.Shader\Shader_Test</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>02.Utility\04.Component\04.Model\Material</Filter>
@@ -252,9 +252,6 @@
     <ClCompile Include="LoadModel.cpp">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>02.Utility\04.Component\04.Model\Texture</Filter>
-    </ClCompile>
     <ClCompile Include="Object_TextureShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClCompile>
@@ -270,6 +267,9 @@
     </ClCompile>
     <ClCompile Include="Animation.cpp">
       <Filter>02.Utility\04.Component\04.Model\01.LoadModel\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="CShader_Test.cpp">
+      <Filter>02.Utility\06.Shader\Shader_Test</Filter>
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>02.Utility\04.Component\04.Model\Material</Filter>
@@ -299,6 +299,9 @@
       <Filter>03.Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\LightingUtil.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextureModel.hlsl">
       <Filter>03.Shaders</Filter>
     </FxCompile>
   </ItemGroup>

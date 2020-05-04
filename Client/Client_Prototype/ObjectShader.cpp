@@ -286,7 +286,7 @@ void CObjectShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	}
 }
 
-void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName)
+void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects)
 {	
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
@@ -299,7 +299,7 @@ void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList
 	CreateRootSignature(pDevice);
 	CreatePSO(pDevice, 1, PSO_OBJECT);
 
-	BuildObjects();
+	BuildObjects(vObjects, pDevice, pd3dCommandList);
 }
 
 void CObjectShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
@@ -365,7 +365,7 @@ void CObjectShader::UpdateObjectCBs()
 	}
 }
 
-void CObjectShader::BuildObjects(void)
+void CObjectShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
 }

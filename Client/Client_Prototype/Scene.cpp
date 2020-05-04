@@ -6,7 +6,7 @@
 #include "ObjectShader.h"
 #include "AxisShader.h"
 #include "Object_TextureShader.h"
-
+#include "CShader_Test.h"
 #include "ModelObject.h"
 
 CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> pCommandList)
@@ -42,41 +42,23 @@ void CScene::BuildShaders()
 	
 	// For TextureObject
 	pShader = new CObject_TextureShader;
-	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl");
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", m_vObjects);
 	m_vShaders.push_back(pShader);
-
-
 	for (int i = 0; i < MAX_USER; ++i)
 	{
-		pObject = new CModelObject;
-		if (i % 3 == 0)
-		{
-			pObject->Initialize(L"Component_Model_idle", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-			pObject->AddModel(L"Component_Model_run");
-			pObject->AddModel(L"Component_Model_attack");
-		}
-			
-		else if(i % 3 == 1)
-			pObject->Initialize(L"Component_Model_run", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-		else
-			pObject->Initialize(L"Component_Model_attack", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-		m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-		pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-		
-		dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 0);
-
-		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
-		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
-
 		m_player[i] = new CPlayer();
-		m_player[i]->SetObjectInstance(pObject);
+		m_player[i]->SetObjectInstance(m_vObjects[i]);
 	}
 
-	pObject = new CModelObject;
-	dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
-	dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 1);
+	pShader = new Shader_Test;
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TextureModel.hlsl", m_vObjects);
+	m_vShaders.push_back(pShader);
+
+	//pObject = new CModelObject;
+	//dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	//m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	//pShader->Push_Object(pObject);		// 개별 셰이더에도 넣는다.
+	//dynamic_cast<CObject_TextureShader*>(pShader)->setMat(pObject, 1);
 }
 
 bool CScene::OnKeyboardInput(const float & fTimeElapsed)
@@ -329,6 +311,15 @@ void CScene::BuildComponents(void)
 	
 	pComponent = new LoadModel("resources/fbx/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_sandbox", pComponent);
+
+	pComponent = new CMaterial(L"resources/character_test.dds", L"Texture_character", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character", pComponent);
+	
+	pComponent = new LoadModel("resources/fbx/bench.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_bench",pComponent);
+
+	pComponent = new CMaterial(L"resources/dds/Bench_diffuse.dds", L"Texture_bench", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_bench", pComponent);
 }
 
 

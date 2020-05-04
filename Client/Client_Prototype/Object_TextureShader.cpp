@@ -220,7 +220,7 @@ void CObject_TextureShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	
 }
 
-void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName)
+void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CModelObject*>& vObjects)
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 	LoadTextures(pDevice,pd3dCommandList);
@@ -234,7 +234,7 @@ void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCom
 	
 	CreatePSO(pDevice, 1, PSO_OBJECT);
 
-	BuildObjects();
+	BuildObjects(vObjects, pDevice, pd3dCommandList);
 }
 
 void CObject_TextureShader::setMat(CModelObject* pObject, int matindex)
@@ -325,8 +325,33 @@ void CObject_TextureShader::UpdateSkinnedCBs()
 	}
 }
 
-void CObject_TextureShader::BuildObjects(void)
+void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CModelObject* pObject = nullptr;
+	CTransform* pTransform = nullptr;
+
+	int MAX_USER = 8;
+
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		pObject = new CModelObject;
+		
+		pObject->Initialize(L"Component_Model_idle",L"Texture_character", pDevice, pd3dCommandList);
+		pObject->AddModel(L"Component_Model_run");		// 애니메이션 추가
+		pObject->AddModel(L"Component_Model_attack");
+		
+		pObject->setAnimIndex(i % 3);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+
+		setMat(pObject, 0);
+		
+		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
+		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
+
+		
+	}
+
 }
 
 void CObject_TextureShader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)

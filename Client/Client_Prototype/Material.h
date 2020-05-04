@@ -1,45 +1,6 @@
 #pragma once
-#include "Base.h"
-#include "d3dUtil.h"
-class CTexture;
-struct CMaterial
-{
-public:
-	CMaterial();
-	virtual ~CMaterial();
+#include "Component.h"
 
-public:
-	std::string Name;
-
-	// Index into constant buffer corresponding to this material.
-	int MatCBIndex = -1;
-
-	// Index into SRV heap for diffuse texture.
-	int DiffuseSrvHeapIndex = -1;
-
-	// Index into SRV heap for normal texture.
-	int NormalSrvHeapIndex = -1;
-
-	int NumFramesDirty = NUM_FRAME_RESOURCE;
-
-	// Material constant buffer data used for shading.
-	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
-	float Roughness = .25f;
-	DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
-
-	CTexture* m_Texture;
-
-public:
-	//void UpdateShaderVariable(void);
-};
-
-typedef struct SRVROOTARGUMENTINFO
-{
-	UINT							m_nRootParameterIndex = 0;
-	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGpuDescriptorHandle;
-
-} SRVROOTARGUMENTINFO;
 #define RESOURCE_TEXTURE2D						0x01
 #define RESOURCE_TEXTURE2D_ARRAY			0x02	//[]
 #define RESOURCE_TEXTURE2DARRAY			0x03
@@ -48,20 +9,33 @@ typedef struct SRVROOTARGUMENTINFO
 #define RESOURCE_TEXTURE2D_SHADOWMAP	0x06
 #define RESOURCE_TEXTURE2D_HDR	0x07
 #define RESOURCE_BUFFER_FLOAT32			0x08
+
+typedef struct SRVROOTARGUMENTINFO
+{
+	UINT							m_nRootParameterIndex = 0;
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGpuDescriptorHandle;
+
+} SRVROOTARGUMENTINFO;
+
+
+
 struct CTexture
 {
+	CTexture();
+	~CTexture();
+
 	int								m_nSamplers = 0;
-	int								m_nTextures = 0;
 	UINT							m_nTexType = 0;
 
-	vector<ComPtr<ID3D12Resource>>	m_ppd3dTextures;
-	vector<ComPtr<ID3D12Resource>>	m_ppd3dTextureUploadBuffers;
-	vector<SRVROOTARGUMENTINFO>		m_pRootArgumentInfos;
-	vector<UINT>					m_pTextureType;
-	D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
+	ComPtr<ID3D12Resource>	m_pd3dTextures = nullptr;
+	ComPtr<ID3D12Resource>  m_pd3dTextureUploadBuffers = nullptr;
+	SRVROOTARGUMENTINFO		m_RootArgumentInfos;
+	UINT					m_pTextureType;
+	//D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_srvDesc;
 
 	//void AddTexture(ID3D12Resource* texture, ID3D12Resource* uploadbuffer, UINT textureType = RESOURCE_TEXTURE2D);
-	//void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	//void UpdateComputeShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	//void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, int nIndex);
 	//void ReleaseShaderVariables();
@@ -80,4 +54,31 @@ struct CTexture
 	//UINT GetTextureType(int index) { return(m_pTextureType[index]); }
 
 	//void ReleaseUploadBuffers();
+};
+
+class CMaterial : public CComponent
+{
+public:
+	CMaterial(const wstring& filename, const wstring& name, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CMaterial();
+
+public:
+	std::wstring Name;
+	std::wstring Filename;
+
+	int NumFramesDirty = NUM_FRAME_RESOURCE;
+
+	// Material constant buffer data used for shading.
+	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
+	float Roughness = .25f;
+	DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+
+	CTexture* m_pTexture;
+
+public:
+	//void UpdateShaderVariable(void);
+
+	virtual CComponent* Clone(void);
+	virtual int Free(void);
 };

@@ -208,7 +208,7 @@ void LoadModel::InitBones(UINT index, const aiMesh * pMesh)
 void LoadModel::InitAnimation(const aiScene* pScene)
 {
 	if (pScene) {
-		m_GlobalInverse = XMMatrixIdentity();
+		m_GlobalInverse = Matrix4x4::Identity();
 		for (UINT index = 0; index < pScene->mNumAnimations; ++index)
 		{
 			aiAnimation* paiAnimation = *(pScene->mAnimations + index);
@@ -337,10 +337,11 @@ void LoadModel::ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, co
 	//부모노드에 변환값 중첩해서 곱하기
 	XMMATRIX GlobalTransformation = ParentTransform * NodeTransformation;
 	//현재노드가 뼈 노드이면 변환정보를 뼈에 적용
+	XMMATRIX GlobalInverse = XMLoadFloat4x4(&m_GlobalInverse);
 	for (auto& p : m_Bones) {
 		if (p.first == pNode->mName.data) {
 			p.second.FinalTransformation =
-				m_GlobalInverse * GlobalTransformation * p.second.BoneOffset;
+				GlobalInverse * GlobalTransformation * p.second.BoneOffset;
 
 			/*if (p.first == "Bip001 L Hand") {
 				XMVECTOR tmp = p.second.BoneOffset.r[3];

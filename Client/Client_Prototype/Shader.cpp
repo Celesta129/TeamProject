@@ -451,7 +451,7 @@ void CShader::UpdateObjectCBs()
 	}
 }
 
-void CShader::BuildObjects(void)
+void CShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 }
