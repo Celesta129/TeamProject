@@ -7,7 +7,7 @@ public:
 	virtual ~CTimer();
 
 	void Reset(void);
-	void Tick(void);		// 타이머 시간 갱신
+	void Tick(float fFPS);		// 타이머 시간 갱신
 	void Start(void);
 	void Stop(void);
 

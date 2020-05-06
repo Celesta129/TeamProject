@@ -2,11 +2,16 @@
 
 #include "pch.h"
 #include "Timer.h"
+#include "CPlayer.h"
 #include "protocol.h"
 
 
 //global
 #define MAX_BUFFER 1024
+
+struct Point3D {
+	float x, y, z;
+};
 
 enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT };
 
@@ -40,13 +45,16 @@ public:
 		ZeroMemory(&m_recv_over.overlapped, sizeof(WSAOVERLAPPED));
 		m_prev_size = 0;
 		m_connected = false;
+
+		m_ani_index = 0;
+		m_dashed = false;
 	}
 };
 
 SOCKETINFO clients[MAX_USER];
 int g_curr_user_id = 0;
 HANDLE g_iocp;
-CTimer cTimer;
+CTimer GameTimer;
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -115,7 +123,7 @@ void send_move_packet(int user_id, int mover) {
 	sc_packet_move p;
 	p.id = mover;
 	p.size = sizeof(p);
-	p.type = CS_MOVEMENT;
+	p.type = SC_MOVEMENT;
 	p.ani_index = clients[mover].m_ani_index;
 	p.dashed = clients[mover].m_dashed;
 	p.x = clients[mover].playerX;
@@ -147,23 +155,22 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float x = clients[user_id].playerX;
-		float y = clients[user_id].playerY;
-		float z = clients[user_id].playerZ;
+		float fSpeed = 1.f;
+
 		if (packet->keydown) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].velocityY == 1.f;
+				clients[user_id].velocityZ = fSpeed;
 				break;
 			case CS_DOWN:
-				clients[user_id].velocityY == -1.f;
+				clients[user_id].velocityZ = -fSpeed;
 				break;
 			case CS_LEFT:
-				clients[user_id].velocityX == -1.f;
+				clients[user_id].velocityX = -fSpeed;
 				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX == 1.f;
+				clients[user_id].velocityX = fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -171,17 +178,34 @@ void process_packet(int user_id, char* buf) {
 				exit(-1);
 				break;
 			}
+			clients[user_id].m_ani_index = 1;
 		}
 		else {
-			clients[user_id].velocityX = 0.f; 
-			clients[user_id].velocityY = 0.f;
-			clients[user_id].velocityZ = 0.f;
+			switch (packet->direction)
+			{
+			case CS_UP:
+			case CS_DOWN:
+				clients[user_id].velocityZ = 0.f;
+				break;
+			case CS_LEFT:
+			case CS_RIGHT:
+				clients[user_id].velocityX = 0.f;
+				break;
+			default:
+				cout << "UnKnown Direction from Client move packet!\n";
+				DebugBreak;
+				exit(-1);
+				break;
+			}
+			clients[user_id].m_ani_index = 0;
 		}
 
-		clients[user_id].playerX = x;
-		clients[user_id].playerY = y;
-		clients[user_id].playerZ = z;
-		printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerY);
+		clients[user_id].playerX += clients[user_id].velocityX * GameTimer.DeltaTime();
+		clients[user_id].playerY += clients[user_id].velocityY * GameTimer.DeltaTime();
+		clients[user_id].playerZ += clients[user_id].velocityZ * GameTimer.DeltaTime();
+
+		printf("%f\n", GameTimer.DeltaTime());
+		//printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerZ);
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
 				send_move_packet(cl.m_id, user_id);
@@ -231,12 +255,57 @@ void recv_packet_construct(int user_id, int io_byte) {
 	}
 }
 
-void main_logic() {
-	cTimer.Reset();
-	while (true) {
-		cTimer.Tick();
+//충돌처리
+bool CheckCollBox(const CPlayer& trg, const Point3D& vMax, const Point3D& vMin)
+{
+	Point3D trg_min;
+	Point3D trg_max;
 
+	trg_min.x = trg.m_posX - trg.m_sizeX;
+	trg_min.y = trg.m_posY;
+	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+
+	trg_max.x = trg.m_posX + trg.m_sizeX;
+	trg_max.y = trg.m_posY + trg.m_sizeY;
+	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+
+	if((trg_min.x <= vMax.x && trg_max.x >= vMin.x) &&
+		(trg_min.y <= vMax.y && trg_max.y >= vMin.y) &&
+		(trg_min.z <= vMax.z && trg_max.z >= vMin.z))
+	{
+		return true;
 	}
+	else
+	{
+		return false;
+	}
+}
+
+bool CheckCollSphere(const CPlayer& trg, const Point3D& src, const float& radius)
+{
+	Point3D trg_min;
+	Point3D trg_max;
+
+	trg_min.x = trg.m_posX - trg.m_sizeX;
+	trg_min.y = trg.m_posY;
+	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+
+	trg_max.x = trg.m_posX + trg.m_sizeX;
+	trg_max.y = trg.m_posY + trg.m_sizeY;
+	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+
+	float close_x = max(trg_min.x, min(src.x, trg_max.x));
+	float close_y = max(trg_min.y, min(src.y, trg_max.y));
+	float close_z = max(trg_min.z, min(src.z, trg_max.z));
+
+	float fDistance = sqrt((close_x - src.x) * (close_x - src.x) +
+						(close_y - src.y) * (close_y - src.y) +
+						(close_z - src.z) * (close_z - src.z));
+
+	if (fDistance > radius)
+		return false;   //충돌안됨
+	else
+		return true;    //충돌
 }
 
 int main()
@@ -288,6 +357,8 @@ int main()
 	accept_over.op = OP_ACCEPT;
 	AcceptEx(listen_socket, client_socket, accept_over.messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &accept_over.overlapped);
 
+	GameTimer.Reset();
+
 	while (1) {
 		//io que넣기
 		DWORD io_byte;
@@ -298,6 +369,7 @@ int main()
 		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
 		int user_id = static_cast<int>(key);
 
+		GameTimer.Tick(60.f);
 		switch (exover->op)
 		{
 		case OP_RECV: {
@@ -330,14 +402,14 @@ int main()
 			clients[user_id].m_socket = client_socket;
 
 			//컨텐츠 초기화
+			srand((unsigned)time(NULL));
 			clients[user_id].playerX = rand() % 1500;
-			clients[user_id].playerY = rand() % 1500;
 			clients[user_id].playerZ = 0;
+			clients[user_id].playerZ = rand() % 1500;
 			DWORD flags = 0;
 
 			//로그인 정보 수신
 			WSARecv(client_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
-			printf("\n");
 
 			//접속 완료후 accept 대기
 			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
