@@ -1,5 +1,5 @@
 #pragma once
-class CGameObject;
+class CModelObject;
 class CPlayer
 {
 public:
@@ -14,14 +14,17 @@ public:
 	void SetAnimation_index(int animation_index);
 	void GetAnimation_index(int *animation_index);
 
-	void SetObjectInstance(CGameObject* pObject) {
+	void SetObjectInstance(CModelObject* pObject) {
 		m_pObjectInstance = pObject;
+	}
+	CModelObject* getObject(void) {
+		return m_pObjectInstance;
 	}
 private:
 	float m_posX, m_posY, m_posZ;
 	float m_velocityX, m_velocityY, m_velocityZ;
 	int m_animation_index = 0;
 
-	CGameObject* m_pObjectInstance = nullptr;
+	CModelObject* m_pObjectInstance = nullptr;
 };
 

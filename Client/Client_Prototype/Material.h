@@ -66,8 +66,6 @@ public:
 	std::wstring Name;
 	std::wstring Filename;
 
-	int NumFramesDirty = NUM_FRAME_RESOURCE;
-
 	// Material constant buffer data used for shading.
 	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
@@ -78,7 +76,7 @@ public:
 
 public:
 	//void UpdateShaderVariable(void);
-
+	MaterialConstants getMaterialConst(void);
 	virtual CComponent* Clone(void);
 	virtual int Free(void);
 };

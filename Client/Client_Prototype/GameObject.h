@@ -29,7 +29,13 @@ public:
 	// -----------------------for FramesDirty-----------------------
 protected:
 	int m_nNumFramesDirty = NUM_FRAME_RESOURCE;		// 이 수가 0보다 크다면 CB를 업데이트할것임.
+	CTransform* m_pTransform = nullptr;
+
 public:
+	CTransform* Get_Transform(void) {
+		return m_pTransform;
+	}
+
 	int GetFramesDirty(void) { 
 		return m_nNumFramesDirty; 
 	}

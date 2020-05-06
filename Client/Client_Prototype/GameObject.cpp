@@ -21,6 +21,7 @@ HRESULT CGameObject::Initialize(void)
 	if (FAILED(Insert_Component_ToMap(L"Component_Transform")))
 		return E_FAIL;
 	
+	m_pTransform = (CTransform*)Get_Component(L"Component_Transform");
 	return S_OK;
 }
 

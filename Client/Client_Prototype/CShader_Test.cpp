@@ -262,7 +262,7 @@ void Shader_Test::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 		CPUSRVHANDLEMAP iter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
 		if (iter != m_mapTextureCPUSrvHandle.end())
 			continue;
-		
+
 		ID3D12Resource* pResource = pMaterial->m_pTexture->m_pd3dTextures.Get();
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pObject->GetMaterial()->m_pTexture->m_srvDesc;
 
@@ -339,8 +339,33 @@ void Shader_Test::CreateConstantBufferViews(ID3D12Device * pDevice)
 void Shader_Test::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
 	UpdateMainPassCB(pCamera);
-	UpdateObjectCBs();
-	UpdateMaterialCB();
+	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
+	auto currMaterialCB = m_CurrFrameResource->MaterialCB.get();
+
+	for (UINT i = 0; i < m_vpObjects.size(); ++i)
+	{
+		CModelObject* pObject = *m_vpObjects[i];
+		if (pObject == nullptr)
+			continue;
+		
+		if (pObject->GetFramesDirty() > 0)
+		{
+			currObjectCB->CopyData(i, pObject->GetObjectConstants());
+
+			CMaterial* material = pObject->GetMaterial();
+			if (material == nullptr)
+				continue;
+			
+			XMMATRIX matTransform = XMLoadFloat4x4(&material->MatTransform);
+
+			MaterialConstants matConstants = material->getMaterialConst();
+			currMaterialCB->CopyData(i, matConstants);
+
+			pObject->DecreaseFramesDirty();
+		}
+	}
+	//UpdateObjectCBs();
+	//UpdateMaterialCB();
 	
 }
 
@@ -385,33 +410,6 @@ void Shader_Test::UpdateMainPassCB(CCamera * pCamera)
 
 void Shader_Test::UpdateMaterialCB()
 {
-	auto currMaterialCB = m_CurrFrameResource->MaterialCB.get();
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
-	{
-		CModelObject* pObject = *m_vpObjects[i];
-		if (pObject == nullptr)
-			continue;
-
-		CMaterial* mat = pObject->GetMaterial();
-		if (mat == nullptr)
-			continue;
-
-		if (mat->NumFramesDirty > 0)
-		{
-			XMMATRIX matTransform = XMLoadFloat4x4(&mat->MatTransform);
-
-			MaterialConstants matConstants;
-			matConstants.DiffuseAlbedo = mat->DiffuseAlbedo;
-			matConstants.FresnelR0 = mat->FresnelR0;
-			matConstants.Roughness = mat->Roughness;
-			XMStoreFloat4x4(&matConstants.MatTransform, XMMatrixTranspose(matTransform));
-
-			currMaterialCB->CopyData(i, matConstants);
-
-			// Next FrameResource need to be updated too.
-			mat->NumFramesDirty--;
-		}
-	}
 }
 
 void Shader_Test::UpdateObjectCBs()
@@ -439,8 +437,50 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_bench", L"Texture_bench", pDevice, pd3dCommandList);
 	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5, 1.5f, 1.5f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 55.f, 400.f));
+	pObject->Get_Transform()->Rotate(30.f,0.f,0.f);
 	Push_Object(pObject);
 
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_bench", L"Texture_bench", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5f, 1.5f, 1.5f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(400.f, 55.f, 400.f));
+	pObject->Get_Transform()->Rotate(30.f, 0.f, 0.f);
+	Push_Object(pObject);
+
+
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	Push_Object(pObject);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-90.f, 0.f, 0.f));
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(90.f, 0.f, 0.f));
+
+	// Floor
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_Floor", L"Texture_Floor", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, -50.f, 0.f));
+
+	// Sandbox
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_SandBox", L"Texture_SandBox", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(5.f, 5.f, 5.f));
 }
 
 void Shader_Test::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)

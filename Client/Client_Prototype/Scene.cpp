@@ -103,6 +103,40 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 		if (m_vCameras[7])
 			m_pCurrentCamera = m_vCameras[7];
 	}
+
+	float fSpeed = 500.f * fTimeElapsed;
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	{
+		if (m_vObjects[0] == nullptr)
+			return false;
+
+		m_vObjects[0]->Get_Transform()->MovePos(XMFLOAT3(-fSpeed,0.f,0.f));
+		m_vObjects[0]->DirtyFrames();
+	}
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+		if (m_vObjects[0] == nullptr)
+			return false;
+
+		m_vObjects[0]->Get_Transform()->MovePos(XMFLOAT3(fSpeed, 0.f, 0.f));
+		m_vObjects[0]->DirtyFrames();
+	}
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	{
+		if (m_vObjects[0] == nullptr)
+			return false;
+
+		m_vObjects[0]->Get_Transform()->MovePos(XMFLOAT3(0.f, 0.f, fSpeed));
+		m_vObjects[0]->DirtyFrames();
+	}
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	{
+		if (m_vObjects[0] == nullptr)
+			return false;
+
+		m_vObjects[0]->Get_Transform()->MovePos(XMFLOAT3(0.f, 0.f, -fSpeed));
+		m_vObjects[0]->DirtyFrames();
+	}
 	return false;
 }
 
@@ -117,8 +151,8 @@ void CScene::OnMouseMove(WPARAM btnState, int x, int y, const POINT& lastPoint)
 
 	float Unit = 0.25f;		//0.25f
 	float Unit2 = 0.05f;		//0.05f
-	float fMax_Radius = 200.f;
-	float fMin_Radius = 50.f;
+	float fMax_Radius = 500.f;
+	float fMin_Radius = 500.f;
 
 
 	if ((btnState & MK_LBUTTON) != 0)
@@ -309,17 +343,28 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/attack_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_attack", pComponent);
 	
-	pComponent = new LoadModel("resources/fbx/xyz.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Component_Model_sandbox", pComponent);
-
 	pComponent = new CMaterial(L"resources/character_test.dds", L"Texture_character", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_character", pComponent);
 	
 	pComponent = new LoadModel("resources/fbx/bench.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_bench",pComponent);
-
 	pComponent = new CMaterial(L"resources/dds/Bench_diffuse.dds", L"Texture_bench", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_bench", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/brick_wall_A.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_brick_wall_A", pComponent);
+	pComponent = new CMaterial(L"resources/dds/Brickwall_A_diffuse.dds", L"Texture_brick_wall_A", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_brick_wall_A", pComponent);
+
+	pComponent = new LoadModel("resources/floor_playground_test1.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_Floor", pComponent);
+	pComponent = new CMaterial(L"resources/map_playground_floor.dds", L"Texture_Floor", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Floor", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/SandBox.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_SandBox", pComponent);
+	pComponent = new CMaterial(L"resources/dds/SandBox_diffuse.dds", L"Texture_SandBox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_SandBox", pComponent);
 }
 
 

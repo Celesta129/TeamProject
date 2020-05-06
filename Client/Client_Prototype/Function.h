@@ -138,6 +138,11 @@ namespace Vector3
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
 	}
+
+	inline XMFLOAT3 Muliply(XMFLOAT3& xmf3Vector, const float& fmul)
+	{
+		return XMFLOAT3(xmf3Vector.x * fmul, xmf3Vector.y * fmul, xmf3Vector.z * fmul);
+	}
 }
 namespace Vector4
 {

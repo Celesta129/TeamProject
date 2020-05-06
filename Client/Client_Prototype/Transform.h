@@ -17,7 +17,7 @@ public:
 	XMFLOAT3 Get_Scale(void);
 	XMFLOAT3 Get_Pos(void);
 
-	void Set_Scale(XMFLOAT3* pScale);
+	void Set_Scale(const XMFLOAT3& pScale);
 
 	void Rotate(float fPitch, float fYaw, float fRoll);
 	void MovePos(const XMFLOAT3& Pos);

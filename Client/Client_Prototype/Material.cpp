@@ -30,6 +30,17 @@ CMaterial::~CMaterial()
 }
 
 
+MaterialConstants CMaterial::getMaterialConst(void)
+{
+	MaterialConstants result;
+	result.DiffuseAlbedo = DiffuseAlbedo;
+	result.FresnelR0 = FresnelR0;
+	result.MatTransform = MatTransform;
+	result.Roughness = Roughness;
+
+	return result;
+}
+
 CComponent * CMaterial::Clone(void)
 {
 	AddRef();

@@ -245,9 +245,34 @@ void CObject_TextureShader::setMat(CModelObject* pObject, int matindex)
 void CObject_TextureShader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
 	UpdateMainPassCB(pCamera);
-	UpdateObjectCBs();
-	UpdateMaterialCB();
-	UpdateSkinnedCBs();
+	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
+	auto currMaterialCB = m_CurrFrameResource->MaterialCB.get();
+	auto currSkinnedCB = m_CurrFrameResource->SkinnedCB.get();
+	for (UINT i = 0; i < m_vpObjects.size(); ++i)
+	{
+		CModelObject* pObject = *m_vpObjects[i];
+		if (pObject == nullptr)
+			continue;
+
+		bool result = true;
+		if (pObject->GetFramesDirty() > 0)
+		{
+			currObjectCB->CopyData(i, pObject->GetObjectConstants());
+			currSkinnedCB->CopyData(i, pObject->GetSkinnedConstants());
+			
+			CMaterial* material = pObject->GetMaterial();
+			if (material == nullptr)
+				result = false;
+
+			XMMATRIX matTransform = XMLoadFloat4x4(&material->MatTransform);
+
+			MaterialConstants matConstants = material->getMaterialConst();
+			currMaterialCB->CopyData(i, matConstants);
+
+		}
+		if (result == true)
+			pObject->DecreaseFramesDirty();
+	}
 }
 
 void CObject_TextureShader::ReleaseShaderVariables()
@@ -348,6 +373,7 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 		
 		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
 		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
+		pTransform->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
 
 		
 	}
