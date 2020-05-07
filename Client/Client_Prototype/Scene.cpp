@@ -361,9 +361,9 @@ void CScene::BuildComponents(void)
 	pComponent = new CMaterial(L"resources/dds/Brickwall_B_diffuse.dds", L"Texture_brick_wall_B", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_brick_wall_B", pComponent);
 
-	pComponent = new LoadModel("resources/floor_playground_test1.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new LoadModel("resources/map_playground_floor.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_Floor", pComponent);
-	pComponent = new CMaterial(L"resources/map_playground_floor_ver.dds", L"Texture_Floor", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new CMaterial(L"resources/map_playground_floor_test.dds", L"Texture_Floor", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Floor", pComponent);
 
 	pComponent = new LoadModel("resources/fbx/SandBox.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());

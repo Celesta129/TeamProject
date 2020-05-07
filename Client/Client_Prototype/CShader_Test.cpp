@@ -456,7 +456,7 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 	Push_Object(pObject);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -725.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-700.f, 0.f, -700.f));
 
 	for (int i = 0; i < 7; ++i) {
 		pObject = new CModelObject;
@@ -464,14 +464,14 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -625.f + 200.f * i));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-700.f, 0.f, -600.f + 200.f * i));
 
 		pObject = new CModelObject;
 		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 		Push_Object(pObject);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -525.f + 200.f * i));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-700.f, 0.f, -500.f + 200.f * i));
 	}
 
 	for (int i = 0; i < 7; ++i) {
@@ -480,14 +480,14 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(-625.f + 200.f * i, 0.f, 675.f));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-600.f + 200.f * i, 0.f, 700.f));
 
 		pObject = new CModelObject;
 		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
 		Push_Object(pObject);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(-525.f + 200.f * i, 0.f, 675.f));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-500.f + 200.f * i, 0.f, 700.f));
 	}
 
 	for (int i = 0; i < 7; ++i) {
@@ -496,14 +496,14 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(675.f, 0.f, -625.f + 200.f * i));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(700.f, 0.f, -600.f + 200.f * i));
 
 		pObject = new CModelObject;
 		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 		Push_Object(pObject);
-		pObject->Get_Transform()->MovePos(XMFLOAT3(675.f, 0.f, -725.f + 200.f * i));
+		pObject->Get_Transform()->MovePos(XMFLOAT3(700.f, 0.f, -700.f + 200.f * i));
 	}
 
 	// Floor
@@ -571,7 +571,7 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(0.f, 90.f, 0.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-750.f, 150.f, 0.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-1025.f, 150.f, 0.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	pObject = new CModelObject;
@@ -579,7 +579,15 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(0.f, 0.f, 0.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 150.f, 750.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 150.f, 1025.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_BillBoard", L"Texture_BillBoard", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(0.f, -90.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(1025.f, 150.f, 0.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	//Flag
