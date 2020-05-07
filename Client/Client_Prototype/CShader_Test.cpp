@@ -451,13 +451,6 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	Push_Object(pObject);
 
 	//Brick
-	pObject = new CModelObject;
-	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
-	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
-	Push_Object(pObject);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-700.f, 0.f, -700.f));
-
 	for (int i = 0; i < 7; ++i) {
 		pObject = new CModelObject;
 		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
@@ -506,6 +499,45 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 		pObject->Get_Transform()->MovePos(XMFLOAT3(700.f, 0.f, -700.f + 200.f * i));
 	}
 
+	for (int i = 0; i < 3; ++i) {
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(600.f - 200.f * i, 0.f, -700.f));
+
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		Push_Object(pObject);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(500.f - 200.f * i, 0.f, -700.f));
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-600.f + 200.f * i, 0.f, -700.f));
+
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		Push_Object(pObject);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-700.f + 200.f * i, 0.f, -700.f));
+	}
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+	Push_Object(pObject);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-100.f, 0.f, -700.f));
+
 	// Floor
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_Floor", L"Texture_Floor", pDevice, pd3dCommandList);
@@ -546,7 +578,7 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -300.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -250.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	pObject = new CModelObject;
@@ -554,7 +586,7 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -450.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -400.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	pObject = new CModelObject;
@@ -562,7 +594,7 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -600.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -550.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	//BillBoard
