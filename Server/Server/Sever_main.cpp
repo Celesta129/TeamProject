@@ -369,7 +369,7 @@ int main()
 		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
 		int user_id = static_cast<int>(key);
 
-		GameTimer.Tick(60.f);
+		GameTimer.Tick(30.f);
 		switch (exover->op)
 		{
 		case OP_RECV: {

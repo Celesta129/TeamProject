@@ -437,34 +437,74 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_bench", L"Texture_bench", pDevice, pd3dCommandList);
 	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5, 1.5f, 1.5f));
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 55.f, 400.f));
-	pObject->Get_Transform()->Rotate(30.f,0.f,0.f);
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
+	pObject->Get_Transform()->Rotate(25.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 61.f, 450.f));
 	Push_Object(pObject);
 
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_bench", L"Texture_bench", pDevice, pd3dCommandList);
 	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5f, 1.5f, 1.5f));
-	pObject->Get_Transform()->MovePos(XMFLOAT3(400.f, 55.f, 400.f));
-	pObject->Get_Transform()->Rotate(30.f, 0.f, 0.f);
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
+	pObject->Get_Transform()->Rotate(25.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(400.f, 61.f, 450.f));
 	Push_Object(pObject);
 
-
-
+	//Brick
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
 	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 	Push_Object(pObject);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(-90.f, 0.f, 0.f));
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -725.f));
 
-	pObject = new CModelObject;
-	pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
-	vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
-	Push_Object(pObject);
-	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
-	pObject->Get_Transform()->MovePos(XMFLOAT3(90.f, 0.f, 0.f));
+	for (int i = 0; i < 7; ++i) {
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -625.f + 200.f * i));
+
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+		Push_Object(pObject);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-725.f, 0.f, -525.f + 200.f * i));
+	}
+
+	for (int i = 0; i < 7; ++i) {
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-625.f + 200.f * i, 0.f, 675.f));
+
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+		Push_Object(pObject);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(-525.f + 200.f * i, 0.f, 675.f));
+	}
+
+	for (int i = 0; i < 7; ++i) {
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_B", L"Texture_brick_wall_B", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		Push_Object(pObject);
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(675.f, 0.f, -625.f + 200.f * i));
+
+		pObject = new CModelObject;
+		pObject->Initialize(L"Component_Model_brick_wall_A", L"Texture_brick_wall_A", pDevice, pd3dCommandList);
+		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+		Push_Object(pObject);
+		pObject->Get_Transform()->MovePos(XMFLOAT3(675.f, 0.f, -725.f + 200.f * i));
+	}
 
 	// Floor
 	pObject = new CModelObject;
@@ -480,7 +520,76 @@ void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pD
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
-	pObject->Get_Transform()->Set_Scale(XMFLOAT3(5.f, 5.f, 5.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(6.f, 6.f, 3.f));
+
+	// SeeSaw
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_SeeSaw", L"Texture_SeeSaw", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(400.f, 42.f, -350.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5f, 1.5f, 1.5f));
+
+	// SeeSaw
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_SeeSaw", L"Texture_SeeSaw", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(400.f, 42.f, -550.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.5f, 1.5f, 1.5f));
+
+	// HobbyHorse
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_HobbyHorse", L"Texture_HobbyHorse_red", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -300.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_HobbyHorse", L"Texture_HobbyHorse_yellow", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -450.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_HobbyHorse", L"Texture_HobbyHorse_red", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 90.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-400.f, 15.f, -600.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	//BillBoard
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_BillBoard", L"Texture_BillBoard", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(0.f, 90.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(-750.f, 150.f, 0.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_BillBoard", L"Texture_BillBoard", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(0.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 150.f, 750.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	//Flag
+	pObject = new CModelObject;
+	pObject->Initialize(L"Component_Model_Flag", L"Texture_Flag", pDevice, pd3dCommandList);
+	vObjects.push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 5.f, 0.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 }
 
 void Shader_Test::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
