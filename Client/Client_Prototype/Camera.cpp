@@ -59,7 +59,7 @@ void CCamera::Update(float fTimeElapsed)
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	GenerateViewMatrix(pos, target, up);
-	GenerateProjectionMatrix(NEAR_PLANE_DISTANCE,FAR_PLANE_DISTANCE, BASE_CAMERA_ASPECT, BASE_CAMERA_FOV);
+	GenerateProjectionMatrix(NEAR_PLANE_DISTANCE,1500.f, BASE_CAMERA_ASPECT, BASE_CAMERA_FOV);
 }
 
 void CCamera::CreateShaderVariables(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)

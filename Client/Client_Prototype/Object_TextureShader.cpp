@@ -355,24 +355,30 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 	CModelObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
 
-	int MAX_USER = 8;
+	int MAX_USER = 3;
 
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		pObject = new CModelObject;
 		
 		pObject->Initialize(L"Component_Model_idle",L"Texture_character", pDevice, pd3dCommandList);
-		pObject->AddModel(L"Component_Model_run");		// 애니메이션 추가
-		pObject->AddModel(L"Component_Model_attack");
 		
-		pObject->setAnimIndex(i % 3);
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 
 		setMat(pObject, 0);
 		
 		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
-		pTransform->MovePos(XMFLOAT3(50.f * i, 0.f, 0.f));
+		if (i == 1)
+		{
+			pTransform->MovePos(XMFLOAT3(125, 0.f, 100.f));
+			pTransform->Rotate(0.f, 45.f, 0.f);
+		}
+		else if (i == 2)
+		{
+			pTransform->MovePos(XMFLOAT3(-300, 0.f, -250));
+			pTransform->Rotate(0.f, 180.f, 0.f);
+		}
 		pTransform->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
 
 		

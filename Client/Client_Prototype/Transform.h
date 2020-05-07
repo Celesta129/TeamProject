@@ -14,14 +14,17 @@ public:
 	XMFLOAT4X4 Get_World(void) {return m_xmf4x4World;	};
 	void Set_World(XMFLOAT4X4* pWorld);
 	
-	XMFLOAT3 Get_Scale(void);
-	XMFLOAT3 Get_Pos(void);
+	const XMFLOAT3 Get_Scale(void);
+	const XMFLOAT3 Get_Pos(void);
+	const XMFLOAT3 Get_Dir(void);
 
 	void Set_Scale(const XMFLOAT3& pScale);
-
-	void Rotate(float fPitch, float fYaw, float fRoll);
-	void MovePos(const XMFLOAT3& Pos);
 	void Set_Pos(const XMFLOAT3& Pos);
+	void Set_Rotate(float fRoll, float fPitch, float fYaw);
+	
+	void Rotate(float fRoll, float fPitch, float fYaw);
+	void MovePos(const XMFLOAT3& Pos);
+	void Go_Straight(const float fSpeed);
 
 public:
 	virtual CComponent* Clone(void);

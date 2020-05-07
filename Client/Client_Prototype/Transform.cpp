@@ -22,14 +22,34 @@ void CTransform::Set_World(XMFLOAT4X4 * pWorld)
 	m_xmf4x4World = *pWorld;
 }
 
-XMFLOAT3 CTransform::Get_Scale(void)
+const XMFLOAT3 CTransform::Get_Scale(void)
 {
-	return XMFLOAT3();
+	XMFLOAT3 vRight, vUp, vLook;
+	memcpy(&vRight, &m_xmf4x4World.m[0][0], sizeof(XMFLOAT3));
+	memcpy(&vUp, &m_xmf4x4World.m[1][0], sizeof(XMFLOAT3));
+	memcpy(&vLook, &m_xmf4x4World.m[2][0], sizeof(XMFLOAT3));
+
+	float lengthRight = Vector3::Length(vRight);
+	float lengthUp = Vector3::Length(vUp);
+	float lengthLook = Vector3::Length(vLook);
+
+	return XMFLOAT3(lengthRight, lengthUp, lengthLook);
 }
 
-XMFLOAT3 CTransform::Get_Pos(void)
+const XMFLOAT3 CTransform::Get_Pos(void)
 {
 	return XMFLOAT3(m_xmf4x4World.m[3]);
+}
+
+const XMFLOAT3 CTransform::Get_Dir(void)
+{
+	XMFLOAT3 Direction;
+	Direction.x = Vector3::Length((XMFLOAT3)m_xmf4x4World.m[0]);
+	Direction.y = Vector3::Length((XMFLOAT3)m_xmf4x4World.m[1]);
+	Direction.z = Vector3::Length((XMFLOAT3)m_xmf4x4World.m[2]);
+
+	Direction = Vector3::Normalize(Direction);
+	return Direction;
 }
 
 void CTransform::Set_Scale(const XMFLOAT3& pScale)
@@ -66,9 +86,30 @@ void CTransform::MovePos(const XMFLOAT3& Pos)
 	m_xmf4x4World.m[3][2] += Pos.z;
 }
 
+void CTransform::Go_Straight(const float fSpeed)
+{
+	XMFLOAT3 vDir = Vector3::Normalize((XMFLOAT3)m_xmf4x4World.m[2]);
+	XMFLOAT3 vMove = Vector3::Muliply(vDir, fSpeed);
+
+	MovePos(vMove);
+}
+
 void CTransform::Set_Pos(const XMFLOAT3& Pos)
 {
 	memcpy(m_xmf4x4World.m[3], &Pos, sizeof(XMFLOAT3));
+}
+
+void CTransform::Set_Rotate(float fRoll, float fPitch ,float fYaw)
+{
+	XMFLOAT3 vPos;
+	memcpy(&vPos, &m_xmf4x4World.m[3][0], sizeof(XMFLOAT3));
+
+	XMFLOAT3 vScale = Get_Scale();
+
+	m_xmf4x4World = Matrix4x4::Identity();
+	Set_Scale(vScale);
+	Rotate(fRoll, fPitch, fYaw);
+	MovePos(vPos);
 }
 
 CComponent * CTransform::Clone(void)

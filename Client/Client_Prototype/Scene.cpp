@@ -44,7 +44,7 @@ void CScene::BuildShaders()
 	pShader = new CObject_TextureShader;
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", m_vObjects);
 	m_vShaders.push_back(pShader);
-	for (int i = 0; i < MAX_USER; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		m_player[i] = new CPlayer();
 		m_player[i]->SetObjectInstance(m_vObjects[i]);
@@ -77,31 +77,6 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 	{
 		if (m_vCameras[2])
 			m_pCurrentCamera = m_vCameras[2];
-	}
-	if (GetAsyncKeyState('4') & 0x8000)
-	{
-		if (m_vCameras[3])
-			m_pCurrentCamera = m_vCameras[3];
-	}
-	if (GetAsyncKeyState('5') & 0x8000)
-	{
-		if (m_vCameras[4])
-			m_pCurrentCamera = m_vCameras[4];
-	}
-	if (GetAsyncKeyState('6') & 0x8000)
-	{
-		if (m_vCameras[5])
-			m_pCurrentCamera = m_vCameras[5];
-	}
-	if (GetAsyncKeyState('7') & 0x8000)
-	{
-		if (m_vCameras[6])
-			m_pCurrentCamera = m_vCameras[6];
-	}
-	if (GetAsyncKeyState('8') & 0x8000)
-	{
-		if (m_vCameras[7])
-			m_pCurrentCamera = m_vCameras[7];
 	}
 
 	float fSpeed = 500.f * fTimeElapsed;
