@@ -79,7 +79,7 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 			m_pCurrentCamera = m_vCameras[2];
 	}
 
-	float fSpeed = 500.f * fTimeElapsed;
+	/*float fSpeed = 500.f * fTimeElapsed;
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
 		if (m_vObjects[0] == nullptr)
@@ -111,7 +111,7 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 
 		m_vObjects[0]->Get_Transform()->MovePos(XMFLOAT3(0.f, 0.f, -fSpeed));
 		m_vObjects[0]->DirtyFrames();
-	}
+	}*/
 	return false;
 }
 

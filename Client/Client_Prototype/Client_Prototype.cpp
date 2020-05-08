@@ -359,7 +359,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		m_pScene->getplayer(other_id)->SetVelocity(p_movement->vx, p_movement->vy, p_movement->vz);
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_movement->ani_index);
 
-		//cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
+		cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
 		
 	}
 		break;

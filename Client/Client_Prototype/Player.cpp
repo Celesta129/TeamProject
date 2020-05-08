@@ -1,5 +1,5 @@
 #include "Player.h"
-
+#include "ModelObject.h"
 
 
 CPlayer::CPlayer()
@@ -25,6 +25,12 @@ void CPlayer::SetPos(float x, float y, float z)
 	m_posX = x;
 	m_posY = y;
 	m_posZ = z;
+
+	if (m_pObjectInstance != nullptr)
+	{
+		m_pObjectInstance->Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
+		m_pObjectInstance->DirtyFrames();
+	}
 }
 
 void CPlayer::GetPos(float * x, float * y, float * z)

@@ -22,7 +22,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
 	bool Push_Object(CModelObject* pObject);
-
+	vector<CModelObject**>& Get_Vector(void) {
+		return m_vpObjects;
+	};
 
 	virtual int Free(void);
 protected:
