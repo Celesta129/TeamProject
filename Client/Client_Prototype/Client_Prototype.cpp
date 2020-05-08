@@ -323,6 +323,8 @@ void CGameFramework_Client::processPacket(char* buf)
 		//player객체 추가
 		m_Player = m_pScene->getplayer(m_client_id);
 		m_pScene->getplayer(m_client_id)->SetPos(tempx, tempy, tempz);
+		m_pScene->getplayer(m_client_id)->Setconnected(true);
+
 		cout << m_client_id << " : (" << tempx << ", " << tempy << ", " << tempz << ")\n";
 	}
 		break;
@@ -333,7 +335,8 @@ void CGameFramework_Client::processPacket(char* buf)
 		float tempx = p_enter->posX, tempy = p_enter->posY, tempz = p_enter->posZ;
 
 		m_pScene->getplayer(other_id)->SetPos(tempx, tempy, tempz);
-		cout << m_client_id << " : (" << tempx << ", " << tempy << ", " << tempz << ")\n";
+		m_pScene->getplayer(other_id)->Setconnected(true);
+		cout << other_id << " : (" << tempx << ", " << tempy << ", " << tempz << ")\n";
 	}
 		break;
 	case SC_LEAVE: {
@@ -356,7 +359,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		m_pScene->getplayer(other_id)->SetVelocity(p_movement->vx, p_movement->vy, p_movement->vz);
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_movement->ani_index);
 
-		cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
+		//cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
 		
 	}
 		break;

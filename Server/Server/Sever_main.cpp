@@ -403,9 +403,9 @@ int main()
 
 			//컨텐츠 초기화
 			srand((unsigned)time(NULL));
-			clients[user_id].playerX = rand() % 1500;
+			clients[user_id].playerX = 0;
 			clients[user_id].playerZ = 0;
-			clients[user_id].playerZ = rand() % 1500;
+			clients[user_id].playerZ = 0;
 			DWORD flags = 0;
 
 			//로그인 정보 수신

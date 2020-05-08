@@ -11,6 +11,8 @@ CPlayer::CPlayer()
 	m_velocityX = 0.f;
 	m_velocityY = 0.f;
 	m_velocityZ = 0.f;
+
+	m_connected = false;
 }
 
 
