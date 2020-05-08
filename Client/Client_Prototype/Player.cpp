@@ -57,6 +57,10 @@ void CPlayer::GetVelocity(float * x, float * y, float * z)
 void CPlayer::SetAnimation_index(int animation_index)
 {
 	m_animation_index = animation_index;
+	if (m_pObjectInstance != nullptr)
+	{
+		m_pObjectInstance->ChangeAnim(animation_index);
+	}
 }
 
 void CPlayer::GetAnimation_index(int *animation_index)

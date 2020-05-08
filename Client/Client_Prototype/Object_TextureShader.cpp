@@ -362,7 +362,8 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 		pObject = new CModelObject;
 		
 		pObject->Initialize(L"Component_Model_idle",L"Texture_character", pDevice, pd3dCommandList);
-		
+		pObject->AddModel(L"Component_Model_run");
+		pObject->AddModel(L"Component_Model_attack");
 		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 

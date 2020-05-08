@@ -94,12 +94,16 @@ void CModelObject::ChangeAnim(const UINT & index)
 {
 	if (index < m_pModel.size())
 	{
-		m_pModel[m_AnimIndex]->SetAnimTime(0);
+		if (m_AnimIndex != index)
+		{
 
-		setAnimIndex(index);
+			m_pModel[m_AnimIndex]->SetAnimTime(0);
 
-		m_pModel[m_AnimIndex]->SetAnimTime(0);
-		m_Animtime = 0.0f;
+			setAnimIndex(index);
+
+			m_pModel[m_AnimIndex]->SetAnimTime(0);
+			m_Animtime = 0.0f;
+		}
 	}
 }
 
