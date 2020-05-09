@@ -130,17 +130,6 @@ void CModelObject::Animate(const float fTimeElapsed)
 {
 	if (m_pModel[m_AnimIndex]->HasAnimation())
 	{
-		if (m_Animtime > 3.f)
-		{
-			m_AnimIndex++;
-			m_Animtime = 0.0f;
-			if (m_AnimIndex >= m_pModel.size())
-			{
-				m_AnimIndex  = m_AnimIndex % m_pModel.size();
-				m_pModel[m_AnimIndex]->SetAnimTime(0);
-				
-			}
-		}
 		m_pModel[m_AnimIndex]->BornTransform(fTimeElapsed);
 		DirtyFrames();
 

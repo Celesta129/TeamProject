@@ -118,7 +118,6 @@ void send_leave_packet(int user_id, int o_id) {
 	send_packet(user_id, &p);
 }
 
-//임시로 login_ok로 보냄
 void send_move_packet(int user_id, int mover) {
 	sc_packet_move p;
 	p.id = mover;
@@ -155,22 +154,22 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 1.f;
+		float fSpeed = 0.5f;
 
 		if (packet->keydown) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].velocityZ = fSpeed;
+				clients[user_id].velocityZ += fSpeed;
 				break;
 			case CS_DOWN:
-				clients[user_id].velocityZ = -fSpeed;
+				clients[user_id].velocityZ -= fSpeed;
 				break;
 			case CS_LEFT:
-				clients[user_id].velocityX = -fSpeed;
+				clients[user_id].velocityX -= fSpeed;
 				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX = fSpeed;
+				clients[user_id].velocityX += fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -178,18 +177,21 @@ void process_packet(int user_id, char* buf) {
 				exit(-1);
 				break;
 			}
-			clients[user_id].m_ani_index = 1;
 		}
 		else {
 			switch (packet->direction)
 			{
 			case CS_UP:
+				clients[user_id].velocityZ -= fSpeed;
+				break;
 			case CS_DOWN:
-				clients[user_id].velocityZ = 0.f;
+				clients[user_id].velocityZ += fSpeed;
 				break;
 			case CS_LEFT:
+				clients[user_id].velocityX += fSpeed;
+				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX = 0.f;
+				clients[user_id].velocityX -= fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -197,15 +199,16 @@ void process_packet(int user_id, char* buf) {
 				exit(-1);
 				break;
 			}
+		}
+
+		//키 다운이 없는지 판단하고 ani index 변경
+		if (clients[user_id].velocityX != 0.f || clients[user_id].velocityZ != 0.f) {
+			clients[user_id].m_ani_index = 1;
+		}
+		else {
 			clients[user_id].m_ani_index = 0;
 		}
 
-		clients[user_id].playerX += clients[user_id].velocityX * GameTimer.DeltaTime();
-		clients[user_id].playerY += clients[user_id].velocityY * GameTimer.DeltaTime();
-		clients[user_id].playerZ += clients[user_id].velocityZ * GameTimer.DeltaTime();
-
-		printf("%f\n", GameTimer.DeltaTime());
-		//printf("%s(%d) : %f, %f\n", clients[user_id].player_id, user_id, clients[user_id].playerX, clients[user_id].playerZ);
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
 				send_move_packet(cl.m_id, user_id);
@@ -308,6 +311,33 @@ bool CheckCollSphere(const CPlayer& trg, const Point3D& src, const float& radius
 		return true;    //충돌
 }
 
+void logic() {
+	GameTimer.Reset();
+	while (true) {
+		GameTimer.Tick(60.f);
+
+		for (int i = 0; i < MAX_USER; ++i) {
+			if (clients[i].m_connected == true) {
+				clients[i].playerX += clients[i].velocityX * GameTimer.DeltaTime();
+				clients[i].playerY += clients[i].velocityY * GameTimer.DeltaTime();
+				clients[i].playerZ += clients[i].velocityZ * GameTimer.DeltaTime();
+
+				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
+			}
+		}
+
+		for (int i = 0; i < MAX_USER; ++i) {
+			if (clients[i].m_connected == true) {
+				for (int j = 0; j < MAX_USER; ++j) {
+					if (clients[j].m_connected == true) {
+						send_move_packet(i, j);
+					}
+				}
+			}
+		}
+	}
+}
+
 int main()
 {
 	g_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
@@ -357,7 +387,8 @@ int main()
 	accept_over.op = OP_ACCEPT;
 	AcceptEx(listen_socket, client_socket, accept_over.messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &accept_over.overlapped);
 
-	GameTimer.Reset();
+
+	thread logic_thread{ logic };
 
 	while (1) {
 		//io que넣기
@@ -369,7 +400,6 @@ int main()
 		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
 		int user_id = static_cast<int>(key);
 
-		GameTimer.Tick(30.f);
 		switch (exover->op)
 		{
 		case OP_RECV: {
@@ -421,6 +451,8 @@ int main()
 			break;
 		}
 	}
+
+	logic_thread.join();
 
 	return 0;
 }

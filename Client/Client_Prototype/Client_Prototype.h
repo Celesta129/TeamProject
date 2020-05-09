@@ -29,6 +29,9 @@ public:
 	int m_client_id = -1;
 	CPlayer *m_Player;
 
+	//좌우상하
+	bool movement_state[4] = { false, false, false, false };
+
 	void processPacket(char* buf);
 	virtual int Run() override;
 

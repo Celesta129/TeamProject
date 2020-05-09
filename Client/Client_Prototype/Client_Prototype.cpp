@@ -12,8 +12,44 @@
 UINT g_CbvSrvUavDescriptorSize;
 
 // 전역 변수:
+CGameFramework_Client* GameFramework = nullptr;
+thread RecvThread;
+bool Server_disconnect = true;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
+void process_data()
+{
+	while (Server_disconnect) {
+		if (GameFramework == nullptr) return;
+
+		int retval = recv(GameFramework->m_pSocket->clientSocket, GameFramework->m_pSocket->buf, MAX_PACKET_SIZE, 0);
+
+		if (retval == 0 || retval == SOCKET_ERROR)
+		{
+			closesocket(GameFramework->m_pSocket->clientSocket);
+		}
+
+		char* ptr = GameFramework->m_pSocket->buf;
+
+		while (retval > 0) {
+			if (GameFramework->m_pSocket->packet_size == 0) GameFramework->m_pSocket->packet_size = ptr[0];
+			if (GameFramework->m_pSocket->saved_size + retval >= GameFramework->m_pSocket->packet_size) {
+				memcpy(GameFramework->m_pSocket->packetBuffer + GameFramework->m_pSocket->saved_size, ptr, GameFramework->m_pSocket->packet_size - GameFramework->m_pSocket->saved_size);
+				GameFramework->processPacket(GameFramework->m_pSocket->packetBuffer);
+
+				ptr += GameFramework->m_pSocket->packet_size - GameFramework->m_pSocket->saved_size;
+				retval -= GameFramework->m_pSocket->packet_size - GameFramework->m_pSocket->saved_size;
+				GameFramework->m_pSocket->packet_size = 0;
+				GameFramework->m_pSocket->saved_size = 0;
+			}
+			else {
+				memcpy(GameFramework->m_pSocket->packetBuffer + GameFramework->m_pSocket->saved_size, ptr, retval);
+				GameFramework->m_pSocket->saved_size += retval;
+				retval = 0;
+			}
+		}
+	}
+}
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -24,12 +60,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	CComponent_Manager::GetInstance();
-	CGameFramework_Client GameFramework(hInstance);
+	GameFramework = new CGameFramework_Client (hInstance);
 	
 	try {
-		if (!GameFramework.Initialize())
+		if (!GameFramework->Initialize())
 			return 0;
-
+			
 		//sever접속
 		char temp_ip[15];
 		char temp_id[MAX_NAME_LEN];
@@ -37,56 +73,30 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 		cin >> temp_id;
 		cout << "Input ip : ";
 		cin >> temp_ip;
-		GameFramework.m_pSocket = new CSocket(temp_id, temp_ip);
-		if (GameFramework.m_pSocket->init()) {
+		GameFramework->m_pSocket = new CSocket(temp_id, temp_ip);
+		if (GameFramework->m_pSocket->init()) {
 			cs_packet_connect p_connect;
-			strcpy_s(p_connect.id, GameFramework.m_pSocket->m_pid);
+			strcpy_s(p_connect.id, GameFramework->m_pSocket->m_pid);
 			p_connect.type = CS_LOGIN;
 			p_connect.size = sizeof(cs_packet_connect);
 
-			send(GameFramework.m_pSocket->clientSocket, (char*)&p_connect, sizeof(cs_packet_connect), 0);
+			send(GameFramework->m_pSocket->clientSocket, (char*)&p_connect, sizeof(cs_packet_connect), 0);
 		}
-			
-		return GameFramework.Run();
+
+		return GameFramework->Run();
 	}
 	catch(DxException& e){
-		HRESULT hr = GameFramework.GetDevice()->GetDeviceRemovedReason();
+		HRESULT hr = GameFramework->GetDevice()->GetDeviceRemovedReason();
 		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		Server_disconnect = false;
+		Safe_Delete(GameFramework);
+		RecvThread.join();
 		return 0;
 	}
-
 	
+	Safe_Delete(GameFramework);
+	RecvThread.join();
 	return 0;
-}
-
-void process_data(CGameFramework_Client &GameFrame)
-{
-	int retval = recv(GameFrame.m_pSocket->clientSocket, GameFrame.m_pSocket->buf, MAX_PACKET_SIZE, 0);
-
-	if (retval == 0 || retval == SOCKET_ERROR)
-	{
-		closesocket(GameFrame.m_pSocket->clientSocket);
-	}
-
-	char* ptr = GameFrame.m_pSocket->buf;
-
-	while (retval > 0) {
-		if (GameFrame.m_pSocket->packet_size == 0) GameFrame.m_pSocket->packet_size = ptr[0];
-		if (GameFrame.m_pSocket->saved_size + retval >= GameFrame.m_pSocket->packet_size) {
-			memcpy(GameFrame.m_pSocket->packetBuffer + GameFrame.m_pSocket->saved_size, ptr, GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size);
-			GameFrame.processPacket(GameFrame.m_pSocket->packetBuffer);
-
-			ptr += GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size;
-			retval -= GameFrame.m_pSocket->packet_size - GameFrame.m_pSocket->saved_size;
-			GameFrame.m_pSocket->packet_size = 0;
-			GameFrame.m_pSocket->saved_size = 0;
-		}
-		else {
-			memcpy(GameFrame.m_pSocket->packetBuffer + GameFrame.m_pSocket->saved_size, ptr, retval);
-			GameFrame.m_pSocket->saved_size += retval;
-			retval = 0;
-		}
-	}
 }
 
 CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
@@ -137,6 +147,8 @@ int CGameFramework_Client::Run()
 
 	m_Timer.Reset();
 
+	RecvThread = thread(process_data);
+
 	while (msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -152,7 +164,6 @@ int CGameFramework_Client::Run()
 
 			if (!m_bAppPaused)
 			{
-				process_data(*this);
 				CalculateFrameStats();
 				Update(m_Timer);
 				Draw(m_Timer);
@@ -274,39 +285,46 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 	if (m_pScene)
 		m_pScene->OnKeyboardInput(gt.DeltaTime());
 
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000 && !movement_state[0])
 	{
+		movement_state[0] = true;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_LEFT, true, 0);
 	}
-	else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000 && !movement_state[1])
 	{
+		movement_state[1] = true;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_RIGHT, true, 0);
 	}
-
-	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	if (GetAsyncKeyState(VK_UP) & 0x8000 && !movement_state[2])
 	{
+		movement_state[2] = true;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_UP, true, 0);
 	}
-	else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000 && !movement_state[3])
 	{
+		movement_state[3] = true;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_DOWN, true, 0);
 	}
 
-	if (GetAsyncKeyState(VK_LEFT) == 0)
+
+	if (GetAsyncKeyState(VK_LEFT) == 0 && movement_state[0])
 	{
+		movement_state[0] = false;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_LEFT, false, 0);
 	}
-	else if (GetAsyncKeyState(VK_RIGHT) == 0)
+	if (GetAsyncKeyState(VK_RIGHT) == 0 && movement_state[1])
 	{
+		movement_state[1] = false;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_RIGHT, false, 0);
 	}
-
-	if (GetAsyncKeyState(VK_UP) == 0)
+	if (GetAsyncKeyState(VK_UP) == 0 && movement_state[2])
 	{
+		movement_state[2] = false;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_UP, false, 0);
 	}
-	else if (GetAsyncKeyState(VK_DOWN) == 0)
+	if (GetAsyncKeyState(VK_DOWN) == 0 && movement_state[3])
 	{
+		movement_state[3] = false;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_DOWN, false, 0);
 	}
 }
@@ -342,12 +360,8 @@ void CGameFramework_Client::processPacket(char* buf)
 	case SC_LEAVE: {
 		sc_packet_leave* p_leave = reinterpret_cast<sc_packet_leave*>(buf);
 		int other_id = p_leave->id;
-		if (other_id == m_client_id) {
-			//캐릭터 제거
-		}
-		else {
-			//다른플레이어 제거
-		}
+
+		m_pScene->getplayer(other_id)->Setconnected(false);
 	}
 		break;
 	case SC_MOVEMENT:
@@ -359,7 +373,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		m_pScene->getplayer(other_id)->SetVelocity(p_movement->vx, p_movement->vy, p_movement->vz);
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_movement->ani_index);
 
-		cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
+		//cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
 		
 	}
 		break;
