@@ -327,6 +327,20 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		movement_state[3] = false;
 		m_pSocket->sendPacket(CS_MOVEMENT, CS_DOWN, false, 0);
 	}
+
+
+	if (GetAsyncKeyState(0x41) & 0x8000 && !attack_state)
+	{
+		attack_state = true;
+		m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+	}
+	if (GetAsyncKeyState(0x41) == 0 && attack_state)
+	{
+		attack_state = false;
+		attack_count += 1;
+		m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+	}
+
 }
 
 void CGameFramework_Client::processPacket(char* buf)
@@ -376,6 +390,14 @@ void CGameFramework_Client::processPacket(char* buf)
 
 		//cout << p_movement->x << ", " << p_movement->y << ", " << p_movement->z << endl;
 		
+	}
+		break;
+	case SC_ATTACK:
+	{
+		sc_packet_motion* p_motion = reinterpret_cast<sc_packet_motion*>(buf);
+		int other_id = p_motion->id;
+
+		m_pScene->getplayer(other_id)->SetAnimation_index(p_motion->ani_index);
 	}
 		break;
 	default:

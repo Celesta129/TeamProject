@@ -28,6 +28,7 @@ constexpr int SC_LEAVE = 3;
 
 
 constexpr int SC_MOVEMENT = 11;
+constexpr int SC_ATTACK = 12;
 
 
 #pragma pack(push ,1)
@@ -85,6 +86,13 @@ struct sc_packet_move {
 	float vx, vy, vz;
 	char ani_index;
 	char dashed;
+};
+
+struct sc_packet_motion {
+	char size;
+	char type;
+	char id;
+	char ani_index;
 };
 
 #pragma pack(pop)

@@ -31,6 +31,8 @@ public:
 
 	//좌우상하
 	bool movement_state[4] = { false, false, false, false };
+	bool attack_state = false;
+	char attack_count = 0;
 
 	void processPacket(char* buf);
 	void Set_Camera(UINT index) {

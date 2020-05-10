@@ -138,6 +138,16 @@ void send_move_packet(int user_id, int mover) {
 	send_packet(user_id, &p);
 }
 
+void send_motion_packet(int user_id, int mover) {
+	sc_packet_motion p;
+	p.id = mover;
+	p.size = sizeof(p);
+	p.type = SC_ATTACK;
+	p.ani_index = clients[mover].m_ani_index;
+
+	//통째로 보내면 메모리에 안좋으므로 &붙이자
+	send_packet(user_id, &p);
+}
 
 void process_packet(int user_id, char* buf) {
 	switch (buf[1])
@@ -156,7 +166,7 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 0.5f;
+		float fSpeed = 2.f;
 
 		if (packet->keydown) {
 			switch (packet->direction)
@@ -214,6 +224,17 @@ void process_packet(int user_id, char* buf) {
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
 				send_move_packet(cl.m_id, user_id);
+		}
+	}
+		break;
+	case CS_ATTACK: {
+		cs_packet_motion* packet = reinterpret_cast<cs_packet_motion*>(buf);
+
+		clients[user_id].m_ani_index = 2;
+
+		for (auto& cl : clients) {
+			if (true == cl.m_connected)
+				send_motion_packet(cl.m_id, user_id);
 		}
 	}
 		break;
@@ -397,8 +418,30 @@ bool object_collision(int user_id) {
 			return true;
 	}
 
+	//user
+	float Amax_x = clients[user_id].playerX + 27.f;
+	float Amin_x = clients[user_id].playerX - 27.f;
+	float Amax_z = clients[user_id].playerZ + 27.f;
+	float Amin_z = clients[user_id].playerZ - 27.f;
+
+	for (int j = user_id + 1; j < MAX_USER; ++j) {
+		if (clients[j].m_connected == true) {
+			float Bmax_x = clients[j].playerX + 27.f;
+			float Bmin_x = clients[j].playerX - 27.f;
+			float Bmax_z = clients[j].playerZ + 27.f;
+			float Bmin_z = clients[j].playerZ - 27.f;
+
+			if (Amax_x < Bmin_x || Amin_x > Bmax_x) break;
+			if (Amax_z< Bmin_z || Amin_z > Bmax_z) break;
+
+			return true;
+		}
+	}
+
 	return false;
 }
+
+
 
 void logic() {
 	GameTimer.Reset();
@@ -414,24 +457,25 @@ void logic() {
 		//	}
 		//}
 
-		bool collision_flag = false;
-
 		for (int i = 0; i < MAX_USER; ++i) {
 			if (clients[i].m_connected == true) {
 				float movement_x = clients[i].velocityX * GameTimer.DeltaTime();
 				float movement_y = clients[i].velocityY * GameTimer.DeltaTime();
 				float movement_z = clients[i].velocityZ * GameTimer.DeltaTime();
-
+				
 				clients[i].playerX += movement_x;
 				clients[i].playerY += movement_y;
 				clients[i].playerZ += movement_z;
 
-				if (object_collision(i) == true) {//충돌일어났을때
-					clients[i].playerX -= movement_x;
-					clients[i].playerY -= movement_y;
-					clients[i].playerZ -= movement_z;
+
+				if (object_collision(i) == true) {	//충돌된상태
+					clients[i].playerX -= movement_x * 1.5f;
+					clients[i].playerY -= movement_y * 1.5f;
+					clients[i].playerZ -= movement_z * 1.5f;
 				}
-				//printf("%f, %f, %f \n", clients[i].velocityX, clients[i].velocityY, clients[i].velocityZ);
+
+
+				printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
 				//printf("%d\n", object_collision(i));
 				mapcollision(i);
 			}
