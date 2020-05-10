@@ -166,7 +166,7 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 2.f;
+		float fSpeed = 0.5f;
 
 		if (packet->keydown) {
 			switch (packet->direction)
@@ -424,15 +424,16 @@ bool object_collision(int user_id) {
 	float Amax_z = clients[user_id].playerZ + 27.f;
 	float Amin_z = clients[user_id].playerZ - 27.f;
 
-	for (int j = user_id + 1; j < MAX_USER; ++j) {
+	for (int j = 0; j < MAX_USER; ++j) {
 		if (clients[j].m_connected == true) {
 			float Bmax_x = clients[j].playerX + 27.f;
 			float Bmin_x = clients[j].playerX - 27.f;
 			float Bmax_z = clients[j].playerZ + 27.f;
 			float Bmin_z = clients[j].playerZ - 27.f;
 
-			if (Amax_x < Bmin_x || Amin_x > Bmax_x) break;
-			if (Amax_z< Bmin_z || Amin_z > Bmax_z) break;
+			if (user_id == j) continue;
+			if (Amax_x < Bmin_x || Amin_x > Bmax_x) continue;
+			if (Amax_z< Bmin_z || Amin_z > Bmax_z) continue;
 
 			return true;
 		}
@@ -472,10 +473,11 @@ void logic() {
 					clients[i].playerX -= movement_x * 1.5f;
 					clients[i].playerY -= movement_y * 1.5f;
 					clients[i].playerZ -= movement_z * 1.5f;
+					printf("player %d collision \n", i);
 				}
 
 
-				printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
+				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
 				//printf("%d\n", object_collision(i));
 				mapcollision(i);
 			}
