@@ -3,15 +3,16 @@
 #include "pch.h"
 #include "Timer.h"
 #include "CPlayer.h"
+#include "CObject.h"
 #include "protocol.h"
 
 
 //global
 #define MAX_BUFFER 1024
 
-struct Point3D {
-	float x, y, z;
-};
+//struct Point3D {
+//	float x, y, z;
+//};
 
 enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT };
 
@@ -55,6 +56,7 @@ SOCKETINFO clients[MAX_USER];
 int g_curr_user_id = 0;
 HANDLE g_iocp;
 CTimer GameTimer;
+CObject g_Object[8];
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -259,22 +261,28 @@ void recv_packet_construct(int user_id, int io_byte) {
 }
 
 //충돌처리
-bool CheckCollBox(const CPlayer& trg, const Point3D& vMax, const Point3D& vMin)
+bool CheckCollPlayer(const CPlayer& trg, const CPlayer& src)
 {
 	Point3D trg_min;
 	Point3D trg_max;
 
+	Point3D src_min;
+	Point3D src_max;
+
 	trg_min.x = trg.m_posX - trg.m_sizeX;
-	trg_min.y = trg.m_posY;
 	trg_min.z = trg.m_posZ - trg.m_sizeZ;
 
 	trg_max.x = trg.m_posX + trg.m_sizeX;
-	trg_max.y = trg.m_posY + trg.m_sizeY;
 	trg_max.z = trg.m_posZ + trg.m_sizeZ;
 
-	if((trg_min.x <= vMax.x && trg_max.x >= vMin.x) &&
-		(trg_min.y <= vMax.y && trg_max.y >= vMin.y) &&
-		(trg_min.z <= vMax.z && trg_max.z >= vMin.z))
+	src_min.x = src.m_posX - src.m_sizeX;
+	src_min.z = src.m_posZ - src.m_sizeZ;
+
+	src_max.x = src.m_posX + src.m_sizeX;
+	src_max.z = src.m_posZ + src.m_sizeZ;
+
+	if ((trg_min.x <= src_max.x && trg_max.x >= src_min.x) &&
+		(trg_min.z <= src_max.z && trg_max.z >= src_min.z))
 	{
 		return true;
 	}
@@ -284,31 +292,112 @@ bool CheckCollBox(const CPlayer& trg, const Point3D& vMax, const Point3D& vMin)
 	}
 }
 
-bool CheckCollSphere(const CPlayer& trg, const Point3D& src, const float& radius)
-{
-	Point3D trg_min;
-	Point3D trg_max;
+//bool CheckCollBox(const CPlayer& trg, const Point3D& vMax, const Point3D& vMin)
+//{
+//	Point3D trg_min;
+//	Point3D trg_max;
+//
+//	trg_min.x = trg.m_posX - trg.m_sizeX;
+//	trg_min.y = trg.m_posY;
+//	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+//
+//	trg_max.x = trg.m_posX + trg.m_sizeX;
+//	trg_max.y = trg.m_posY + trg.m_sizeY;
+//	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+//
+//	if((trg_min.x <= vMax.x && trg_max.x >= vMin.x) &&
+//		(trg_min.y <= vMax.y && trg_max.y >= vMin.y) &&
+//		(trg_min.z <= vMax.z && trg_max.z >= vMin.z))
+//	{
+//		return true;
+//	}
+//	else
+//	{
+//		return false;
+//	}
+//}
+//
+//bool CheckCollSphere(const CPlayer& trg, const Point3D& src, const float& radius)
+//{
+//	Point3D trg_min;
+//	Point3D trg_max;
+//
+//	trg_min.x = trg.m_posX - trg.m_sizeX;
+//	trg_min.y = trg.m_posY;
+//	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+//
+//	trg_max.x = trg.m_posX + trg.m_sizeX;
+//	trg_max.y = trg.m_posY + trg.m_sizeY;
+//	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+//
+//	float close_x = max(trg_min.x, min(src.x, trg_max.x));
+//	float close_y = max(trg_min.y, min(src.y, trg_max.y));
+//	float close_z = max(trg_min.z, min(src.z, trg_max.z));
+//
+//	float fDistance = sqrt((close_x - src.x) * (close_x - src.x) +
+//						(close_y - src.y) * (close_y - src.y) +
+//						(close_z - src.z) * (close_z - src.z));
+//
+//	if (fDistance > radius)
+//		return false;   //충돌안됨
+//	else
+//		return true;    //충돌
+//}
 
-	trg_min.x = trg.m_posX - trg.m_sizeX;
-	trg_min.y = trg.m_posY;
-	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+void mapcollision(int user_id) {
+	if (clients[user_id].playerX >= 640)
+		clients[user_id].playerX = 640;
+	else if (clients[user_id].playerX <= -640)
+		clients[user_id].playerX = -640;
 
-	trg_max.x = trg.m_posX + trg.m_sizeX;
-	trg_max.y = trg.m_posY + trg.m_sizeY;
-	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+	if (clients[user_id].playerZ >= 640)
+		clients[user_id].playerZ = 640;
+	else if(clients[user_id].playerZ <= -640)
+		clients[user_id].playerZ = -640;
+}
 
-	float close_x = max(trg_min.x, min(src.x, trg_max.x));
-	float close_y = max(trg_min.y, min(src.y, trg_max.y));
-	float close_z = max(trg_min.z, min(src.z, trg_max.z));
+void init_Object() {
+	g_Object[0].SetObject(-400, 0, 450, 0);
+	g_Object[1].SetObject(400, 0, 450, 0);
 
-	float fDistance = sqrt((close_x - src.x) * (close_x - src.x) +
-						(close_y - src.y) * (close_y - src.y) +
-						(close_z - src.z) * (close_z - src.z));
+	g_Object[2].SetObject(400, 0, -350, 1);
+	g_Object[3].SetObject(400, 0, -550, 1);
 
-	if (fDistance > radius)
-		return false;   //충돌안됨
-	else
-		return true;    //충돌
+	g_Object[4].SetObject(-400, 0, -250, 2);
+	g_Object[5].SetObject(-400, 0, -400, 2);
+	g_Object[6].SetObject(-400, 0, -550, 2);
+
+	g_Object[7].SetObject(0, 0, 0, 3);
+}
+
+//temp_collision
+bool object_collision(int user_id) {
+	//left top bench
+	if (clients[user_id].playerZ >= 320 && clients[user_id].playerZ <= 510) {
+		if (clients[user_id].playerX >= -560 && clients[user_id].playerX <= -230)
+			return true;
+		if (clients[user_id].playerX >= 240 && clients[user_id].playerX <= 560)
+			return true;
+	}
+	//right bottom seesaw
+	if (clients[user_id].playerX >= 225 && clients[user_id].playerX <= 565) {
+		if (clients[user_id].playerZ >= -432 && clients[user_id].playerZ <= -258)
+			return true;
+
+		if (clients[user_id].playerZ >= -630 && clients[user_id].playerZ <= -466)
+			return true;
+	}
+	//left bottom horse
+	if (clients[user_id].playerX >= -474 && clients[user_id].playerX <= -310) {
+		if (clients[user_id].playerZ >= -601 && clients[user_id].playerZ <= -495)
+			return true;
+		if (clients[user_id].playerZ >= -449 && clients[user_id].playerZ <= -350)
+			return true;
+		if (clients[user_id].playerZ >= -296 && clients[user_id].playerZ <= -196)
+			return true;
+	}
+
+	return false;
 }
 
 void logic() {
@@ -316,13 +405,35 @@ void logic() {
 	while (true) {
 		GameTimer.Tick(60.f);
 
+		//collision check
+		//for (int obj = 0; obj < 7; ++obj) {
+		//	for (int i = 0; i < MAX_USER; ++i) {
+		//		if (clients[i].m_connected == true) {
+		//			g_Object[obj].CheckCollBox(clients[i]);
+		//		}
+		//	}
+		//}
+
+		bool collision_flag = false;
+
 		for (int i = 0; i < MAX_USER; ++i) {
 			if (clients[i].m_connected == true) {
-				clients[i].playerX += clients[i].velocityX * GameTimer.DeltaTime();
-				clients[i].playerY += clients[i].velocityY * GameTimer.DeltaTime();
-				clients[i].playerZ += clients[i].velocityZ * GameTimer.DeltaTime();
+				float movement_x = clients[i].velocityX * GameTimer.DeltaTime();
+				float movement_y = clients[i].velocityY * GameTimer.DeltaTime();
+				float movement_z = clients[i].velocityZ * GameTimer.DeltaTime();
 
-				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
+				clients[i].playerX += movement_x;
+				clients[i].playerY += movement_y;
+				clients[i].playerZ += movement_z;
+
+				if (object_collision(i) == true) {//충돌일어났을때
+					clients[i].playerX -= movement_x;
+					clients[i].playerY -= movement_y;
+					clients[i].playerZ -= movement_z;
+				}
+				//printf("%f, %f, %f \n", clients[i].velocityX, clients[i].velocityY, clients[i].velocityZ);
+				//printf("%d\n", object_collision(i));
+				mapcollision(i);
 			}
 		}
 
@@ -343,6 +454,7 @@ int main()
 	g_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 	
 	//initialize clients
+	init_Object();
 	for (int i = 0; i < MAX_USER; ++i) {
 		clients[i].m_connected = false;
 	}

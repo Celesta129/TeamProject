@@ -11,9 +11,9 @@ CPlayer::CPlayer()
 {
 	m_Animation_index = 0;
 	m_hp = 100;
-	m_sizeX = 50;
-	m_sizeZ = 50;
-	m_sizeY = 150;
+	m_sizeX = 27;
+	m_sizeZ = 27;
+	m_sizeY = 136;
 }
 
 

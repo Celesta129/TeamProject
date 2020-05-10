@@ -12,3 +12,7 @@ using namespace std;
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "mswsock.lib")
+
+struct Point3D {
+	float x, y, z;
+};
