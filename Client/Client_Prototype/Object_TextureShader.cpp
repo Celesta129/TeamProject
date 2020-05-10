@@ -355,7 +355,7 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 	CModelObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
 
-	int MAX_USER = 3;
+	int MAX_USER = 8;
 
 	for (int i = 0; i < MAX_USER; ++i)
 	{
@@ -379,6 +379,10 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 		{
 			pTransform->MovePos(XMFLOAT3(-300, 0.f, -250));
 			pTransform->Rotate(0.f, 180.f, 0.f);
+		}
+		else
+		{
+			pTransform->MovePos(XMFLOAT3(3000, 0.f, 3000));
 		}
 		pTransform->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
 

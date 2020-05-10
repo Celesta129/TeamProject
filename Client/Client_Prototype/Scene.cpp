@@ -56,7 +56,7 @@ void CScene::BuildShaders()
 	pShader = new CObject_TextureShader;
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", m_vObjects);
 	m_vShaders.push_back(pShader);
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < MAX_USER; ++i)
 	{
 		m_player[i] = new CPlayer();
 		m_player[i]->SetObjectInstance(m_vObjects[i]);
