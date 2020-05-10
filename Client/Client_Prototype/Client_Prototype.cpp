@@ -82,7 +82,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
 			send(GameFramework->m_pSocket->clientSocket, (char*)&p_connect, sizeof(cs_packet_connect), 0);
 		}
-
+		
 		return GameFramework->Run();
 	}
 	catch(DxException& e){
@@ -339,6 +339,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		m_client_id = p_login->id;
 		float tempx = p_login->posX, tempy = p_login->posY , tempz = p_login->posZ;
 		//player객체 추가
+		Set_Camera(m_client_id);
 		m_Player = m_pScene->getplayer(m_client_id);
 		m_pScene->getplayer(m_client_id)->SetPos(tempx, tempy, tempz);
 		m_pScene->getplayer(m_client_id)->Setconnected(true);

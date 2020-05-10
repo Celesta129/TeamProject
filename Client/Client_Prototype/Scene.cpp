@@ -33,6 +33,18 @@ HRESULT CScene::Initialize()
 	return true;
 }
 
+void CScene::Set_Camera(UINT index)
+{
+	if (index > m_vObjects.size())
+	{
+		return;
+	}
+	if (m_vObjects[index] != nullptr)
+	{
+		m_pCurrentCamera->SetTarget(m_vObjects[index]);
+	}
+}
+
 void CScene::BuildShaders()
 {
 	CShader* pShader = nullptr;

@@ -21,6 +21,7 @@ public:
 	virtual ~CScene();
 
 	virtual HRESULT Initialize();
+	void Set_Camera(UINT index);
 	//씬에서 마우스와 키보드 메시지를 처리한다. 
 	virtual bool OnKeyboardInput(const float& fTimeElapsed);
 	virtual void OnMouseDown(WPARAM btnState, int x, int y, const POINT& lastPoint);

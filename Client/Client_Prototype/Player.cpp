@@ -45,6 +45,18 @@ void CPlayer::SetVelocity(float x, float y, float z)
 	m_velocityX = x;
 	m_velocityY = y;
 	m_velocityZ = z;
+	if (m_pObjectInstance != nullptr)
+	{
+		CTransform* pTransform = m_pObjectInstance->Get_Transform();
+		XMFLOAT3 velocity = XMFLOAT3(-m_velocityX, m_velocityY, -m_velocityZ);
+		
+		if (IsEqual(velocity.x, 0.0f) && IsEqual(velocity.z, 0.0f))
+		{
+			return;
+		}
+		pTransform->Set_Look(velocity);
+		m_pObjectInstance->DirtyFrames();
+	}
 }
 
 void CPlayer::GetVelocity(float * x, float * y, float * z)

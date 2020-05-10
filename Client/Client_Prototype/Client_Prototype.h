@@ -33,6 +33,9 @@ public:
 	bool movement_state[4] = { false, false, false, false };
 
 	void processPacket(char* buf);
+	void Set_Camera(UINT index) {
+		m_pScene->Set_Camera(index);
+	};
 	virtual int Run() override;
 
 private:

@@ -25,9 +25,9 @@ void CTransform::Set_World(XMFLOAT4X4 * pWorld)
 const XMFLOAT3 CTransform::Get_Scale(void)
 {
 	XMFLOAT3 vRight, vUp, vLook;
-	memcpy(&vRight, &m_xmf4x4World.m[0][0], sizeof(XMFLOAT3));
-	memcpy(&vUp, &m_xmf4x4World.m[1][0], sizeof(XMFLOAT3));
-	memcpy(&vLook, &m_xmf4x4World.m[2][0], sizeof(XMFLOAT3));
+	memcpy(&vRight, &m_xmf4x4World.m[INFO_RIGHT][0], sizeof(XMFLOAT3));
+	memcpy(&vUp, &m_xmf4x4World.m[INFO_UP][0], sizeof(XMFLOAT3));
+	memcpy(&vLook, &m_xmf4x4World.m[INFO_LOOK][0], sizeof(XMFLOAT3));
 
 	float lengthRight = Vector3::Length(vRight);
 	float lengthUp = Vector3::Length(vUp);
@@ -55,9 +55,9 @@ const XMFLOAT3 CTransform::Get_Dir(void)
 void CTransform::Set_Scale(const XMFLOAT3& pScale)
 {
 	XMFLOAT3 vRight, vUp, vLook;
-	memcpy(&vRight, &m_xmf4x4World.m[0][0], sizeof(XMFLOAT3));
-	memcpy(&vUp, &m_xmf4x4World.m[1][0], sizeof(XMFLOAT3));
-	memcpy(&vLook, &m_xmf4x4World.m[2][0], sizeof(XMFLOAT3));
+	memcpy(&vRight, &m_xmf4x4World.m[INFO_RIGHT][0], sizeof(XMFLOAT3));
+	memcpy(&vUp, &m_xmf4x4World.m[INFO_UP][0], sizeof(XMFLOAT3));
+	memcpy(&vLook, &m_xmf4x4World.m[INFO_LOOK][0], sizeof(XMFLOAT3));
 
 	vRight = Vector3::Normalize(vRight);
 	vUp = Vector3::Normalize(vUp);
@@ -67,9 +67,9 @@ void CTransform::Set_Scale(const XMFLOAT3& pScale)
 	vUp = Vector3::Muliply(vUp, pScale.y);
 	vLook = Vector3::Muliply(vLook, pScale.z);
 
-	memcpy(&m_xmf4x4World.m[0][0], &vRight, sizeof(XMFLOAT3));
-	memcpy(&m_xmf4x4World.m[1][0], &vUp, sizeof(XMFLOAT3));
-	memcpy(&m_xmf4x4World.m[2][0], &vLook, sizeof(XMFLOAT3));
+	memcpy(&m_xmf4x4World.m[INFO_RIGHT][0], &vRight, sizeof(XMFLOAT3));
+	memcpy(&m_xmf4x4World.m[INFO_UP][0], &vUp, sizeof(XMFLOAT3));
+	memcpy(&m_xmf4x4World.m[INFO_LOOK][0], &vLook, sizeof(XMFLOAT3));
 }
 
 void CTransform::Rotate(float fRoll, float fPitch, float fYaw)
@@ -107,9 +107,35 @@ void CTransform::Set_Rotate(float fRoll, float fPitch ,float fYaw)
 	XMFLOAT3 vScale = Get_Scale();
 
 	m_xmf4x4World = Matrix4x4::Identity();
+	MovePos(vPos);
 	Set_Scale(vScale);
 	Rotate(fRoll, fPitch, fYaw);
-	MovePos(vPos);
+}
+
+void CTransform::Set_Look(XMFLOAT3 & xmf3Look)
+{
+	if (xmf3Look.x == 0 && xmf3Look.y == 0 && xmf3Look.z == 0)
+		return;
+	//memcpy(m_xmf4x4World.m[2], &xmf3Look, sizeof(XMFLOAT3));
+	XMFLOAT3 vRight, vUp, vLook;
+	memcpy(&vUp, m_xmf4x4World.m[INFO_UP], sizeof(XMFLOAT3));
+	vUp = Vector3::Normalize(vUp);
+
+	vLook = xmf3Look;
+	vLook.y = 0.0f;
+	vLook = Vector3::Normalize(vLook);
+
+	vRight = Vector3::CrossProduct(vUp, vLook, true);
+	vUp = Vector3::CrossProduct(vLook, vRight, true);
+
+	XMFLOAT3 vScale = Get_Scale();
+	vRight = Vector3::Muliply(vRight, vScale.x);
+	vUp = Vector3::Muliply(vUp, vScale.y);
+	vLook = Vector3::Muliply(vLook, vScale.z);
+
+	memcpy(m_xmf4x4World.m[INFO_RIGHT], &vRight, sizeof(XMFLOAT3));
+	memcpy(m_xmf4x4World.m[INFO_UP], &vUp, sizeof(XMFLOAT3));
+	memcpy(m_xmf4x4World.m[INFO_LOOK], &vLook, sizeof(XMFLOAT3));
 }
 
 CComponent * CTransform::Clone(void)
