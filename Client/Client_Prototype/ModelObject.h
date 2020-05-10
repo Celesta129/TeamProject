@@ -31,7 +31,10 @@ public:
 	void AddModel(const wstring& pModel);
 	
 	Material* getMat(void) { return m_pMaterial; }
-	
+	UINT getAnimStatus(void) {
+		return m_AnimStatus;
+	};
+
 protected:
 	void Animate(const float fTimeElapsed);
 protected:
@@ -40,6 +43,8 @@ protected:
 	UINT m_AnimIndex = -1;
 	float m_Animtime = -1.f;
 	UINT m_nMeshes = 0;
+
+	UINT m_AnimStatus;
 
 	vector<XMFLOAT4X4> m_Bones;
 	Material* m_pMaterial = nullptr;
