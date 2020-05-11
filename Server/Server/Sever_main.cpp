@@ -38,6 +38,11 @@ public:
 	char m_ani_index;
 	volatile bool m_dashed;
 	char player_id[MAX_NAME_LEN];
+
+	chrono::high_resolution_clock::time_point attack_time;
+	char attack_count;
+
+	char state;
 	
 
 	SOCKETINFO() {
@@ -230,7 +235,24 @@ void process_packet(int user_id, char* buf) {
 	case CS_ATTACK: {
 		cs_packet_motion* packet = reinterpret_cast<cs_packet_motion*>(buf);
 
-		clients[user_id].m_ani_index = 2;
+		if (packet->key == 1) {
+			if (packet->count == 0) {
+				clients[user_id].m_ani_index = 2;
+				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
+				clients[user_id].attack_count = 1;
+			}
+			else if (packet->count == 1) {
+				clients[user_id].m_ani_index = 2;
+				clients[user_id].attack_count = 2;
+			}
+
+			//피격 - 공격 상태 전환
+			clients[user_id].state = 1;
+		}
+		else if (packet->key == 0) {
+			clients[user_id].m_ani_index = 0;
+			clients[user_id].state = 0;
+		}
 
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
@@ -442,7 +464,33 @@ bool object_collision(int user_id) {
 	return false;
 }
 
+int player_hit(int user_id) {
 
+	if (clients[user_id].state == 1) {
+		//user
+		float Amax_x = clients[user_id].playerX + 37.f;
+		float Amin_x = clients[user_id].playerX - 37.f;
+		float Amax_z = clients[user_id].playerZ + 37.f;
+		float Amin_z = clients[user_id].playerZ - 37.f;
+
+		for (int j = 0; j < MAX_USER; ++j) {
+			if (clients[j].m_connected == true) {
+				float Bmax_x = clients[j].playerX + 27.f;
+				float Bmin_x = clients[j].playerX - 27.f;
+				float Bmax_z = clients[j].playerZ + 27.f;
+				float Bmin_z = clients[j].playerZ - 27.f;
+
+				if (user_id == j) continue;
+				if (Amax_x < Bmin_x || Amin_x > Bmax_x) continue;
+				if (Amax_z< Bmin_z || Amin_z > Bmax_z) continue;
+
+				return j;
+			}
+		}
+	}
+
+	return 0;
+}
 
 void logic() {
 	GameTimer.Reset();
@@ -473,9 +521,11 @@ void logic() {
 					clients[i].playerX -= movement_x * 1.5f;
 					clients[i].playerY -= movement_y * 1.5f;
 					clients[i].playerZ -= movement_z * 1.5f;
-					printf("player %d collision \n", i);
 				}
 
+				if (player_hit(i) != 0) {
+					clients[player_hit(i)].m_ani_index = 3;
+				}
 
 				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
 				//printf("%d\n", object_collision(i));

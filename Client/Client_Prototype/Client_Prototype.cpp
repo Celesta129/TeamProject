@@ -331,14 +331,31 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 	if (GetAsyncKeyState(0x41) & 0x8000 && !attack_state)
 	{
+		if (attack_count < 1) {
+			chrono::high_resolution_clock::time_point temp;
+			temp = chrono::high_resolution_clock::now();
+			attack_count += 1;
+			m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+		}
+		else if(attack_count < 2) {
+			//일정시간안에 다시 눌림
+			attack_count += 1;
+			m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+		}
+
 		attack_state = true;
-		m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
 	}
 	if (GetAsyncKeyState(0x41) == 0 && attack_state)
 	{
 		attack_state = false;
-		attack_count += 1;
-		m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+	}
+
+	//일정시간동안 아무키도 안눌리면 00 초기화
+	if (!movement_state[0] && !movement_state[1] && !movement_state[2] && !movement_state[3] && !attack_state) {
+
+		attack_count = 0;
+		attack_state = false;
+		m_pSocket->sendPacket(CS_ATTACK, 0, attack_count, 0);
 	}
 
 }
