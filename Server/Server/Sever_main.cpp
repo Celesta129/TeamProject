@@ -33,17 +33,12 @@ public:
 	char m_packet_buf[MAX_PACKET_SIZE];
 	volatile bool m_connected;
 
-	float playerX, playerY, playerZ;
-	float velocityX, velocityY, velocityZ;
-	char m_ani_index;
+	CPlayer* playerinfo;
 	volatile bool m_dashed;
 	char player_id[MAX_NAME_LEN];
 
 	chrono::high_resolution_clock::time_point attack_time;
 	char attack_count;
-
-	char state;
-	
 
 	SOCKETINFO() {
 		m_recv_over.wsabuf.len = MAX_BUFFER;
@@ -52,7 +47,7 @@ public:
 		m_prev_size = 0;
 		m_connected = false;
 
-		m_ani_index = 0;
+		playerinfo = new CPlayer();
 		m_dashed = false;
 	}
 };
@@ -82,9 +77,9 @@ void send_connected_packet(int user_id) {
 	p.id = user_id;
 	p.size = sizeof(p);
 	p.type = SC_CONNECTED;
-	p.posX = clients[user_id].playerX;
-	p.posY = clients[user_id].playerY;
-	p.posZ = clients[user_id].playerZ;
+	p.posX = clients[user_id].playerinfo->m_posX;
+	p.posY = clients[user_id].playerinfo->m_posY;
+	p.posZ = clients[user_id].playerinfo->m_posZ;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);
@@ -95,9 +90,9 @@ void send_enter_packet(int user_id, int o_id) {
 	p.id = o_id;
 	p.size = sizeof(p);
 	p.type = SC_ENTER;
-	p.posX = clients[o_id].playerX;
-	p.posY = clients[o_id].playerY;
-	p.posZ = clients[o_id].playerZ;
+	p.posX = clients[o_id].playerinfo->m_posX;
+	p.posY = clients[o_id].playerinfo->m_posY;
+	p.posZ = clients[o_id].playerinfo->m_posZ;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);
@@ -130,14 +125,14 @@ void send_move_packet(int user_id, int mover) {
 	p.id = mover;
 	p.size = sizeof(p);
 	p.type = SC_MOVEMENT;
-	p.ani_index = clients[mover].m_ani_index;
+	p.ani_index = clients[mover].playerinfo->m_Animation_index;
 	p.dashed = clients[mover].m_dashed;
-	p.x = clients[mover].playerX;
-	p.y = clients[mover].playerY;
-	p.z = clients[mover].playerZ;
-	p.vx = clients[mover].velocityX;
-	p.vy = clients[mover].velocityY;
-	p.vz = clients[mover].velocityZ;
+	p.x = clients[mover].playerinfo->m_posX;
+	p.y = clients[mover].playerinfo->m_posY;
+	p.z = clients[mover].playerinfo->m_posZ;
+	p.vx = clients[mover].playerinfo->m_velX;
+	p.vy = clients[mover].playerinfo->m_velY;
+	p.vz = clients[mover].playerinfo->m_velZ;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);
@@ -148,7 +143,7 @@ void send_motion_packet(int user_id, int mover) {
 	p.id = mover;
 	p.size = sizeof(p);
 	p.type = SC_ATTACK;
-	p.ani_index = clients[mover].m_ani_index;
+	p.ani_index = clients[mover].playerinfo->m_Animation_index;
 
 	//통째로 보내면 메모리에 안좋으므로 &붙이자
 	send_packet(user_id, &p);
@@ -177,16 +172,16 @@ void process_packet(int user_id, char* buf) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].velocityZ += fSpeed;
+				clients[user_id].playerinfo->m_velZ += fSpeed;
 				break;
 			case CS_DOWN:
-				clients[user_id].velocityZ -= fSpeed;
+				clients[user_id].playerinfo->m_velZ -= fSpeed;
 				break;
 			case CS_LEFT:
-				clients[user_id].velocityX -= fSpeed;
+				clients[user_id].playerinfo->m_velX -= fSpeed;
 				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX += fSpeed;
+				clients[user_id].playerinfo->m_velX += fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -199,16 +194,16 @@ void process_packet(int user_id, char* buf) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].velocityZ -= fSpeed;
+				clients[user_id].playerinfo->m_velZ -= fSpeed;
 				break;
 			case CS_DOWN:
-				clients[user_id].velocityZ += fSpeed;
+				clients[user_id].playerinfo->m_velZ += fSpeed;
 				break;
 			case CS_LEFT:
-				clients[user_id].velocityX += fSpeed;
+				clients[user_id].playerinfo->m_velX += fSpeed;
 				break;
 			case CS_RIGHT:
-				clients[user_id].velocityX -= fSpeed;
+				clients[user_id].playerinfo->m_velX -= fSpeed;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -219,11 +214,11 @@ void process_packet(int user_id, char* buf) {
 		}
 
 		//키 다운이 없는지 판단하고 ani index 변경
-		if (clients[user_id].velocityX != 0.f || clients[user_id].velocityZ != 0.f) {
-			clients[user_id].m_ani_index = 1;
+		if (clients[user_id].playerinfo->m_velX != 0.f || clients[user_id].playerinfo->m_velZ != 0.f) {
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::RUN;
 		}
 		else {
-			clients[user_id].m_ani_index = 0;
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
 		}
 
 		for (auto& cl : clients) {
@@ -237,21 +232,21 @@ void process_packet(int user_id, char* buf) {
 
 		if (packet->key == 1) {
 			if (packet->count == 0) {
-				clients[user_id].m_ani_index = 2;
+				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
 				clients[user_id].attack_count = 1;
 			}
 			else if (packet->count == 1) {
-				clients[user_id].m_ani_index = 2;
+				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_count = 2;
 			}
 
 			//피격 - 공격 상태 전환
-			clients[user_id].state = 1;
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::DAMAGED;
 		}
 		else if (packet->key == 0) {
-			clients[user_id].m_ani_index = 0;
-			clients[user_id].state = 0;
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
 		}
 
 		for (auto& cl : clients) {
@@ -388,15 +383,15 @@ bool CheckCollPlayer(const CPlayer& trg, const CPlayer& src)
 //}
 
 void mapcollision(int user_id) {
-	if (clients[user_id].playerX >= 640)
-		clients[user_id].playerX = 640;
-	else if (clients[user_id].playerX <= -640)
-		clients[user_id].playerX = -640;
+	if (clients[user_id].playerinfo->m_posX >= 640)
+		clients[user_id].playerinfo->m_posX = 640;
+	else if (clients[user_id].playerinfo->m_posX <= -640)
+		clients[user_id].playerinfo->m_posX = -640;
 
-	if (clients[user_id].playerZ >= 640)
-		clients[user_id].playerZ = 640;
-	else if(clients[user_id].playerZ <= -640)
-		clients[user_id].playerZ = -640;
+	if (clients[user_id].playerinfo->m_posZ >= 640)
+		clients[user_id].playerinfo->m_posZ = 640;
+	else if(clients[user_id].playerinfo->m_posZ <= -640)
+		clients[user_id].playerinfo->m_posZ = -640;
 }
 
 void init_Object() {
@@ -416,42 +411,42 @@ void init_Object() {
 //temp_collision
 bool object_collision(int user_id) {
 	//left top bench
-	if (clients[user_id].playerZ >= 320 && clients[user_id].playerZ <= 510) {
-		if (clients[user_id].playerX >= -560 && clients[user_id].playerX <= -230)
+	if (clients[user_id].playerinfo->m_posZ >= 320 && clients[user_id].playerinfo->m_posZ <= 510) {
+		if (clients[user_id].playerinfo->m_posX >= -560 && clients[user_id].playerinfo->m_posX <= -230)
 			return true;
-		if (clients[user_id].playerX >= 240 && clients[user_id].playerX <= 560)
+		if (clients[user_id].playerinfo->m_posX >= 240 && clients[user_id].playerinfo->m_posX <= 560)
 			return true;
 	}
 	//right bottom seesaw
-	if (clients[user_id].playerX >= 225 && clients[user_id].playerX <= 565) {
-		if (clients[user_id].playerZ >= -432 && clients[user_id].playerZ <= -258)
+	if (clients[user_id].playerinfo->m_posX >= 225 && clients[user_id].playerinfo->m_posX <= 565) {
+		if (clients[user_id].playerinfo->m_posZ >= -432 && clients[user_id].playerinfo->m_posZ <= -258)
 			return true;
 
-		if (clients[user_id].playerZ >= -630 && clients[user_id].playerZ <= -466)
+		if (clients[user_id].playerinfo->m_posZ >= -630 && clients[user_id].playerinfo->m_posZ <= -466)
 			return true;
 	}
 	//left bottom horse
-	if (clients[user_id].playerX >= -474 && clients[user_id].playerX <= -310) {
-		if (clients[user_id].playerZ >= -601 && clients[user_id].playerZ <= -495)
+	if (clients[user_id].playerinfo->m_posX >= -474 && clients[user_id].playerinfo->m_posX <= -310) {
+		if (clients[user_id].playerinfo->m_posZ >= -601 && clients[user_id].playerinfo->m_posZ <= -495)
 			return true;
-		if (clients[user_id].playerZ >= -449 && clients[user_id].playerZ <= -350)
+		if (clients[user_id].playerinfo->m_posZ >= -449 && clients[user_id].playerinfo->m_posZ <= -350)
 			return true;
-		if (clients[user_id].playerZ >= -296 && clients[user_id].playerZ <= -196)
+		if (clients[user_id].playerinfo->m_posZ >= -296 && clients[user_id].playerinfo->m_posZ <= -196)
 			return true;
 	}
 
 	//user
-	float Amax_x = clients[user_id].playerX + 27.f;
-	float Amin_x = clients[user_id].playerX - 27.f;
-	float Amax_z = clients[user_id].playerZ + 27.f;
-	float Amin_z = clients[user_id].playerZ - 27.f;
+	float Amax_x = clients[user_id].playerinfo->m_posX + clients[user_id].playerinfo->m_sizeX;
+	float Amin_x = clients[user_id].playerinfo->m_posX - clients[user_id].playerinfo->m_sizeX;
+	float Amax_z = clients[user_id].playerinfo->m_posZ + clients[user_id].playerinfo->m_sizeZ;
+	float Amin_z = clients[user_id].playerinfo->m_posZ - clients[user_id].playerinfo->m_sizeZ;
 
 	for (int j = 0; j < MAX_USER; ++j) {
 		if (clients[j].m_connected == true) {
-			float Bmax_x = clients[j].playerX + 27.f;
-			float Bmin_x = clients[j].playerX - 27.f;
-			float Bmax_z = clients[j].playerZ + 27.f;
-			float Bmin_z = clients[j].playerZ - 27.f;
+			float Bmax_x = clients[j].playerinfo->m_posX + clients[j].playerinfo->m_sizeX;
+			float Bmin_x = clients[j].playerinfo->m_posX - clients[j].playerinfo->m_sizeX;
+			float Bmax_z = clients[j].playerinfo->m_posZ + clients[j].playerinfo->m_sizeZ;
+			float Bmin_z = clients[j].playerinfo->m_posZ - clients[j].playerinfo->m_sizeZ;
 
 			if (user_id == j) continue;
 			if (Amax_x < Bmin_x || Amin_x > Bmax_x) continue;
@@ -466,19 +461,19 @@ bool object_collision(int user_id) {
 
 int player_hit(int user_id) {
 
-	if (clients[user_id].state == 1) {
+	if (clients[user_id].playerinfo->m_state == PLAYER_STATE::DAMAGED) {
 		//user
-		float Amax_x = clients[user_id].playerX + 37.f;
-		float Amin_x = clients[user_id].playerX - 37.f;
-		float Amax_z = clients[user_id].playerZ + 37.f;
-		float Amin_z = clients[user_id].playerZ - 37.f;
+		float Amax_x = clients[user_id].playerinfo->m_posX + 37.f;
+		float Amin_x = clients[user_id].playerinfo->m_posX - 37.f;
+		float Amax_z = clients[user_id].playerinfo->m_posZ + 37.f;
+		float Amin_z = clients[user_id].playerinfo->m_posZ - 37.f;
 
 		for (int j = 0; j < MAX_USER; ++j) {
 			if (clients[j].m_connected == true) {
-				float Bmax_x = clients[j].playerX + 27.f;
-				float Bmin_x = clients[j].playerX - 27.f;
-				float Bmax_z = clients[j].playerZ + 27.f;
-				float Bmin_z = clients[j].playerZ - 27.f;
+				float Bmax_x = clients[j].playerinfo->m_posX + 27.f;
+				float Bmin_x = clients[j].playerinfo->m_posX - 27.f;
+				float Bmax_z = clients[j].playerinfo->m_posZ + 27.f;
+				float Bmin_z = clients[j].playerinfo->m_posZ - 27.f;
 
 				if (user_id == j) continue;
 				if (Amax_x < Bmin_x || Amin_x > Bmax_x) continue;
@@ -508,23 +503,23 @@ void logic() {
 
 		for (int i = 0; i < MAX_USER; ++i) {
 			if (clients[i].m_connected == true) {
-				float movement_x = clients[i].velocityX * GameTimer.DeltaTime();
-				float movement_y = clients[i].velocityY * GameTimer.DeltaTime();
-				float movement_z = clients[i].velocityZ * GameTimer.DeltaTime();
+				float movement_x = clients[i].playerinfo->m_velX * GameTimer.DeltaTime();
+				float movement_y = clients[i].playerinfo->m_velY * GameTimer.DeltaTime();
+				float movement_z = clients[i].playerinfo->m_velZ * GameTimer.DeltaTime();
 				
-				clients[i].playerX += movement_x;
-				clients[i].playerY += movement_y;
-				clients[i].playerZ += movement_z;
+				clients[i].playerinfo->m_posX += movement_x;
+				clients[i].playerinfo->m_posY += movement_y;
+				clients[i].playerinfo->m_posZ += movement_z;
 
 
 				if (object_collision(i) == true) {	//충돌된상태
-					clients[i].playerX -= movement_x * 1.5f;
-					clients[i].playerY -= movement_y * 1.5f;
-					clients[i].playerZ -= movement_z * 1.5f;
+					clients[i].playerinfo->m_posX -= movement_x * 1.5f;
+					clients[i].playerinfo->m_posY -= movement_y * 1.5f;
+					clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
 				}
 
 				if (player_hit(i) != 0) {
-					clients[player_hit(i)].m_ani_index = 3;
+					clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
 				}
 
 				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
@@ -641,9 +636,9 @@ int main()
 
 			//컨텐츠 초기화
 			srand((unsigned)time(NULL));
-			clients[user_id].playerX = 0;
-			clients[user_id].playerZ = 0;
-			clients[user_id].playerZ = 0;
+			clients[user_id].playerinfo->m_posX = 0;
+			clients[user_id].playerinfo->m_posY = 0;
+			clients[user_id].playerinfo->m_posZ = 0;
 			DWORD flags = 0;
 
 			//로그인 정보 수신
