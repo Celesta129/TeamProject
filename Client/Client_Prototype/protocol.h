@@ -51,12 +51,21 @@ struct cs_packet_move {
 	char keydown;
 };
 
-struct cs_packet_motion{
+struct cs_packet_motion {
 	char size;
 	char type;
 	char key;
 	char count;
 };
+
+struct cs_packet_weapon {
+	char size;
+	char type;
+	char weapon_type;
+	char weapon_index;
+};
+
+// Server to Clients
 
 struct sc_packet_login_ok {
 	char size;
@@ -95,4 +104,51 @@ struct sc_packet_motion {
 	char ani_index;
 };
 
-#pragma pack(pop)
+struct sc_packet_put_weapon {
+	char size;
+	char type;
+	char weapon_type;
+	char weapon_index;
+	char x, y, z;
+};
+
+struct sc_packet_remove_weapon {
+	char size;
+	char type;
+	char weapon_type;
+	char weapon_index;
+};
+
+struct sc_packet_pick_weapon {
+	char size;
+	char type;
+	char id;
+	char weapon_type;
+	char weapon_index;
+};
+
+struct sc_packet_unpick_weapon {
+	char size;
+	char type;
+	char id;
+	char weapon_type;
+	char weapon_index;
+	float x;
+	float y;
+	float z;
+};
+
+//게임 타이머
+struct sc_packet_timer {
+	char size;
+	char type;
+	int timer;
+};
+
+//종료값
+struct sc_packet_end_flag {
+	char size;
+	char type;
+};
+
+#pragma pack(pop);
