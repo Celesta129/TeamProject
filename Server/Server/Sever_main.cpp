@@ -170,7 +170,7 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 2.f;
+		float fSpeed = 150.f;
 
 		if (packet->keydown) {
 			switch (packet->direction)
@@ -558,56 +558,72 @@ int player_hit(int user_id) {
 }
 
 void logic() {
-	GameTimer.Reset();
+	//GameTimer.Reset();
+	//정민씨 최곱니다요.
+	auto FixedDeltaTimeInNano = std::chrono::nanoseconds(int(1000000000.f / float(60)));
+	std::chrono::nanoseconds AccumulatedTime(0);
+	auto Last = chrono::high_resolution_clock::now();
+
 	while (true) {
-		GameTimer.Tick(60.f);
+		//GameTimer.Tick(60.f);
+		auto Now = std::chrono::high_resolution_clock::now();
+		auto Duration = std::chrono::duration_cast<std::chrono::nanoseconds>(Now - Last);
+		AccumulatedTime += Duration;
+		Last = Now;
 
-		//collision check
-		//for (int obj = 0; obj < 7; ++obj) {
-		//	for (int i = 0; i < MAX_USER; ++i) {
-		//		if (clients[i].m_connected == true) {
-		//			g_Object[obj].CheckCollBox(clients[i]);
-		//		}
-		//	}
-		//}
+		while (AccumulatedTime > FixedDeltaTimeInNano)
+		{
+			AccumulatedTime -= FixedDeltaTimeInNano;
+			float DeltaTime = FixedDeltaTimeInNano.count() * 1e-9f;
+			//collision check
+			//for (int obj = 0; obj < 7; ++obj) {
+			//	for (int i = 0; i < MAX_USER; ++i) {
+			//		if (clients[i].m_connected == true) {
+			//			g_Object[obj].CheckCollBox(clients[i]);
+			//		}
+			//	}
+			//}
 
-		for (int i = 0; i < MAX_USER; ++i) {
-			if (clients[i].m_connected == true) {
-				float movement_x = clients[i].playerinfo->m_velX * GameTimer.DeltaTime();
-				float movement_y = clients[i].playerinfo->m_velY * GameTimer.DeltaTime();
-				float movement_z = clients[i].playerinfo->m_velZ * GameTimer.DeltaTime();
+			//충돌처리
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true) {
+					float movement_x = clients[i].playerinfo->m_velX * /*GameTimer.DeltaTime()*/ DeltaTime;
+					float movement_y = clients[i].playerinfo->m_velY * /*GameTimer.DeltaTime()*/ DeltaTime;
+					float movement_z = clients[i].playerinfo->m_velZ * /*GameTimer.DeltaTime()*/ DeltaTime;
 
-				printf("%f \n", GameTimer.DeltaTime());
-				
-				clients[i].playerinfo->m_posX += movement_x;
-				clients[i].playerinfo->m_posY += movement_y;
-				clients[i].playerinfo->m_posZ += movement_z;
+					//printf("%f \n", DeltaTime);
+
+					clients[i].playerinfo->m_posX += movement_x;
+					clients[i].playerinfo->m_posY += movement_y;
+					clients[i].playerinfo->m_posZ += movement_z;
 
 
-				if (object_collision(i) == true) {	//충돌된상태
-					clients[i].playerinfo->m_posX -= movement_x * 1.5f;
-					clients[i].playerinfo->m_posY -= movement_y * 1.5f;
-					clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
+					if (object_collision(i) == true) {	//충돌된상태
+						clients[i].playerinfo->m_posX -= movement_x * 1.5f;
+						clients[i].playerinfo->m_posY -= movement_y * 1.5f;
+						clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
+					}
+
+					if (player_hit(i) != -1) {
+						clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
+					}
+
+					//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
+					//printf("%d\n", object_collision(i));
+					mapcollision(i);
 				}
-
-				if (player_hit(i) != -1) {
-					clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
-				}
-
-				//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
-				//printf("%d\n", object_collision(i));
-				mapcollision(i);
 			}
-		}
 
-		for (int i = 0; i < MAX_USER; ++i) {
-			if (clients[i].m_connected == true) {
-				for (int j = 0; j < MAX_USER; ++j) {
-					if (clients[j].m_connected == true) {
-						send_move_packet(i, j);
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true) {
+					for (int j = 0; j < MAX_USER; ++j) {
+						if (clients[j].m_connected == true) {
+							send_move_packet(i, j);
+						}
 					}
 				}
 			}
+
 		}
 	}
 }
