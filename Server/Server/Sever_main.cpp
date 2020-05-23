@@ -21,7 +21,10 @@ struct OVER_EX
 	WSAOVERLAPPED overlapped;
 	ENUMOP op;
 	char messageBuffer[MAX_BUFFER];
-	WSABUF wsabuf;
+	union {
+		SOCKET c_socket;
+		WSABUF wsabuf;
+	};
 };
 
 class SOCKETINFO {
@@ -54,6 +57,7 @@ public:
 
 SOCKETINFO clients[MAX_USER];
 int g_curr_user_id = 0;
+SOCKET listen_socket;
 HANDLE g_iocp;
 CTimer GameTimer;
 CObject g_Object[8];
@@ -166,7 +170,7 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 0.5f;
+		float fSpeed = 2.f;
 
 		if (packet->keydown) {
 			switch (packet->direction)
@@ -294,6 +298,72 @@ void recv_packet_construct(int user_id, int io_byte) {
 			clients[user_id].m_prev_size += rest_byte;
 			rest_byte = 0;
 			p += rest_byte;
+		}
+	}
+}
+
+void worker_thread() {
+	while (1) {
+		//io que넣기
+		DWORD io_byte;
+		ULONG_PTR key;
+		WSAOVERLAPPED* over;
+		GetQueuedCompletionStatus(g_iocp, &io_byte, &key, &over, INFINITE);
+
+		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
+		int user_id = static_cast<int>(key);
+
+		switch (exover->op)
+		{
+		case OP_RECV: {
+			if (0 == io_byte) {
+				disconnect(user_id);
+			}
+			else {
+				recv_packet_construct(user_id, io_byte);
+				ZeroMemory(&clients[user_id].m_recv_over.overlapped, sizeof(clients[user_id].m_recv_over.overlapped));
+				DWORD flags = 0;
+				WSARecv(clients[user_id].m_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
+			}
+		}
+					  break;
+		case OP_SEND:
+			if (io_byte == 0) disconnect(user_id);
+			delete exover;
+			break;
+		case OP_ACCEPT: {
+			int user_id = g_curr_user_id++;
+
+			SOCKET client_socket = exover->c_socket;
+
+			CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket), g_iocp, user_id, 0);
+			g_curr_user_id = g_curr_user_id % MAX_USER;
+			clients[user_id].m_id = user_id;
+			clients[user_id].m_prev_size = 0;
+			clients[user_id].m_recv_over.op = OP_RECV;
+			ZeroMemory(&clients[user_id].m_recv_over.overlapped, sizeof(clients[user_id].m_recv_over.overlapped));
+			clients[user_id].m_recv_over.wsabuf.buf = clients[user_id].m_recv_over.messageBuffer;
+			clients[user_id].m_recv_over.wsabuf.len = MAX_BUFFER;
+			clients[user_id].m_socket = client_socket;
+
+			//컨텐츠 초기화
+			clients[user_id].playerinfo->m_posX = 0;
+			clients[user_id].playerinfo->m_posY = 0;
+			clients[user_id].playerinfo->m_posZ = 0;
+			DWORD flags = 0;
+
+			//로그인 정보 수신
+			WSARecv(client_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
+
+			//접속 완료후 accept 대기
+			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+			exover->c_socket = client_socket;
+			ZeroMemory(&exover->overlapped, sizeof(exover->overlapped));
+			AcceptEx(listen_socket, client_socket, exover->messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &exover->overlapped);
+		}
+				break;
+		default:
+			break;
 		}
 	}
 }
@@ -470,10 +540,10 @@ int player_hit(int user_id) {
 
 		for (int j = 0; j < MAX_USER; ++j) {
 			if (clients[j].m_connected == true) {
-				float Bmax_x = clients[j].playerinfo->m_posX + 27.f;
-				float Bmin_x = clients[j].playerinfo->m_posX - 27.f;
-				float Bmax_z = clients[j].playerinfo->m_posZ + 27.f;
-				float Bmin_z = clients[j].playerinfo->m_posZ - 27.f;
+				float Bmax_x = clients[j].playerinfo->m_posX + clients[j].playerinfo->m_sizeX;
+				float Bmin_x = clients[j].playerinfo->m_posX - clients[j].playerinfo->m_sizeX;
+				float Bmax_z = clients[j].playerinfo->m_posZ + clients[j].playerinfo->m_sizeZ;
+				float Bmin_z = clients[j].playerinfo->m_posZ - clients[j].playerinfo->m_sizeZ;
 
 				if (user_id == j) continue;
 				if (Amax_x < Bmin_x || Amin_x > Bmax_x) continue;
@@ -484,7 +554,7 @@ int player_hit(int user_id) {
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 void logic() {
@@ -506,6 +576,8 @@ void logic() {
 				float movement_x = clients[i].playerinfo->m_velX * GameTimer.DeltaTime();
 				float movement_y = clients[i].playerinfo->m_velY * GameTimer.DeltaTime();
 				float movement_z = clients[i].playerinfo->m_velZ * GameTimer.DeltaTime();
+
+				printf("%f \n", GameTimer.DeltaTime());
 				
 				clients[i].playerinfo->m_posX += movement_x;
 				clients[i].playerinfo->m_posY += movement_y;
@@ -518,7 +590,7 @@ void logic() {
 					clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
 				}
 
-				if (player_hit(i) != 0) {
+				if (player_hit(i) != -1) {
 					clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
 				}
 
@@ -557,7 +629,7 @@ int main()
 	}
 
 	// Accept =============
-	SOCKET listen_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	listen_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (listen_socket == INVALID_SOCKET) {
 		cout << "Error - Invalid socket\n";
 		return 0;
@@ -588,73 +660,15 @@ int main()
 	OVER_EX accept_over;
 	ZeroMemory(&accept_over.overlapped, sizeof(accept_over.overlapped));
 	accept_over.op = OP_ACCEPT;
+	accept_over.c_socket = client_socket;
 	AcceptEx(listen_socket, client_socket, accept_over.messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &accept_over.overlapped);
 
+	vector<thread> worker_threads;
 
+	for (int i = 0; i < 4; ++i) worker_threads.push_back(thread{ worker_thread });
 	thread logic_thread{ logic };
 
-	while (1) {
-		//io que넣기
-		DWORD io_byte;
-		ULONG_PTR key;
-		WSAOVERLAPPED* over;
-		GetQueuedCompletionStatus(g_iocp, &io_byte, &key, &over, INFINITE);
-
-		OVER_EX* exover = reinterpret_cast<OVER_EX*>(over);
-		int user_id = static_cast<int>(key);
-
-		switch (exover->op)
-		{
-		case OP_RECV: {
-			if (0 == io_byte) {
-				disconnect(user_id);
-			}
-			else {
-				recv_packet_construct(user_id, io_byte);
-				ZeroMemory(&clients[user_id].m_recv_over.overlapped, sizeof(clients[user_id].m_recv_over.overlapped));
-				DWORD flags = 0;
-				WSARecv(clients[user_id].m_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
-			}
-		}
-			break;
-		case OP_SEND:
-			if (io_byte == 0) disconnect(user_id);
-			delete exover;
-			break;
-		case OP_ACCEPT: {
-			int user_id = g_curr_user_id++;
-
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket), g_iocp, user_id, 0);
-			g_curr_user_id = g_curr_user_id % MAX_USER;
-			clients[user_id].m_id = user_id;
-			clients[user_id].m_prev_size = 0;
-			clients[user_id].m_recv_over.op = OP_RECV;
-			ZeroMemory(&clients[user_id].m_recv_over.overlapped, sizeof(clients[user_id].m_recv_over.overlapped));
-			clients[user_id].m_recv_over.wsabuf.buf = clients[user_id].m_recv_over.messageBuffer;
-			clients[user_id].m_recv_over.wsabuf.len = MAX_BUFFER;
-			clients[user_id].m_socket = client_socket;
-
-			//컨텐츠 초기화
-			srand((unsigned)time(NULL));
-			clients[user_id].playerinfo->m_posX = 0;
-			clients[user_id].playerinfo->m_posY = 0;
-			clients[user_id].playerinfo->m_posZ = 0;
-			DWORD flags = 0;
-
-			//로그인 정보 수신
-			WSARecv(client_socket, &clients[user_id].m_recv_over.wsabuf, 1, NULL, &flags, &clients[user_id].m_recv_over.overlapped, NULL);
-
-			//접속 완료후 accept 대기
-			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-			ZeroMemory(&accept_over.overlapped, sizeof(accept_over.overlapped));
-			AcceptEx(listen_socket, client_socket, accept_over.messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &accept_over.overlapped);
-		}
-			break;
-		default:
-			break;
-		}
-	}
-
+	for (auto &th : worker_threads) th.join();
 	logic_thread.join();
 
 	return 0;
