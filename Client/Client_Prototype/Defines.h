@@ -24,3 +24,9 @@ const UINT LOOP_SKIP = 4;
 #define Anim_Run					2
 #define Anim_Jump					3
 #define Anim_Guard					4
+
+// 업데이트 메세지
+
+#define UPDATE_NULL		0
+#define UPDATE_TIMEOUT  1
+#define UPDATE_GAMESET	2

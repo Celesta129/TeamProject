@@ -9,11 +9,12 @@ CObject_TextureShader::~CObject_TextureShader()
 {
 }
 
-void CObject_TextureShader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
+int CObject_TextureShader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
 {
 	CShader::Update(timer, pFence, pCamera);
 	UpdateShaderVariables(timer, pCamera);
 	
+	return 0;
 }
 
 D3D12_INPUT_LAYOUT_DESC CObject_TextureShader::CreateInputLayout()
@@ -220,7 +221,7 @@ void CObject_TextureShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	
 }
 
-void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CModelObject*>& vObjects)
+void CObject_TextureShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CGameObject*>& vObjects)
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 	LoadTextures(pDevice,pd3dCommandList);
@@ -350,7 +351,7 @@ void CObject_TextureShader::UpdateSkinnedCBs()
 	}
 }
 
-void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CObject_TextureShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CModelObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
@@ -372,20 +373,7 @@ void CObject_TextureShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12
 		setMat(pObject, 0);
 		
 		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
-		if (i == 1)
-		{
-			pTransform->MovePos(XMFLOAT3(125, 0.f, 100.f));
-			pTransform->Rotate(0.f, 45.f, 0.f);
-		}
-		else if (i == 2)
-		{
-			pTransform->MovePos(XMFLOAT3(-300, 0.f, -250));
-			pTransform->Rotate(0.f, 180.f, 0.f);
-		}
-		else
-		{
-			pTransform->MovePos(XMFLOAT3(3000, 0.f, 3000));
-		}
+		pTransform->MovePos(XMFLOAT3(3000, 0.f, 3000));
 		pTransform->Set_Scale(XMFLOAT3(2.f, 2.f, 2.f));
 
 		

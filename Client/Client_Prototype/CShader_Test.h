@@ -7,9 +7,9 @@ public:
 	virtual ~Shader_Test();
 
 	// CShader을(를) 통해 상속됨
-	virtual void Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CModelObject*>& vObjects) override;
+	virtual void Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CGameObject*>& vObjects) override;
 
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
+	virtual int Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 protected:
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
@@ -34,7 +34,7 @@ protected:
 	virtual void UpdateMaterialCB();
 	virtual void UpdateObjectCBs();
 
-	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual int Free(void);

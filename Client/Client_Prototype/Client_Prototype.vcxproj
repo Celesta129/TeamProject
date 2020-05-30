@@ -180,6 +180,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="Component_Manager.h" />
     <ClInclude Include="Extern.h" />
+    <ClInclude Include="Object_Manager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="ObjectShader.h" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Typedef.h" />
+    <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
@@ -222,10 +224,12 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="ObjectShader.cpp" />
+    <ClCompile Include="Object_Manager.cpp" />
     <ClCompile Include="Object_TextureShader.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="FrameResource.cpp" />

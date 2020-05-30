@@ -8,9 +8,9 @@ public:
 	virtual ~CObjectShader();
 
 public:
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence,  CCamera* pCamera);
+	virtual int Update(const CTimer& timer, ID3D12Fence* pFence,  CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects);
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CGameObject*>& vObjects);
 public:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
@@ -34,7 +34,7 @@ public:
 	virtual void UpdateMainPassCB(CCamera* pCamera);
 	virtual void UpdateObjectCBs();
 
-	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 private:

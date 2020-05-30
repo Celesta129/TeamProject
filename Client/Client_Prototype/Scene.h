@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Base.h"
 #include "Component_Manager.h"
+#include "Object_Manager.h"
 #include "protocol.h"
 #include "Player.h"
 
@@ -34,7 +35,7 @@ public:
 
 
 	virtual void UpdateCamera(const float& fTimeElapsed);
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence);
+	virtual int Update(const CTimer& timer, ID3D12Fence* pFence);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT64& nFenceValue);
 
@@ -60,8 +61,6 @@ protected:
 	ComPtr<ID3D12GraphicsCommandList> m_GraphicsCommandList;
 
 protected:
-	vector<CModelObject*> m_vObjects;
-
 	// -----------for camera--------------------
 	vector<CCamera*> m_vCameras;
 	CCamera* m_pCurrentCamera = nullptr;
@@ -72,7 +71,7 @@ protected:
 
 protected:
 	CComponent_Manager* m_pComponent_Manager = nullptr;
-
+	CObject_Manager* m_pObject_Manager = nullptr;
 };
 
 

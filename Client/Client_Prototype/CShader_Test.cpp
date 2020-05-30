@@ -11,7 +11,7 @@ Shader_Test::~Shader_Test()
 {
 }
 
-void Shader_Test::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CModelObject*>& vObjects)
+void Shader_Test::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CGameObject*>& vObjects)
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 	
@@ -28,10 +28,12 @@ void Shader_Test::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList *
 	
 }
 
-void Shader_Test::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
+int Shader_Test::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
 {
 	CShader::Update(timer, pFence, pCamera);
 	UpdateShaderVariables(timer, pCamera);
+
+	return 0;
 }
 
 void Shader_Test::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
@@ -430,7 +432,7 @@ void Shader_Test::UpdateObjectCBs()
 	}
 }
 
-void Shader_Test::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CModelObject* pObject = nullptr;
 

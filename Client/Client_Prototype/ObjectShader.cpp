@@ -17,10 +17,12 @@ CObjectShader::~CObjectShader()
 	
 }
 
-void CObjectShader::Update(const CTimer & timer, ID3D12Fence * pFence,  CCamera * pCamera)
+int CObjectShader::Update(const CTimer & timer, ID3D12Fence * pFence,  CCamera * pCamera)
 {
 	CShader::Update(timer, pFence, pCamera);
 	UpdateShaderVariables(timer, pCamera);
+
+	return 0;
 }
 
 D3D12_INPUT_LAYOUT_DESC CObjectShader::CreateInputLayout()
@@ -286,7 +288,7 @@ void CObjectShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	}
 }
 
-void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects)
+void CObjectShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CGameObject*>& vObjects)
 {	
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
@@ -365,7 +367,7 @@ void CObjectShader::UpdateObjectCBs()
 	}
 }
 
-void CObjectShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CObjectShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
 }

@@ -55,10 +55,14 @@ HRESULT CModelObject::Initialize(const wstring& modeltag, const wstring& texture
 	return S_OK;
 }
 
-void CModelObject::Update(float fTimeElapsed)
+int CModelObject::Update(float fTimeElapsed)
 {
-	CGameObject::Update(fTimeElapsed);
+	int result = 0;
+
+	result = CGameObject::Update(fTimeElapsed);
 	Animate(fTimeElapsed);
+
+	return result;
 }
 
 void CModelObject::Render(ID3D12GraphicsCommandList * pCommandList)

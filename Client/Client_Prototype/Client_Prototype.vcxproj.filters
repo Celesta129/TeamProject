@@ -86,6 +86,12 @@
     <Filter Include="02.Utility\06.Shader\Shader_Test">
       <UniqueIdentifier>{5ee01274-7d5c-4e47-81d6-27bbfc475a4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\05.Manager\02.Object_Manager">
+      <UniqueIdentifier>{3cfe63e3-cda7-4d1a-a381-9be3e2c6f62a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\02.UIObject">
+      <UniqueIdentifier>{ac8ac3d4-7c69-49c0-a5ff-151a1743aa9b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -189,6 +195,12 @@
     <ClInclude Include="Material.h">
       <Filter>02.Utility\04.Component\04.Model\Material</Filter>
     </ClInclude>
+    <ClInclude Include="Object_Manager.h">
+      <Filter>02.Utility\05.Manager\02.Object_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="UIObject.h">
+      <Filter>02.Utility\03.Object\02.UIObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -273,6 +285,12 @@
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>02.Utility\04.Component\04.Model\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Object_Manager.cpp">
+      <Filter>02.Utility\05.Manager\02.Object_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="UIObject.cpp">
+      <Filter>02.Utility\03.Object\02.UIObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

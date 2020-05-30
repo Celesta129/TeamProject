@@ -471,6 +471,7 @@ bool CD3DApp::InitDirect3D()
 
 	CreateCommandObjects();
 	CreateSwapChain();
+	//m_dxgiFactory->MakeWindowAssociation(m_hMainWnd,DXGI_MWA_NO_ALT_ENTER);
 	CreateRtvAndDsvDescriptorHeaps();
 
 	return true;

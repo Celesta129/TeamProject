@@ -15,10 +15,10 @@ public:
 	CShader();
 	virtual ~CShader();
 public:
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects) = 0;
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CGameObject*>& vObjects) = 0;
 
 			void ResetCmd(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
+	virtual int Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
 	bool Push_Object(CModelObject* pObject);

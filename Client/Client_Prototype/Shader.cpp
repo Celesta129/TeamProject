@@ -12,7 +12,7 @@ CShader::~CShader()
 	
 }
 
-void CShader::Update(const CTimer& timer, ID3D12Fence * pFence, CCamera* pCamera)
+int CShader::Update(const CTimer& timer, ID3D12Fence * pFence, CCamera* pCamera)
 {
 	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % NUM_FRAME_RESOURCE;
 	m_CurrFrameResource = m_vFrameResources[m_CurrFrameResourceIndex].get();

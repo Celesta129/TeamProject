@@ -17,7 +17,7 @@ public:
 public:
 	virtual HRESULT Initialize(void);
 
-	virtual void Update(float fTimeElapsed);
+	virtual int Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 	virtual int Free(void);

@@ -15,6 +15,8 @@ CScene::CScene(ComPtr<ID3D12Device> pDevice, ComPtr<ID3D12GraphicsCommandList> p
 	m_pComponent_Manager = CComponent_Manager::GetInstance();
 	m_pComponent_Manager->AddRef();
 
+	m_pObject_Manager = CObject_Manager::GetInstance();
+	m_pObject_Manager->AddRef();
 }
 
 
@@ -35,13 +37,14 @@ HRESULT CScene::Initialize()
 
 void CScene::Set_Camera(UINT index)
 {
-	if (index > m_vObjects.size())
+	vector<CGameObject*>* pPlayerLayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_PLAYER);
+	if (index > pPlayerLayer->size())
 	{
 		return;
 	}
-	if (m_vObjects[index] != nullptr)
+	if ((*pPlayerLayer)[index] != nullptr)
 	{
-		m_pCurrentCamera->SetTarget(m_vObjects[index]);
+		m_pCurrentCamera->SetTarget(m_pObject_Manager->Get_Object(CObject_Manager::LAYER_PLAYER,index));
 	}
 }
 
@@ -52,18 +55,21 @@ void CScene::BuildShaders()
 	CTransform* pTransform = nullptr;
 
 	
+	vector<CGameObject*>* pPlayerLayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_PLAYER);
+	vector<CGameObject*>* pObjectLayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_OBJECT);
+
 	// For TextureObject
 	pShader = new CObject_TextureShader;
-	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", m_vObjects);
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", *pPlayerLayer);
 	m_vShaders.push_back(pShader);
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		m_player[i] = new CPlayer();
-		m_player[i]->SetObjectInstance(m_vObjects[i]);
+		m_player[i]->SetObjectInstance((CModelObject*)(*pPlayerLayer)[i]);
 	}
 
 	pShader = new Shader_Test;
-	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TextureModel.hlsl", m_vObjects);
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TextureModel.hlsl", *pObjectLayer);
 	m_vShaders.push_back(pShader);
 
 	//pObject = new CModelObject;
@@ -198,10 +204,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 void CScene::ReleaseObjects()
 {
-	for (auto& pObject : m_vObjects) 
-	{
-		int refCnt = Safe_Release(pObject);
-	}
+	
 }
 
 void CScene::ResetCmdList(ID3D12GraphicsCommandList * pd3dCommandList)
@@ -247,21 +250,27 @@ void CScene::UpdateCamera(const float & fTimeElapsed)
 
 }
 
-void CScene::Update(const CTimer& timer, ID3D12Fence* pFence)
+int CScene::Update(const CTimer& timer, ID3D12Fence* pFence)
 {
-	
+	int result = 0;
 	UpdateCamera(timer.DeltaTime());
 
-
-	for (auto& object : m_vObjects)
+	for (UINT i = 0; i < CObject_Manager::LAYER_END; ++i)
 	{
-		object->Update(timer.DeltaTime());
-	}
-	for (auto& shader : m_vShaders)
-	{
-		shader->Update(timer,  pFence, m_pCurrentCamera);
+		for (auto& object : *m_pObject_Manager->Get_Layer(i))
+		{
+			result = object->Update(timer.DeltaTime());
+			if (result == UPDATE_TIMEOUT)
+				cout << "timeout" << endl;
+		}
 	}
 	
+	for (auto& shader : m_vShaders)
+	{
+		result = shader->Update(timer,  pFence, m_pCurrentCamera);
+	}
+	
+	return 0;
 }
 
 void CScene::Render(ID3D12GraphicsCommandList * cmdList, UINT64& nFenceValue)
@@ -289,6 +298,7 @@ int CScene::Free(void)
 	ReleaseScene();
 
 	Safe_Release(m_pComponent_Manager);
+	Safe_Release(m_pObject_Manager);
 	return 0;
 }
 
@@ -390,7 +400,7 @@ void CScene::BuildCamera(void)
 {
 	for (int i = 0; i < MAX_USER; ++i) {
 		m_vCameras.push_back(new CCamera);
-		m_vCameras[i]->SetTarget(m_vObjects[i]);
+		m_vCameras[i]->SetTarget(m_pObject_Manager->Get_Object(CObject_Manager::LAYER_PLAYER,i));
 	}
 	m_pCurrentCamera = m_vCameras[0];
 }

@@ -12,7 +12,7 @@ public:
 	virtual HRESULT Initialize(void);
 	virtual HRESULT Initialize(const wstring& modeltag,const wstring& texturetag, ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 
-	virtual void Update(float fTimeElapsed);
+	virtual int Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
 
 public:

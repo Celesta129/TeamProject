@@ -25,9 +25,9 @@ HRESULT CGameObject::Initialize(void)
 	return S_OK;
 }
 
-void CGameObject::Update(float fTimeElapsed)
+int CGameObject::Update(float fTimeElapsed)
 {
-
+	return 0;
 }
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pCommandList)

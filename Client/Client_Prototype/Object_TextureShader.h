@@ -11,9 +11,9 @@ public:
 	~CObject_TextureShader();
 
 public:
-	virtual void Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
+	virtual int Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
-	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects);
+	virtual void Initialize(ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList, const WCHAR* pszShaderFileName, vector<CGameObject*>& vObjects);
 	void setMat(CModelObject* pObject, int matindex);
 protected:
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -43,7 +43,7 @@ protected:
 	virtual void UpdateObjectCBs();
 	virtual void UpdateSkinnedCBs();
 
-	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 private:

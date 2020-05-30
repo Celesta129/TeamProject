@@ -17,10 +17,12 @@ CAxisShader::~CAxisShader()
 
 }
 
-void CAxisShader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
+int CAxisShader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCamera)
 {
 	CShader::Update(timer, pFence, pCamera);
 	UpdateShaderVariables(timer, pCamera);
+
+	return 0;
 }
 
 D3D12_INPUT_LAYOUT_DESC CAxisShader::CreateInputLayout()
@@ -284,7 +286,7 @@ void CAxisShader::CreateConstantBufferViews(ID3D12Device * pDevice)
 	}
 }
 
-void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CModelObject*>& vObjects)
+void CAxisShader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR* pszShaderFileName, vector<CGameObject*>& vObjects)
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
@@ -357,7 +359,7 @@ void CAxisShader::UpdateObjectCBs()
 	}
 }
 
-void CAxisShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CAxisShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 }

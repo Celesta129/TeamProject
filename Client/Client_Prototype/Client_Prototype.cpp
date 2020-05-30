@@ -60,6 +60,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	CComponent_Manager::GetInstance();
+	CObject_Manager::GetInstance();
 	GameFramework = new CGameFramework_Client (hInstance);
 	
 	try {
@@ -109,6 +110,7 @@ CGameFramework_Client::~CGameFramework_Client()
 {
 	Safe_Release(m_pScene);
 	int refCount = CComponent_Manager::DestroyInstance();
+	refCount = CObject_Manager::DestroyInstance();
 }
 
 //객체 초기화
