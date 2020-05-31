@@ -84,6 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,6 +112,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -120,12 +122,15 @@
   <ItemGroup>
     <ClCompile Include="CObject.cpp" />
     <ClCompile Include="CPlayer.cpp" />
+    <ClCompile Include="CWeapon.cpp" />
     <ClCompile Include="Sever_main.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CObject.h" />
     <ClInclude Include="CPlayer.h" />
+    <ClInclude Include="CWeapon.h" />
+    <ClInclude Include="def.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Timer.h" />

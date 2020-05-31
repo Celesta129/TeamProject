@@ -333,18 +333,32 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 	if (GetAsyncKeyState(0x41) & 0x8000 && !attack_state)
 	{
-		if (attack_count < 1) {
-			chrono::high_resolution_clock::time_point temp;
-			temp = chrono::high_resolution_clock::now();
-			attack_count += 1;
-			m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
-		}
-		else if(attack_count < 2) {
-			//일정시간안에 다시 눌림
-			attack_count += 1;
-			m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
-		}
+		int type = m_Player->GetWeapontype();	//무기 종류
+		int index = m_Player->GetWeaponIndex();  //무기 번호
 
+		//맨손
+		if (m_Player->GetWeapon_grab() == false) {
+			if (index != -1 && type != -1) {
+				m_pSocket->sendPacket(CS_ITEM, type, index, 0);
+			}
+			else
+			{
+				if (attack_count < 1) {
+					chrono::high_resolution_clock::time_point temp;
+					temp = chrono::high_resolution_clock::now();
+					attack_count += 1;
+					m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+				}
+				else if (attack_count < 2) {
+					//일정시간안에 다시 눌림
+					attack_count += 1;
+					m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+				}
+			}
+		}
+		else {	//맨손아닐때
+
+		}
 		attack_state = true;
 	}
 	if (GetAsyncKeyState(0x41) == 0 && attack_state)
@@ -417,6 +431,21 @@ void CGameFramework_Client::processPacket(char* buf)
 		int other_id = p_motion->id;
 
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_motion->ani_index);
+	}
+		break;
+	case SC_PUT_WEAPON: 
+	{
+		sc_packet_put_weapon* p_put_weapon = reinterpret_cast<sc_packet_put_weapon*>(buf);
+		int type = p_put_weapon->weapon_type;
+		int index = p_put_weapon->weapon_index;
+		int x = p_put_weapon->x;
+		int y = p_put_weapon->y;
+		int z = p_put_weapon->z;
+
+		//flag
+		if (type == 10) {
+
+		}
 	}
 		break;
 	default:

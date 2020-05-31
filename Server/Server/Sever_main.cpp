@@ -4,8 +4,9 @@
 #include "Timer.h"
 #include "CPlayer.h"
 #include "CObject.h"
+#include "CWeapon.h"
+#include "def.h"
 #include "protocol.h"
-
 
 //global
 #define MAX_BUFFER 1024
@@ -13,6 +14,20 @@
 //struct Point3D {
 //	float x, y, z;
 //};
+
+gmtl::Point3f Player_map1_Init_pos[MAX_USER] = {
+	gmtl::Point3f(-280.f, 0.f, 0.f), gmtl::Point3f(280.f, 0.f, 0.f),
+	gmtl::Point3f(0.f, 0.f, -280.f), gmtl::Point3f(0.f, 0.f, 280.f),
+	gmtl::Point3f(-210.f, 0.f, 190.f), gmtl::Point3f(190.f, 0.f, -210.f),
+	gmtl::Point3f(210.f, 0.f, 190.f), gmtl::Point3f(-190.f, 0.f, -210.f)
+};
+
+gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
+	gmtl::Point3f(-585.f, 0.f, 570.f), gmtl::Point3f(-410.f, 0.f, -110.f), gmtl::Point3f(-570.f, 0.f, -570.f),
+	gmtl::Point3f(-180.f, 0.f, -520.f), gmtl::Point3f(100.f, 0.f, -520.f), gmtl::Point3f(600.f, 0.f, -455.f),
+	gmtl::Point3f(485.f, 0.f, -90.f), gmtl::Point3f(600.f, 0.f, 550.f), gmtl::Point3f(-85.f, 0.f, 470.f),
+	gmtl::Point3f(130.f, 0.f, 470.f)
+};
 
 enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT };
 
@@ -61,6 +76,8 @@ SOCKET listen_socket;
 HANDLE g_iocp;
 CTimer GameTimer;
 CObject g_Object[8];
+CWeapon g_weapon_list[10];
+CFlag g_Flag;
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -102,6 +119,64 @@ void send_enter_packet(int user_id, int o_id) {
 	send_packet(user_id, &p);
 }
 
+void send_put_weapon_packet(int user_id, char type, char index, const gmtl::Point3f& pos) {
+	sc_packet_put_weapon p;
+	p.size = sizeof(p);
+	p.type = SC_PUT_WEAPON;
+	p.weapon_index = index;
+	p.type = type;
+	p.x = pos.mData[0];
+	p.y = pos.mData[1];
+	p.z = pos.mData[2];
+
+	send_packet(user_id, &p);
+}
+
+void send_remove_weapon_packet(int user_id, char type, char index) {
+	sc_packet_remove_weapon p;
+	p.size = sizeof(p);
+	p.type = SC_REMOVE_WEAPON;
+	p.weapon_index = index;
+	p.weapon_type = type;
+
+	send_packet(user_id, &p);
+}
+
+void send_pick_weapon_packet(int user_id, char player_id, char type, char index) {
+	sc_packet_pick_weapon p;
+	p.size = sizeof(p);
+	p.type = SC_PICK_WEAPON;
+	p.id = player_id;
+	p.weapon_index = index;
+	p.weapon_type = type;
+
+	send_packet(user_id, &p);
+}
+
+void send_unpick_weapon_packet(int user_id, char player_id, char type, char index) {
+	sc_packet_unpick_weapon p;
+	p.size = sizeof(p);
+	p.type = SC_UNPICK_WEAPON;
+	p.id = player_id;
+	p.weapon_index = index;
+	p.weapon_type = type;
+}
+
+void send_setting_weapon(int user_id) {
+	for (int i = 0; i < MAX_WEAPON; ++i) {
+		if (clients[user_id].m_connected == true) {
+			char type = g_weapon_list[i].weapon_index;
+			gmtl::Point3f pos = g_weapon_list[i].pos;
+
+			send_put_weapon_packet(user_id, type, i, pos);
+		}
+	}
+	//flag
+	if (g_Flag.drop == true)
+		send_put_weapon_packet(user_id, 10, 10, g_Flag.pos);
+}
+
+//접속과 함께 weapon spawn, timer값 보내기
 void enter_game(int user_id) {
 	clients[user_id].m_connected = true;
 
@@ -110,7 +185,16 @@ void enter_game(int user_id) {
 			if (user_id != i) {
 				send_enter_packet(user_id, i);
 				send_enter_packet(i, user_id);
+
+				send_setting_weapon(user_id);
 			}
+	}
+}
+
+void setting_weapon() {
+	for (int j = 0; j < MAX_WEAPON; ++j) {
+		g_weapon_list[j].weapon_index = rand() % (MAX_WEAPON_TYPE - 1);
+		g_weapon_list[j].pos = Weapon_map1_Init_pos[j];
 	}
 }
 
@@ -170,22 +254,20 @@ void process_packet(int user_id, char* buf) {
 	case CS_MOVEMENT: {
 		cs_packet_move* packet = reinterpret_cast<cs_packet_move*>(buf);
 		
-		float fSpeed = 150.f;
-
 		if (packet->keydown) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].playerinfo->m_velZ += fSpeed;
+				clients[user_id].playerinfo->m_velZ += 1.f;
 				break;
 			case CS_DOWN:
-				clients[user_id].playerinfo->m_velZ -= fSpeed;
+				clients[user_id].playerinfo->m_velZ -= 1.f;
 				break;
 			case CS_LEFT:
-				clients[user_id].playerinfo->m_velX -= fSpeed;
+				clients[user_id].playerinfo->m_velX -= 1.f;
 				break;
 			case CS_RIGHT:
-				clients[user_id].playerinfo->m_velX += fSpeed;
+				clients[user_id].playerinfo->m_velX += 1.f;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -198,16 +280,16 @@ void process_packet(int user_id, char* buf) {
 			switch (packet->direction)
 			{
 			case CS_UP:
-				clients[user_id].playerinfo->m_velZ -= fSpeed;
+				clients[user_id].playerinfo->m_velZ -= 1.f;
 				break;
 			case CS_DOWN:
-				clients[user_id].playerinfo->m_velZ += fSpeed;
+				clients[user_id].playerinfo->m_velZ += 1.f;
 				break;
 			case CS_LEFT:
-				clients[user_id].playerinfo->m_velX += fSpeed;
+				clients[user_id].playerinfo->m_velX += 1.f;
 				break;
 			case CS_RIGHT:
-				clients[user_id].playerinfo->m_velX -= fSpeed;
+				clients[user_id].playerinfo->m_velX -= 1.f;
 				break;
 			default:
 				cout << "UnKnown Direction from Client move packet!\n";
@@ -217,13 +299,19 @@ void process_packet(int user_id, char* buf) {
 			}
 		}
 
+		gmtl::Vec3f vel = gmtl::Vec3f(clients[user_id].playerinfo->m_velX, clients[user_id].playerinfo->m_velY, clients[user_id].playerinfo->m_velZ);
+
 		//키 다운이 없는지 판단하고 ani index 변경
 		if (clients[user_id].playerinfo->m_velX != 0.f || clients[user_id].playerinfo->m_velZ != 0.f) {
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::RUN;
+
+			//vel로 방향벡터 생성
+			clients[user_id].playerinfo->m_look = gmtl::makeNormal(vel);
 		}
 		else {
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
 		}
+	
 
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
@@ -257,6 +345,16 @@ void process_packet(int user_id, char* buf) {
 			if (true == cl.m_connected)
 				send_motion_packet(cl.m_id, user_id);
 		}
+	}
+		break;
+	case CS_ITEM: {
+		cs_packet_weapon* packet = reinterpret_cast<cs_packet_weapon*>(buf);
+		char type = packet->weapon_type;
+		char index = packet->weapon_index;
+
+		clients[user_id].playerinfo->m_weapon_type = type;
+		clients[user_id].playerinfo->m_weapon_index = index;
+		clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::PICK_UP;
 	}
 		break;
 	default:
@@ -371,26 +469,26 @@ void worker_thread() {
 //충돌처리
 bool CheckCollPlayer(const CPlayer& trg, const CPlayer& src)
 {
-	Point3D trg_min;
-	Point3D trg_max;
+	gmtl::Point3f trg_min;
+	gmtl::Point3f trg_max;
 
-	Point3D src_min;
-	Point3D src_max;
+	gmtl::Point3f src_min;
+	gmtl::Point3f src_max;
 
-	trg_min.x = trg.m_posX - trg.m_sizeX;
-	trg_min.z = trg.m_posZ - trg.m_sizeZ;
+	trg_min.mData[0] = trg.m_posX - trg.m_sizeX;
+	trg_min.mData[2] = trg.m_posZ - trg.m_sizeZ;
 
-	trg_max.x = trg.m_posX + trg.m_sizeX;
-	trg_max.z = trg.m_posZ + trg.m_sizeZ;
+	trg_max.mData[0] = trg.m_posX + trg.m_sizeX;
+	trg_max.mData[2] = trg.m_posZ + trg.m_sizeZ;
 
-	src_min.x = src.m_posX - src.m_sizeX;
-	src_min.z = src.m_posZ - src.m_sizeZ;
+	src_min.mData[0] = src.m_posX - src.m_sizeX;
+	src_min.mData[2] = src.m_posZ - src.m_sizeZ;
 
-	src_max.x = src.m_posX + src.m_sizeX;
-	src_max.z = src.m_posZ + src.m_sizeZ;
+	src_max.mData[0] = src.m_posX + src.m_sizeX;
+	src_max.mData[2] = src.m_posZ + src.m_sizeZ;
 
-	if ((trg_min.x <= src_max.x && trg_max.x >= src_min.x) &&
-		(trg_min.z <= src_max.z && trg_max.z >= src_min.z))
+	if ((trg_min.mData[0] <= src_max.mData[0] && trg_max.mData[0] >= src_min.mData[0]) &&
+		(trg_min.mData[2] <= src_max.mData[2] && trg_max.mData[2] >= src_min.mData[2]))
 	{
 		return true;
 	}
@@ -529,14 +627,30 @@ bool object_collision(int user_id) {
 	return false;
 }
 
+//weapon_collision
+//bool weapon_collision(int user_id) {
+//
+//}
+
 int player_hit(int user_id) {
 
 	if (clients[user_id].playerinfo->m_state == PLAYER_STATE::DAMAGED) {
+
+		gmtl::Vec3f Look = clients[user_id].playerinfo->m_look;
+		gmtl::Point3f Pos(clients[user_id].playerinfo->m_posX, clients[user_id].playerinfo->m_posY, clients[user_id].playerinfo->m_posZ);
+
+		float hit_dist = 10.f;
+		int type = clients[user_id].playerinfo->m_weapon_type;
+		if (type == WEAPON_SWORD)
+			hit_dist = 20.f;
+		if (type = WEAPON_HAMMER)
+			hit_dist = 15.f;
+		
 		//user
-		float Amax_x = clients[user_id].playerinfo->m_posX + 37.f;
-		float Amin_x = clients[user_id].playerinfo->m_posX - 37.f;
-		float Amax_z = clients[user_id].playerinfo->m_posZ + 37.f;
-		float Amin_z = clients[user_id].playerinfo->m_posZ - 37.f;
+		float Amax_x = Pos.mData[0] + Look.mData[0] * hit_dist + clients[user_id].playerinfo->m_sizeX;
+		float Amin_x = Pos.mData[0] + Look.mData[0] * hit_dist - clients[user_id].playerinfo->m_sizeX;
+		float Amax_z = Pos.mData[2] + Look.mData[2] * hit_dist + clients[user_id].playerinfo->m_sizeZ;
+		float Amin_z = Pos.mData[2] + Look.mData[2] * hit_dist - clients[user_id].playerinfo->m_sizeZ;
 
 		for (int j = 0; j < MAX_USER; ++j) {
 			if (clients[j].m_connected == true) {
@@ -557,9 +671,28 @@ int player_hit(int user_id) {
 	return -1;
 }
 
+bool flag_collision(int user_id) {
+	gmtl::Point3f Pos(clients[user_id].playerinfo->m_posX, clients[user_id].playerinfo->m_posY, clients[user_id].playerinfo->m_posZ);
+
+	//user
+	float Amax_x = Pos.mData[0] + clients[user_id].playerinfo->m_sizeX;
+	float Amin_x = Pos.mData[0] - clients[user_id].playerinfo->m_sizeX;
+	float Amax_z = Pos.mData[2] + clients[user_id].playerinfo->m_sizeZ;
+	float Amin_z = Pos.mData[2] - clients[user_id].playerinfo->m_sizeZ;
+
+	float Bmax_x = g_Flag.pos.mData[0] + 10.f;
+	float Bmin_x = g_Flag.pos.mData[0] - 10.f;
+	float Bmax_z = g_Flag.pos.mData[2] + 10.f;
+	float Bmin_z = g_Flag.pos.mData[2] - 10.f;
+
+	if (Amax_x < Bmin_x || Amin_x > Bmax_x) return false;
+	if (Amax_z< Bmin_z || Amin_z > Bmax_z) return false;
+
+	return true;
+}
+
 void logic() {
 	//GameTimer.Reset();
-	//정민씨 최곱니다요.
 	auto FixedDeltaTimeInNano = std::chrono::nanoseconds(int(1000000000.f / float(60)));
 	std::chrono::nanoseconds AccumulatedTime(0);
 	auto Last = chrono::high_resolution_clock::now();
@@ -587,9 +720,11 @@ void logic() {
 			//충돌처리
 			for (int i = 0; i < MAX_USER; ++i) {
 				if (clients[i].m_connected == true) {
-					float movement_x = clients[i].playerinfo->m_velX * /*GameTimer.DeltaTime()*/ DeltaTime;
-					float movement_y = clients[i].playerinfo->m_velY * /*GameTimer.DeltaTime()*/ DeltaTime;
-					float movement_z = clients[i].playerinfo->m_velZ * /*GameTimer.DeltaTime()*/ DeltaTime;
+					gmtl::Vec3f Look = clients[i].playerinfo->m_look;
+					
+					float movement_x = DeltaTime * Look.mData[0] * 150 * abs(clients[i].playerinfo->m_velX);
+					float movement_y = DeltaTime * Look.mData[1] * 150 * abs(clients[i].playerinfo->m_velY);
+					float movement_z = DeltaTime * Look.mData[2] * 150 * abs(clients[i].playerinfo->m_velZ);
 
 					//printf("%f \n", DeltaTime);
 
@@ -604,11 +739,19 @@ void logic() {
 						clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
 					}
 
-					if (player_hit(i) != -1) {
-						clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
+					if (flag_collision(i) == true) {
+						clients[i].playerinfo->m_collide_flag = true;
+					}
+					else {
+						clients[i].playerinfo->m_collide_flag = false;
 					}
 
-					//printf("%f, %f, %f \n", clients[i].playerX, clients[i].playerY, clients[i].playerZ);
+					if (player_hit(i) != -1) {
+						clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
+						clients[player_hit(i)].playerinfo->m_hp -= 20;
+					}
+
+					//printf("%f, %f, %f \n", clients[i].playerinfo->m_posX, clients[i].playerinfo->m_posY, clients[i].playerinfo->m_posZ);
 					//printf("%d\n", object_collision(i));
 					mapcollision(i);
 				}
@@ -637,6 +780,7 @@ int main()
 	for (int i = 0; i < MAX_USER; ++i) {
 		clients[i].m_connected = false;
 	}
+	setting_weapon();
 
 	WSADATA WSAData;
 	if (WSAStartup(MAKEWORD(2, 2), &WSAData) != 0) {

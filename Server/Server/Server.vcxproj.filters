@@ -16,6 +16,9 @@
     <Filter Include="소스 파일\Player">
       <UniqueIdentifier>{3576acce-d44f-4202-ac36-5ac11d537d77}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Weapon">
+      <UniqueIdentifier>{265e1830-2304-4025-ab80-3e8106707fd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sever_main.cpp">
@@ -29,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="CObject.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CWeapon.cpp">
+      <Filter>소스 파일\Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +51,12 @@
       <Filter>소스 파일\Player</Filter>
     </ClInclude>
     <ClInclude Include="CObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CWeapon.h">
+      <Filter>소스 파일\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="def.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

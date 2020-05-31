@@ -10,6 +10,7 @@ constexpr int MAX_NAME_LEN = 15;
 constexpr int CS_LOGIN = 1;
 constexpr int CS_DISCONNECT = 2;
 constexpr int CS_MOVEMENT = 3;
+constexpr int CS_ITEM = 4;
 
 constexpr int CS_UP = 10;
 constexpr int CS_DOWN = 11;
@@ -26,6 +27,10 @@ constexpr int SC_CONNECTED = 1;
 constexpr int SC_ENTER = 2;
 constexpr int SC_LEAVE = 3;
 
+constexpr int SC_PUT_WEAPON = 4;
+constexpr int SC_PICK_WEAPON = 5;
+constexpr int SC_REMOVE_WEAPON = 6;
+constexpr int SC_UNPICK_WEAPON = 7;
 
 constexpr int SC_MOVEMENT = 11;
 constexpr int SC_ATTACK = 12;
@@ -133,9 +138,6 @@ struct sc_packet_unpick_weapon {
 	char id;
 	char weapon_type;
 	char weapon_index;
-	float x;
-	float y;
-	float z;
 };
 
 //게임 타이머

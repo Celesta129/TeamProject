@@ -97,6 +97,15 @@ void CSocket::sendPacket(char type, char key, char state, char id)
 		send(clientSocket, (char*)& p_motion, sizeof(cs_packet_motion), 0);
 	}
 		break;
+	case CS_ITEM: {
+		cs_packet_weapon p_weapon;
+		p_weapon.type = CS_ITEM;
+		p_weapon.size = sizeof(cs_packet_weapon);
+		p_weapon.weapon_type = key;
+		p_weapon.weapon_index = state;
+		send(clientSocket, (char*)& p_weapon, sizeof(cs_packet_weapon), 0);
+	}
+		break;
 	default:
 		cout << "Error in SendPacket, Invalid Key Input or Type \n";
 		break;
