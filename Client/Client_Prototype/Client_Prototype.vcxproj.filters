@@ -92,6 +92,9 @@
     <Filter Include="02.Utility\03.Object\02.UIObject">
       <UniqueIdentifier>{ac8ac3d4-7c69-49c0-a5ff-151a1743aa9b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\06.Shader\03.UIShader">
+      <UniqueIdentifier>{f8af8028-7812-45eb-9f09-9396680dc470}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -201,6 +204,9 @@
     <ClInclude Include="UIObject.h">
       <Filter>02.Utility\03.Object\02.UIObject</Filter>
     </ClInclude>
+    <ClInclude Include="UI_Shader.h">
+      <Filter>02.Utility\06.Shader\03.UIShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -292,6 +298,9 @@
     <ClCompile Include="UIObject.cpp">
       <Filter>02.Utility\03.Object\02.UIObject</Filter>
     </ClCompile>
+    <ClCompile Include="UI_Shader.cpp">
+      <Filter>02.Utility\06.Shader\03.UIShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc">
@@ -320,6 +329,9 @@
       <Filter>03.Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\TextureModel.hlsl">
+      <Filter>03.Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\UIShader.hlsl">
       <Filter>03.Shaders</Filter>
     </FxCompile>
   </ItemGroup>

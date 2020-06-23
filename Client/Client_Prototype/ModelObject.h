@@ -40,8 +40,8 @@ protected:
 protected:
 	vector<LoadModel*>m_pModel;
 	UINT m_NumofAnim = 0;
-	UINT m_AnimIndex = -1;
-	float m_Animtime = -1.f;
+	UINT m_AnimIndex = 0;
+	float m_Animtime = 0.0f;
 	UINT m_nMeshes = 0;
 
 	UINT m_AnimStatus;

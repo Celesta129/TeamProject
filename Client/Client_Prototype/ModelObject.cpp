@@ -32,9 +32,7 @@ HRESULT CModelObject::Initialize(const wstring& modeltag, const wstring& texture
 	pMaterial = (CMaterial*)Get_Component(texturetag);
 
 	// m_ani = nullptr;
-	m_NumofAnim = 0;
-	m_AnimIndex = 0;
-	m_Animtime = 0.0f;
+	
 	m_nMeshes = m_pModel[m_AnimIndex]->getNumMesh();
 
 	//boundingbox = m_model->getBoudingBox();
