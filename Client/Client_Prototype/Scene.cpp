@@ -5,6 +5,7 @@
 
 #include "ObjectShader.h"
 #include "AxisShader.h"
+#include "UI_Shader.h"
 #include "Object_TextureShader.h"
 #include "CShader_Test.h"
 #include "ModelObject.h"
@@ -57,7 +58,7 @@ void CScene::BuildShaders()
 	
 	vector<CGameObject*>* pPlayerLayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_PLAYER);
 	vector<CGameObject*>* pObjectLayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_OBJECT);
-
+	vector<CGameObject*>* pUILayer = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_UI);
 	// For TextureObject
 	pShader = new CObject_TextureShader;
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TexObject.hlsl", *pPlayerLayer);
@@ -72,6 +73,9 @@ void CScene::BuildShaders()
 	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\TextureModel.hlsl", *pObjectLayer);
 	m_vShaders.push_back(pShader);
 
+	pShader = new CUI_Shader;
+	pShader->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get(), L"Shaders\\UIShader.hlsl", *pUILayer);
+	m_vShaders.push_back(pShader);
 	//pObject = new CModelObject;
 	//dynamic_cast<CModelObject*>(pObject)->Initialize(L"Component_Model_sandbox", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	//m_vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
@@ -393,6 +397,14 @@ void CScene::BuildComponents(void)
 	m_pComponent_Manager->Add_Component(L"Component_Model_Flag", pComponent);
 	pComponent = new CMaterial(L"resources/dds/flag_diffuse.dds", L"Texture_Flag", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Flag", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/1x1_plane.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_UIPlane", pComponent);
+
+	pComponent = new CMaterial(L"resources/dds/HPedge.dds", L"Texture_HPedge", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HPedge", pComponent);
+	pComponent = new CMaterial(L"resources/dds/HPbar.dds", L"Texture_HPbar", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HPbar", pComponent);
 }
 
 
