@@ -52,5 +52,5 @@ int CUI_Timer::Update(float fTimeElapsed)
 
 void CUI_Timer::Render(ID3D12GraphicsCommandList * pCommandList)
 {
-	CModelObject::Render(pCommandList);
+	//CModelObject::Render(pCommandList);
 }

@@ -89,11 +89,14 @@
     <Filter Include="02.Utility\05.Manager\02.Object_Manager">
       <UniqueIdentifier>{3cfe63e3-cda7-4d1a-a381-9be3e2c6f62a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\03.Object\02.UIObject">
-      <UniqueIdentifier>{ac8ac3d4-7c69-49c0-a5ff-151a1743aa9b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\06.Shader\03.UIShader">
       <UniqueIdentifier>{f8af8028-7812-45eb-9f09-9396680dc470}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject">
+      <UniqueIdentifier>{ac8ac3d4-7c69-49c0-a5ff-151a1743aa9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\02.Player">
+      <UniqueIdentifier>{13c24a57-a4ea-4def-9076-33d4e035d54d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +176,6 @@
     </ClInclude>
     <ClInclude Include="CSocket.h" />
     <ClInclude Include="protocol.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="ObjectShader.h">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClInclude>
@@ -202,10 +204,13 @@
       <Filter>02.Utility\05.Manager\02.Object_Manager</Filter>
     </ClInclude>
     <ClInclude Include="UIObject.h">
-      <Filter>02.Utility\03.Object\02.UIObject</Filter>
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject</Filter>
     </ClInclude>
     <ClInclude Include="UI_Shader.h">
       <Filter>02.Utility\06.Shader\03.UIShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\02.Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -273,7 +278,6 @@
     <ClCompile Include="Object_TextureShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Component.cpp">
       <Filter>02.Utility\04.Component</Filter>
     </ClCompile>
@@ -296,10 +300,13 @@
       <Filter>02.Utility\05.Manager\02.Object_Manager</Filter>
     </ClCompile>
     <ClCompile Include="UIObject.cpp">
-      <Filter>02.Utility\03.Object\02.UIObject</Filter>
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject</Filter>
     </ClCompile>
     <ClCompile Include="UI_Shader.cpp">
       <Filter>02.Utility\06.Shader\03.UIShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\02.Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
