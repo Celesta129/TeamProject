@@ -31,6 +31,7 @@ constexpr int SC_PUT_WEAPON = 4;
 constexpr int SC_PICK_WEAPON = 5;
 constexpr int SC_REMOVE_WEAPON = 6;
 constexpr int SC_UNPICK_WEAPON = 7;
+constexpr int SC_UPDATE_STATE = 8;
 
 constexpr int SC_MOVEMENT = 11;
 constexpr int SC_ATTACK = 12;
@@ -138,6 +139,13 @@ struct sc_packet_unpick_weapon {
 	char id;
 	char weapon_type;
 	char weapon_index;
+};
+
+struct sc_packet_update_state {
+	char size;
+	char type;
+	char id;
+	char hp;
 };
 
 //게임 타이머

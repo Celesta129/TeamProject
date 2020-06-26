@@ -195,6 +195,23 @@ void CGameFramework_Client::Update(const CTimer & gt)
 	
 	m_pScene->Update(gt, m_Fence.Get());
 
+	for (int i = 0; i < MAX_USER; ++i) {
+		if (m_pScene->m_player[i]->Getconnected())
+		{
+			CModelObject* pObj = m_pScene->m_player[i]->getObject();
+
+			char status = m_pScene->m_player[i]->Get_Status();
+			if (status == PLAYER_STATE::ATTACK) {
+				if (i == m_client_id)
+					attack_count = 0;
+			}
+			//if (pObj->getAnimStatus() == LOOP_END)
+			//{
+
+			//}
+		}
+	}
+
 }
 
 void CGameFramework_Client::Draw(const CTimer & gt)
@@ -336,23 +353,40 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		int type = m_Player->GetWeapontype();	//무기 종류
 		int index = m_Player->GetWeaponIndex();  //무기 번호
 
-		//맨손
+
 		if (m_Player->GetWeapon_grab() == false) {
 			if (index != -1 && type != -1) {
 				m_pSocket->sendPacket(CS_ITEM, type, index, 0);
 			}
 			else
 			{
-				if (attack_count < 1) {
-					chrono::high_resolution_clock::time_point temp;
-					temp = chrono::high_resolution_clock::now();
-					attack_count += 1;
-					m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
-				}
-				else if (attack_count < 2) {
-					//일정시간안에 다시 눌림
-					attack_count += 1;
-					m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+				if (attack_count < 2) {
+					KEY temp;
+					temp.key = KEY_A;
+					temp.time = chrono::high_resolution_clock::now();
+					if (attack_count == 0) {
+						attack_time = chrono::high_resolution_clock::now();
+						m_Player->Set_status(PLAYER_STATE::ATTACK);
+					}
+					key_buffer.push_back(temp);
+
+					bool key = KEY_A;
+					chrono::high_resolution_clock::time_point start = attack_time;
+
+					auto t = find_if(key_buffer.begin(), key_buffer.end(), [&key, &start](const KEY& k) {
+						auto temp1 = chrono::duration_cast<chrono::milliseconds>(k.time - start).count();
+						if (temp1 >= chrono::duration_cast<chrono::milliseconds>(0ms).count()) {
+							if (temp1 < chrono::duration_cast<chrono::milliseconds>(800ms).count()) {
+								return true;
+							}
+						}
+						return false;
+					});
+
+					if (t != key_buffer.end()) {
+						attack_count += 1;
+						m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+					}
 				}
 			}
 		}
@@ -366,12 +400,18 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		attack_state = false;
 	}
 
-	//일정시간동안 아무키도 안눌리면 00 초기화
-	if (!movement_state[0] && !movement_state[1] && !movement_state[2] && !movement_state[3] && !attack_state) {
 
-		attack_count = 0;
-		attack_state = false;
-		m_pSocket->sendPacket(CS_ATTACK, 0, attack_count, 0);
+
+	////일정시간동안 아무키도 안눌리면 00 초기화
+	for (auto it = key_buffer.begin(); it != key_buffer.end();)
+	{
+		if (it->time < chrono::high_resolution_clock::now() - 3000ms)
+		{
+			it = key_buffer.erase(it);
+		}
+		else {
+			it++;
+		}
 	}
 
 }
@@ -431,8 +471,18 @@ void CGameFramework_Client::processPacket(char* buf)
 		int other_id = p_motion->id;
 
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_motion->ani_index);
+
 	}
 		break;
+	//case SC_UPDATE_STATE:
+	//{
+	//	sc_packet_update_state* p_state = reinterpret_cast<sc_packet_update_state*>(buf);
+	//	int other_id = p_state->id;
+
+	//	m_pScene->getplayer(other_id)->Set_HP(p_state->hp);
+
+	//}
+	//	break;
 	case SC_PUT_WEAPON: 
 	{
 		sc_packet_put_weapon* p_put_weapon = reinterpret_cast<sc_packet_put_weapon*>(buf);
@@ -448,6 +498,14 @@ void CGameFramework_Client::processPacket(char* buf)
 		}
 	}
 		break;
+	//case SC_UNPICK_WEAPON:
+	//{
+	//	sc_packet_unpick_weapon* p_unpick_weapon = reinterpret_cast<sc_packet_unpick_weapon*>(buf);
+	//	int other_id = p_unpick_weapon->id;
+	//	int type = p_unpick_weapon->weapon_type;
+	//	int index = p_unpick_weapon->weapon_index;
+	//}
+	//	break;
 	default:
 		printf("Unknown PACKET type [%d]\n", buf[1]);
 		break;

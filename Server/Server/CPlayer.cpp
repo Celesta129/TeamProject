@@ -30,11 +30,13 @@ CPlayer::CPlayer()
 
 	m_weapon_type = -1;
 	m_weapon_index = -1;
+	m_weapon_count = 0;
 
 	m_flag = false;
 
 	m_collide_flag = false;
 	m_collide_weapon = false;
+	m_hitted = false;
 }
 
 

@@ -29,7 +29,24 @@ gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
 	gmtl::Point3f(130.f, 0.f, 470.f)
 };
 
-enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT };
+enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT,
+			OP_FREE, OP_HIT, OP_PICK, OP_TIME
+};
+
+struct event_type {
+	int obj_id;
+	ENUMOP event_id;
+	high_resolution_clock::time_point wakeup_time;
+	char attack_count;
+
+	constexpr bool operator < (const event_type& left) const
+	{
+		return (wakeup_time > left.wakeup_time);
+	}
+};
+
+priority_queue<event_type> timer_queue;
+mutex timer_lock;
 
 struct OVER_EX
 {
@@ -78,6 +95,15 @@ CTimer GameTimer;
 CObject g_Object[8];
 CWeapon g_weapon_list[10];
 CFlag g_Flag;
+
+
+void add_timer(int obj_id, ENUMOP op_type, high_resolution_clock::time_point duration, char attack_count = 0)
+{
+	timer_lock.lock();
+	event_type ev{ obj_id, op_type, duration, attack_count };
+	timer_queue.push(ev);
+	timer_lock.unlock();
+}
 
 void send_packet(int user_id, void* p) {
 	char* buf = reinterpret_cast<char *>(p);
@@ -160,6 +186,8 @@ void send_unpick_weapon_packet(int user_id, char player_id, char type, char inde
 	p.id = player_id;
 	p.weapon_index = index;
 	p.weapon_type = type;
+
+	//send_packet(user_id, &p);
 }
 
 void send_setting_weapon(int user_id) {
@@ -176,6 +204,16 @@ void send_setting_weapon(int user_id) {
 		send_put_weapon_packet(user_id, 10, 10, g_Flag.pos);
 }
 
+void send_update_state(int user_id, int player_id, int hp) {
+	sc_packet_update_state p;
+	p.size = sizeof(p);
+	p.type = SC_UPDATE_STATE;
+	p.id = player_id;
+	p.hp = hp;
+
+	send_packet(user_id, &p);
+}
+
 //접속과 함께 weapon spawn, timer값 보내기
 void enter_game(int user_id) {
 	clients[user_id].m_connected = true;
@@ -186,7 +224,7 @@ void enter_game(int user_id) {
 				send_enter_packet(user_id, i);
 				send_enter_packet(i, user_id);
 
-				send_setting_weapon(user_id);
+				//send_setting_weapon(user_id);
 			}
 	}
 }
@@ -323,23 +361,29 @@ void process_packet(int user_id, char* buf) {
 		cs_packet_motion* packet = reinterpret_cast<cs_packet_motion*>(buf);
 
 		if (packet->key == 1) {
-			if (packet->count == 0) {
+			if (packet->count == 1) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
 				clients[user_id].attack_count = 1;
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 370ms, 1);
+				printf("1타호출 \n");
+				//add_timer(user_id, OP_HIT, clients[user_id].attack_time + 440ms, 0);
 			}
-			else if (packet->count == 1) {
+			else if (packet->count == 2) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_count = 2;
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1000ms, 2);
+				printf("2타호출 \n");
+				//add_timer(user_id, OP_HIT, clients[user_id].attack_time + 800ms, 0);
 			}
 
 			//피격 - 공격 상태 전환
-			clients[user_id].playerinfo->m_state = PLAYER_STATE::DAMAGED;
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::ATTACK;
 		}
-		else if (packet->key == 0) {
-			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
-			clients[user_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
-		}
+		//else if (packet->key == 0) {
+		//	clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
+		//	clients[user_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
+		//}
 
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
@@ -460,6 +504,8 @@ void worker_thread() {
 			AcceptEx(listen_socket, client_socket, exover->messageBuffer, NULL, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, &exover->overlapped);
 		}
 				break;
+		//case OP_HIT:
+		//	break;
 		default:
 			break;
 		}
@@ -634,7 +680,7 @@ bool object_collision(int user_id) {
 
 int player_hit(int user_id) {
 
-	if (clients[user_id].playerinfo->m_state == PLAYER_STATE::DAMAGED) {
+	if (clients[user_id].playerinfo->m_state == PLAYER_STATE::ATTACK) {
 
 		gmtl::Vec3f Look = clients[user_id].playerinfo->m_look;
 		gmtl::Point3f Pos(clients[user_id].playerinfo->m_posX, clients[user_id].playerinfo->m_posY, clients[user_id].playerinfo->m_posZ);
@@ -691,14 +737,107 @@ bool flag_collision(int user_id) {
 	return true;
 }
 
-void logic() {
-	//GameTimer.Reset();
+void timer_process()
+{
+
+	while (true) {
+		timer_lock.lock();
+		if (true == timer_queue.empty()) {
+			timer_lock.unlock();
+			break;
+		}
+		auto now_t = high_resolution_clock::now();
+		event_type temp_ev = timer_queue.top();
+		if (timer_queue.top().wakeup_time > high_resolution_clock::now()) {
+			timer_lock.unlock();
+			break;
+		}
+		event_type ev = timer_queue.top();
+		timer_queue.pop();
+		timer_lock.unlock();
+		switch (ev.event_id) {
+		case OP_FREE:
+		{
+			if (clients[ev.obj_id].attack_count != ev.attack_count)
+				break;
+
+			clients[ev.obj_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
+			clients[ev.obj_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
+			clients[ev.obj_id].attack_count = 0;
+		}
+		break;
+		case OP_HIT:
+		{
+			//OVER_EX* over = new OVER_EX;
+			//over->op = ev.event_id;
+			//PostQueuedCompletionStatus(g_iocp, 1, ev.obj_id, &over->overlapped);
+
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (player_hit(i) != -1) {
+					int trg = player_hit(i);
+					clients[trg].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
+					clients[trg].playerinfo->m_hitted = true;
+				}
+			}
+		}
+		break;
+		case OP_PICK:
+			break;
+		case OP_TIME:
+			break;
+		}
+	}
+	
+}
+
+void client_update_process()
+{
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		if (clients[i].m_connected == true)
+		{
+			if (clients[i].playerinfo->m_hp > 0)
+			{
+				if (clients[i].playerinfo->m_hitted == true)
+				{
+					if (clients[i].playerinfo->m_state == PLAYER_STATE::HITTED)
+					{
+						add_timer(i, OP_FREE, high_resolution_clock::now() + 660ms);
+
+						int hp = clients[i].playerinfo->m_hp;
+
+						if (hp > 0) {
+							hp -= 20;
+
+							if (hp <= 0) {
+								hp = 0;
+								//사망후 애니메이션
+							}
+						}
+
+						clients[i].playerinfo->m_hp = hp;
+
+						for (int j = 0; j < MAX_USER; ++j) {
+							if (clients[j].m_connected == true) {
+								send_update_state(j, i, hp);
+							}
+						}
+					}
+
+					clients[i].playerinfo->m_hitted == false;
+				}
+			}
+		}
+	}
+}
+
+void logic() 
+{
 	auto FixedDeltaTimeInNano = std::chrono::nanoseconds(int(1000000000.f / float(60)));
 	std::chrono::nanoseconds AccumulatedTime(0);
 	auto Last = chrono::high_resolution_clock::now();
 
 	while (true) {
-		//GameTimer.Tick(60.f);
 		auto Now = std::chrono::high_resolution_clock::now();
 		auto Duration = std::chrono::duration_cast<std::chrono::nanoseconds>(Now - Last);
 		AccumulatedTime += Duration;
@@ -708,16 +847,11 @@ void logic() {
 		{
 			AccumulatedTime -= FixedDeltaTimeInNano;
 			float DeltaTime = FixedDeltaTimeInNano.count() * 1e-9f;
-			//collision check
-			//for (int obj = 0; obj < 7; ++obj) {
-			//	for (int i = 0; i < MAX_USER; ++i) {
-			//		if (clients[i].m_connected == true) {
-			//			g_Object[obj].CheckCollBox(clients[i]);
-			//		}
-			//	}
-			//}
 
-			//충돌처리
+			//입력처리
+			timer_process();
+
+			//이동충돌처리
 			for (int i = 0; i < MAX_USER; ++i) {
 				if (clients[i].m_connected == true) {
 					gmtl::Vec3f Look = clients[i].playerinfo->m_look;
@@ -726,14 +860,12 @@ void logic() {
 					float movement_y = DeltaTime * Look.mData[1] * 150 * abs(clients[i].playerinfo->m_velY);
 					float movement_z = DeltaTime * Look.mData[2] * 150 * abs(clients[i].playerinfo->m_velZ);
 
-					//printf("%f \n", DeltaTime);
-
 					clients[i].playerinfo->m_posX += movement_x;
 					clients[i].playerinfo->m_posY += movement_y;
 					clients[i].playerinfo->m_posZ += movement_z;
 
 
-					if (object_collision(i) == true) {	//충돌된상태
+					if (object_collision(i) == true) {
 						clients[i].playerinfo->m_posX -= movement_x * 1.5f;
 						clients[i].playerinfo->m_posY -= movement_y * 1.5f;
 						clients[i].playerinfo->m_posZ -= movement_z * 1.5f;
@@ -746,16 +878,12 @@ void logic() {
 						clients[i].playerinfo->m_collide_flag = false;
 					}
 
-					if (player_hit(i) != -1) {
-						clients[player_hit(i)].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
-						clients[player_hit(i)].playerinfo->m_hp -= 20;
-					}
-
-					//printf("%f, %f, %f \n", clients[i].playerinfo->m_posX, clients[i].playerinfo->m_posY, clients[i].playerinfo->m_posZ);
-					//printf("%d\n", object_collision(i));
 					mapcollision(i);
 				}
 			}
+
+			//플레이어 충돌정보 갱신
+			//client_update_process();
 
 			for (int i = 0; i < MAX_USER; ++i) {
 				if (clients[i].m_connected == true) {

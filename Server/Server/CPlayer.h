@@ -1,7 +1,8 @@
 #pragma once
 enum PLAYER_STATE {
 	NORMAL,
-	DAMAGED,
+	ATTACK,
+	HITTED,
 	DEFENSE,
 	STUN
 };
@@ -32,12 +33,15 @@ public:
 	int m_hp;
 	char m_state;
 	char m_Animation_index;
+
 	char m_weapon_index;
 	char m_weapon_type;
+	char m_weapon_count;
 
 	volatile bool m_flag;
 	volatile bool m_dashed;
 
+	volatile bool m_hitted;
 	volatile bool m_collide_flag;
 	volatile bool m_collide_weapon;
 

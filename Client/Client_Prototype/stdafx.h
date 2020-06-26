@@ -76,3 +76,5 @@ const int NUM_FRAME_RESOURCE = 3;		// for d3dUtil:: extern const int NUM_FRAMERE
 #include "Macros.h"
 #include "Function.h"
 #include "Functor.h"
+
+#define KEY_A 10

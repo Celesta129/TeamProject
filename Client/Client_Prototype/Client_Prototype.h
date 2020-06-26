@@ -13,6 +13,11 @@
 
 class CShader;
 
+struct KEY {
+	bool key;
+	chrono::high_resolution_clock::time_point time;
+};
+
 class CGameFramework_Client : public CD3DApp
 {
 public:
@@ -29,10 +34,13 @@ public:
 	int m_client_id = -1;
 	CPlayer *m_Player;
 
+	vector<KEY> key_buffer;
+
 	//좌우상하
 	bool movement_state[4] = { false, false, false, false };
 	bool attack_state = false;
 	char attack_count = 0;
+	chrono::high_resolution_clock::time_point attack_time;
 
 	void processPacket(char* buf);
 	void Set_Camera(UINT index) {
