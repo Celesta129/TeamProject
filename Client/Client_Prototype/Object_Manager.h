@@ -10,7 +10,7 @@ public:
 
 public:
 	enum layers {
-		LAYER_PLAYER, LAYER_OBJECT, LAYER_WEAPON, LAYER_UI, LAYER_END
+		LAYER_PLAYER, LAYER_OBJECT, LAYER_WEAPON, LAYER_FLAG, LAYER_UI, LAYER_END
 	};
 
 	void Add_Object(UINT layer, CGameObject* pObject);

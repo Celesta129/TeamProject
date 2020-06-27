@@ -26,3 +26,14 @@ public:
 	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual int Update(float fTimeElapsed);
 };
+
+class CFlag : public CWeapon
+{
+public:
+	CFlag() {};
+	~CFlag() {};
+
+public:
+	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual int Update(float fTimeElapsed);
+};

@@ -627,8 +627,8 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	//Flag
-	pObject = new CModelObject;
-	pObject->Initialize(L"Component_Model_Flag", L"Texture_Flag", pDevice, pd3dCommandList);
+	pObject = new CFlag;
+	pObject->Initialize(pDevice, pd3dCommandList);
 	vObjects.push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
