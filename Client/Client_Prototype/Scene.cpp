@@ -344,6 +344,12 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/attack_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_attack", pComponent);
 
+	//pComponent = new LoadModel("resources/normal_attack_1.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	//m_pComponent_Manager->Add_Component(L"Component_Model_normalattack1", pComponent);
+
+	//pComponent = new LoadModel("resources/normal_attack_2.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	//m_pComponent_Manager->Add_Component(L"Component_Model_normalattack2", pComponent);
+
 	//Å¸°Ý
 	pComponent = new LoadModel("resources/hit_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_hit", pComponent);

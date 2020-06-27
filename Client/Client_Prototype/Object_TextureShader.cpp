@@ -365,6 +365,7 @@ void CObject_TextureShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12D
 		
 		pObject->Initialize(pDevice, pd3dCommandList);
 		
+
 		pvObjects->push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 
