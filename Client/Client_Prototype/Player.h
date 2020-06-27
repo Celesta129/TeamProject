@@ -1,4 +1,5 @@
 #pragma once
+#include "ModelObject.h"
 enum PLAYER_STATE {
 	NORMAL,
 	ATTACK,
@@ -7,13 +8,19 @@ enum PLAYER_STATE {
 	STUN
 };
 
-class CModelObject;
-class CPlayer
+class CWeapon;
+class CPlayer : public CModelObject
 {
 public:
 	CPlayer();
 	~CPlayer();
 
+public:
+	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	bool collision_weapon();
+
+	virtual int Update(float fTimeElapsed);
+public:
 	void SetPos(float x, float y, float z);
 	void GetPos(float * x, float * y, float * z);
 	void SetVelocity(float x, float y, float z);
@@ -44,7 +51,12 @@ public:
 		return m_pObjectInstance;
 	}
 
+	XMFLOAT4X4 get_Hand(void);
 private:
+	
+	bool set_hand(void);
+	XMMATRIX* m_pmatHand = nullptr;
+
 	float m_posX, m_posY, m_posZ;
 	float m_velocityX, m_velocityY, m_velocityZ;
 	int m_animation_index = 0;

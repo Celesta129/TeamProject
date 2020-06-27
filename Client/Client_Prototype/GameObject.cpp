@@ -1,11 +1,16 @@
 
 #include "GameObject.h"
 
+#include "Component_Manager.h"
+#include "Object_Manager.h"
 CGameObject::CGameObject()
 {
 	// ÄÄÆ÷³ÍÆ®¸Å´ÏÀúÀÇ Æ÷ÀÎÅÍ¸¦ È¹µæ
 	m_pComponent_Manager = CComponent_Manager::GetInstance();
 	m_pComponent_Manager->AddRef();
+
+	m_pObject_Manager = CObject_Manager::GetInstance();
+	m_pObject_Manager->AddRef();
 }
 
 
@@ -37,14 +42,15 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pCommandList)
 
 int CGameObject::Free(void)
 {
-	Safe_Release(m_pComponent_Manager);
-
+	
 	for (auto& e : m_mapComponent)
 	{
 		int refCnt = Safe_Release(e.second);
 	}
 	m_mapComponent.clear();
 
+	Safe_Release(m_pComponent_Manager);
+	Safe_Release(m_pObject_Manager);
 	return 0;
 }
 

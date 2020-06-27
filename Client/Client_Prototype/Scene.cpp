@@ -65,7 +65,7 @@ void CScene::BuildShaders()
 	m_vShaders.push_back(pShader);
 	for (int i = 0; i < MAX_USER; ++i)
 	{
-		m_player[i] = new CPlayer();
+		m_player[i] = new CPlayer();	// 이부분 수정요망. 뭔지는 내가 보면 암.
 		m_player[i]->SetObjectInstance((CModelObject*)(*pPlayerLayer)[i]);
 	}
 
@@ -405,6 +405,12 @@ void CScene::BuildComponents(void)
 	m_pComponent_Manager->Add_Component(L"Texture_HPedge", pComponent);
 	pComponent = new CMaterial(L"resources/dds/HPbar.dds", L"Texture_HPbar", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_HPbar", pComponent);
+
+	
+	pComponent = new LoadModel("resources/fbx/hammer.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_Hammer", pComponent);
+	pComponent = new CMaterial(L"resources/dds/hammer_diffuse.dds", L"Texture_Hammer_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Hammer_diffuse", pComponent);
 }
 
 

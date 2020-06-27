@@ -1,5 +1,5 @@
 #include "ModelObject.h"
-
+#include "Component_Manager.h"
 
 CModelObject::CModelObject()
 {
@@ -10,7 +10,7 @@ CModelObject::~CModelObject()
 	
 }
 
-HRESULT CModelObject::Initialize(void)
+HRESULT CModelObject::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	HRESULT hr = E_FAIL;
 	if(FAILED(hr = CGameObject::Initialize()))

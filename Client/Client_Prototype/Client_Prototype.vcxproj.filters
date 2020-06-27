@@ -98,6 +98,9 @@
     <Filter Include="02.Utility\03.Object\01.ModelObject\02.Player">
       <UniqueIdentifier>{13c24a57-a4ea-4def-9076-33d4e035d54d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\03.Weapon">
+      <UniqueIdentifier>{6c7ff6bb-eab6-4370-9742-8a5322737ff4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -212,6 +215,9 @@
     <ClInclude Include="Player.h">
       <Filter>02.Utility\03.Object\01.ModelObject\02.Player</Filter>
     </ClInclude>
+    <ClInclude Include="Weapon.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\03.Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -307,6 +313,9 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>02.Utility\03.Object\01.ModelObject\02.Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Weapon.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\03.Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

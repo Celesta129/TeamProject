@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.h"
-
 #include "GameObject.h"
 class CObject_Manager final : public CBase
 {

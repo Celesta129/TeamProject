@@ -257,6 +257,12 @@ void LoadModel::SetCurrAnimIndex(UINT AnimIndex)
 	
 }
 
+XMFLOAT4X4 LoadModel::FindCombined(string & boneName)
+{
+	*(m_pScene->mMeshes);
+	return XMFLOAT4X4();
+}
+
 UINT LoadModel::BornTransform(const float fTimeElapsed)
 {
 
@@ -303,6 +309,20 @@ void LoadModel::Render(ID3D12GraphicsCommandList * pCommandList)
 	{
 		m_ModelMeshes[i]->Render(pCommandList);
 	}
+}
+
+Bone * LoadModel::GetBone(const string& boneTag)
+{
+	vector<pair<string, Bone>>::iterator result = find_if(m_Bones.begin(), m_Bones.end(), [&](pair<string, Bone>& t) {
+		if (t.first == boneTag)
+			return true;
+
+		return false;
+	});
+	if (result != m_Bones.end())
+		return &(*result).second;
+
+	return nullptr;
 }
 
 

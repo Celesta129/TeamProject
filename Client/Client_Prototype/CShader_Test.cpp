@@ -435,6 +435,8 @@ void Shader_Test::UpdateObjectCBs()
 void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CModelObject* pObject = nullptr;
+	vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
+
 
 	pObject = new CModelObject;
 	pObject->Initialize(L"Component_Model_bench", L"Texture_bench", pDevice, pd3dCommandList);
@@ -631,6 +633,14 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 5.f, 0.f));
+	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
+
+	// hammer
+	pObject = new CWeapon_Hammer;
+	pObject->Initialize(pDevice, pd3dCommandList);
+	pvWeapon->push_back(pObject);
+	Push_Object(pObject);
+	pObject->Get_Transform()->MovePos(XMFLOAT3(300.f, 0.f, 300.f));
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 }
 

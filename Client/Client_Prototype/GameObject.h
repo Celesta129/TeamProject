@@ -7,6 +7,8 @@
 
 #include "Component_Manager.h"
 class CComponent_Manager;
+class CObject_Manager;
+class CTransform;
 
 class CGameObject : public CBase
 {
@@ -53,6 +55,7 @@ public:
 
 protected:
 	map<wstring, CComponent*> m_mapComponent;
+	CObject_Manager* m_pObject_Manager = nullptr;
 	CComponent_Manager* m_pComponent_Manager = nullptr;
 };
 

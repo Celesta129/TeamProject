@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "Material.h"
-
+#include "Object_Manager.h"
 class CMaterial;
 class CModelObject : public CGameObject
 {
@@ -9,7 +9,7 @@ public:
 	CModelObject();
 	virtual ~CModelObject();
 public:
-	virtual HRESULT Initialize(void);
+	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual HRESULT Initialize(const wstring& modeltag,const wstring& texturetag, ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual int Update(float fTimeElapsed);

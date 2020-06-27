@@ -4,6 +4,8 @@
 
 CShader::CShader()
 {
+	m_pObject_Manager = CObject_Manager::GetInstance();
+	m_pObject_Manager->AddRef();
 }
 
 
@@ -176,6 +178,9 @@ int CShader::Free(void)
 
 	for (auto& ppObject : m_vpObjects)
 		Safe_Delete(ppObject);
+
+
+	Safe_Release(m_pObject_Manager);
 
 	return 0;
 }

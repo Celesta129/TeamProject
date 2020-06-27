@@ -5,6 +5,10 @@
 #include "FrameResource.h"
 #include "Camera.h"
 
+#include "Object_Manager.h"
+#include "Component_Manager.h"
+
+#include "Weapon.h"
 class CTimer;
 class CCamera;
 class CModelObject;
@@ -94,4 +98,6 @@ protected:
 	int m_nPipelineStates = 0;
 protected:
 	wchar_t m_filename[100] = L"Shaders\\color.hlsl";
+
+	CObject_Manager* m_pObject_Manager = nullptr;
 };

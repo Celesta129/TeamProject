@@ -207,6 +207,7 @@
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="UI_Shader.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\d3dUtil.cpp" />
@@ -246,6 +247,7 @@
     </ClCompile>
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client_Prototype.rc" />

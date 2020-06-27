@@ -49,6 +49,7 @@ public:
 	void SetAnimTime(const float& fTime);
 	void SetCurrAnimIndex(UINT AnimIndex);
 
+	XMFLOAT4X4 FindCombined(string& boneName);
 	UINT BornTransform(const float fTimeElapsed);	// 애니메이션 코드
 	
 	void Render(ID3D12GraphicsCommandList * pCommandList);
@@ -58,6 +59,7 @@ public:
 	mesh*                  getMesh(UINT index) { return &m_Meshes[index]; }
 	UINT                  getNumMesh() const { return (UINT)m_Meshes.size(); }
 	vector<pair<string, Bone>>* GetBones() { return &m_Bones; }
+	Bone* GetBone(const string& boneTag);
 	UINT                  getNumVertices() const { return m_numVertices; }
 
 	UINT getNumBones(void) {

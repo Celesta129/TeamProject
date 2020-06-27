@@ -10,11 +10,25 @@ CTransform::CTransform()
 CTransform::CTransform(const CTransform & rhs)
 {
 	m_xmf4x4World = rhs.m_xmf4x4World;
+	m_xmf4x4Parent = rhs.m_xmf4x4Parent;
 }
 
 
 CTransform::~CTransform()
 {
+}
+
+XMFLOAT4X4 CTransform::Get_World(void)
+{
+	if (m_xmf4x4Parent)
+		return Matrix4x4::Multiply(m_xmf4x4World, *m_xmf4x4Parent);
+
+	return m_xmf4x4World;	
+}
+
+void CTransform::Set_Parent(XMFLOAT4X4 * pParent)
+{
+	m_xmf4x4Parent = pParent;
 }
 
 void CTransform::Set_World(XMFLOAT4X4 * pWorld)

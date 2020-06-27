@@ -1,5 +1,6 @@
 #include "Object_TextureShader.h"
 #include "ModelObject.h"
+#include "Player.h"
 CObject_TextureShader::CObject_TextureShader()
 {
 }
@@ -355,19 +356,16 @@ void CObject_TextureShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12D
 {
 	CModelObject* pObject = nullptr;
 	CTransform* pTransform = nullptr;
-
+	
 	int MAX_USER = 8;
-
+	vector<CGameObject*>* pvObjects = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_PLAYER);
 	for (int i = 0; i < MAX_USER; ++i)
 	{
-		pObject = new CModelObject;
+		pObject = new CPlayer();
 		
-		pObject->Initialize(L"Component_Model_idle",L"Texture_character", pDevice, pd3dCommandList);
-		pObject->AddModel(L"Component_Model_run");
-		pObject->AddModel(L"Component_Model_attack");
-		//타격
-		pObject->AddModel(L"Component_Model_hit");
-		vObjects.push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
+		pObject->Initialize(pDevice, pd3dCommandList);
+		
+		pvObjects->push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 
 		setMat(pObject, 0);
