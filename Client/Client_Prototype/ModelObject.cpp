@@ -112,6 +112,7 @@ void CModelObject::ChangeAnim(const UINT & index)
 void CModelObject::setAnimIndex(const UINT & index)
 {
 	m_AnimIndex = index;
+	//cout << "modelindex changed : " << index << endl;
 }
 
 UINT CModelObject::getAnimIndex(void)

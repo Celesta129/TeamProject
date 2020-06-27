@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Client_Prototype.h"
 #include "Component_Manager.h"
+#include "ModelObject.h"
 #include "Scene.h"
 
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
@@ -200,15 +201,16 @@ void CGameFramework_Client::Update(const CTimer & gt)
 		{
 			CModelObject* pObj = m_pScene->m_player[i]->getObject();
 
-			char status = m_pScene->m_player[i]->Get_Status();
-			if (status == PLAYER_STATE::ATTACK) {
-				if (i == m_client_id)
-					attack_count = 0;
+			if (pObj->getAnimStatus() == LOOP_END)
+			{
+				char status = m_pScene->m_player[i]->Get_Status();
+				if (status == PLAYER_STATE::ATTACK) {
+					m_pScene->m_player[i]->Set_status(PLAYER_STATE::NORMAL);
+					if (i == m_client_id) {
+						attack_count = 0;
+					}
+				}
 			}
-			//if (pObj->getAnimStatus() == LOOP_END)
-			//{
-
-			//}
 		}
 	}
 
@@ -474,15 +476,16 @@ void CGameFramework_Client::processPacket(char* buf)
 
 	}
 		break;
-	//case SC_UPDATE_STATE:
-	//{
-	//	sc_packet_update_state* p_state = reinterpret_cast<sc_packet_update_state*>(buf);
-	//	int other_id = p_state->id;
+	case SC_UPDATE_STATE:
+	{
+		sc_packet_update_state* p_state = reinterpret_cast<sc_packet_update_state*>(buf);
+		int other_id = p_state->id;
+		int player_hp = p_state->hp;
 
-	//	m_pScene->getplayer(other_id)->Set_HP(p_state->hp);
+		m_pScene->getplayer(other_id)->Set_HP(player_hp);
 
-	//}
-	//	break;
+	}
+		break;
 	case SC_PUT_WEAPON: 
 	{
 		sc_packet_put_weapon* p_put_weapon = reinterpret_cast<sc_packet_put_weapon*>(buf);
@@ -498,14 +501,35 @@ void CGameFramework_Client::processPacket(char* buf)
 		}
 	}
 		break;
-	//case SC_UNPICK_WEAPON:
-	//{
-	//	sc_packet_unpick_weapon* p_unpick_weapon = reinterpret_cast<sc_packet_unpick_weapon*>(buf);
-	//	int other_id = p_unpick_weapon->id;
-	//	int type = p_unpick_weapon->weapon_type;
-	//	int index = p_unpick_weapon->weapon_index;
-	//}
-	//	break;
+	case SC_UNPICK_WEAPON:
+	{
+		sc_packet_unpick_weapon* p_unpick_weapon = reinterpret_cast<sc_packet_unpick_weapon*>(buf);
+		int other_id = p_unpick_weapon->id;
+		int type = p_unpick_weapon->weapon_type;
+		int index = p_unpick_weapon->weapon_index;
+	}
+		break;
+	case SC_TIMER:
+	{
+		sc_packet_timer* p_timer = reinterpret_cast<sc_packet_timer*>(buf);
+		int timer = p_timer->timer;
+	}
+		break;
+	case SC_FLAG_TIMER:
+	{
+		sc_packet_flag_timer* p_flag_timer = reinterpret_cast<sc_packet_flag_timer*>(buf);
+		int other_id = p_flag_timer->id;
+		int timer = p_flag_timer->timer;
+	}
+		break;
+	case SC_WIN:
+		//게임승리
+		printf("게임 승리! \n");
+		break;
+	case SC_LOSE:
+		//게임 패배
+		printf("게임 패배! \n");
+		break;
 	default:
 		printf("Unknown PACKET type [%d]\n", buf[1]);
 		break;

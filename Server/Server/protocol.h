@@ -32,9 +32,14 @@ constexpr int SC_PICK_WEAPON = 5;
 constexpr int SC_REMOVE_WEAPON = 6;
 constexpr int SC_UNPICK_WEAPON = 7;
 constexpr int SC_UPDATE_STATE = 8;
+constexpr int SC_TIMER = 9;
+constexpr int SC_FLAG_TIMER = 10;
 
 constexpr int SC_MOVEMENT = 11;
 constexpr int SC_ATTACK = 12;
+
+constexpr int SC_WIN = 21;
+constexpr int SC_LOSE = 22;
 
 
 #pragma pack(push ,1)
@@ -155,8 +160,20 @@ struct sc_packet_timer {
 	int timer;
 };
 
+struct sc_flag_timer {
+	char size;
+	char type;
+	char id;
+	int timer;
+};
+
 //Á¾·á°ª
-struct sc_packet_end_flag {
+struct sc_packet_win_flag {
+	char size;
+	char type;
+};
+
+struct sc_packet_lose_flag {
 	char size;
 	char type;
 };
