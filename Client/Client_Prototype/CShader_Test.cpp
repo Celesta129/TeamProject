@@ -436,6 +436,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 {
 	CModelObject* pObject = nullptr;
 	vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
+	vector<CGameObject*>* pvFlag = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
 
 
 	pObject = new CModelObject;
@@ -629,7 +630,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	//Flag
 	pObject = new CFlag;
 	pObject->Initialize(pDevice, pd3dCommandList);
-	vObjects.push_back(pObject);
+	pvFlag->push_back(pObject);
 	Push_Object(pObject);
 	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 5.f, 0.f));
