@@ -33,6 +33,7 @@ CPlayer::CPlayer()
 	m_weapon_count = 0;
 
 	m_flag = false;
+	last_hit = -1;
 
 	m_collide_flag = false;
 	m_collide_weapon = false;

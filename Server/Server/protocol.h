@@ -160,7 +160,7 @@ struct sc_packet_timer {
 	int timer;
 };
 
-struct sc_flag_timer {
+struct sc_packet_flag_timer {
 	char size;
 	char type;
 	char id;
