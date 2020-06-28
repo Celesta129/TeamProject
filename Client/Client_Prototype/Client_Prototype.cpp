@@ -430,6 +430,9 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 void CGameFramework_Client::processPacket(char* buf)
 {
+	vector<CGameObject*>* pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+	vector<CGameObject*>* pvFlag = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_FLAG);
+	CWeapon* pFlag = (CWeapon*)(*pvFlag)[0];
 	switch (buf[1])
 	{
 	case SC_CONNECTED:
@@ -585,10 +588,22 @@ void CGameFramework_Client::processPacket(char* buf)
 		break;
 	case SC_WIN:
 		//게임승리
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			CWeapon* pWeapon = (CWeapon*)(*pvWeapon)[i];
+			pWeapon->set_Player(nullptr);
+		}
+		pFlag->set_Player(nullptr);
 		printf("게임 승리! \n");
 		break;
 	case SC_LOSE:
 		//게임 패배
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			CWeapon* pWeapon = (CWeapon*)(*pvWeapon)[i];
+			pWeapon->set_Player(nullptr);
+		}
+		pFlag->set_Player(nullptr);
 		printf("게임 패배! \n");
 		break;
 	default:

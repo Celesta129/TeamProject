@@ -22,18 +22,24 @@ public:
 	const XMFLOAT3 Get_Scale(void);
 	const XMFLOAT3 Get_Pos(void);
 	const XMFLOAT3 Get_Dir(void);
+	const XMFLOAT3 Get_Rotate(void);
 
 	void Set_Scale(const XMFLOAT3& pScale);
 	void Set_Pos(const XMFLOAT3& Pos);
-	void Set_Rotate(float fRoll, float fPitch, float fYaw);
+	void Set_Rotate(float fPitch, float fYaw, float fRoll);
+	void Set_Rotate(const XMFLOAT3& rotate);
 	void Set_Look(XMFLOAT3& xmf3Look);
-	void Rotate(float fRoll, float fPitch, float fYaw);
+
+	void Rotate(float fPitch, float fYaw, float fRoll);
+	void Rotate(const XMFLOAT3& rotate);
 	void MovePos(const XMFLOAT3& Pos);
 	void Go_Straight(const float fSpeed);
 
 public:
 	virtual CComponent* Clone(void);
 private:
+	float m_fRoll = 0.f, m_fPitch = 0.f, m_fYaw = 0.f;
+
 	XMFLOAT4X4 m_xmf4x4World = MathHelper::Identity4x4();
 	XMFLOAT4X4* m_xmf4x4Parent = nullptr;
 };

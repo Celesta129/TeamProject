@@ -631,9 +631,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	pObject->Initialize(pDevice, pd3dCommandList);
 	pvFlag->push_back(pObject);
 	Push_Object(pObject);
-	pObject->Get_Transform()->Rotate(90.f, 0.f, 0.f);
 	pObject->Get_Transform()->MovePos(XMFLOAT3(0.f, 5.f, 0.f));
-	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	// hammer
 	for (int i = 0; i < 10; ++i) {

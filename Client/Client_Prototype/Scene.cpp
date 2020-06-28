@@ -86,24 +86,113 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
 	if (GetAsyncKeyState('1') & 0x8000)
 	{
-		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
-		CWeapon* pWeapon = new CWeapon();
-		
-		pWeapon->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-		pWeapon->set_Type(rand() % 4);
-		pvWeapon->push_back(pWeapon);
-		pWeapon->Get_Transform()->Set_Pos(XMFLOAT3(300.f,0.f,300.f));
-		m_vShaders[1]->Push_Object(pWeapon);
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->Rotate(-10.f * fTimeElapsed, 0.f, 0.f);
+				else
+					pWeapon->Get_Transform()->Rotate(10.f * fTimeElapsed, 0.f, 0.f);
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Rotate: " << pTransform->Get_Rotate().x << ", " << pTransform->Get_Rotate().y << ", " << pTransform->Get_Rotate().z << endl;
+			}
+		}
 	}
 	if (GetAsyncKeyState('2') & 0x8000)
 	{
-		
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->Rotate(0.f, -10.f* fTimeElapsed, 0.f);
+				else
+					pWeapon->Get_Transform()->Rotate(0.f, 10.f* fTimeElapsed, 0.f);
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Rotate: " << pTransform->Get_Rotate().x << ", " << pTransform->Get_Rotate().y << ", " << pTransform->Get_Rotate().z << endl;
+			}
+		}
 	}
 	if (GetAsyncKeyState('3') & 0x8000)
 	{
-		
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->Rotate(0.f, 0.f, -10.f * fTimeElapsed);
+				else
+					pWeapon->Get_Transform()->Rotate(0.f, 0.f, 10.f * fTimeElapsed);
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Rotate: " << pTransform->Get_Rotate().x << ", " << pTransform->Get_Rotate().y << ", " << pTransform->Get_Rotate().z << endl;
+			}
+		}
 	}
-
+	if (GetAsyncKeyState('4') & 0x8000)
+	{
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(-10.f * fTimeElapsed, 0.f, 0.f));
+				else
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(10.f * fTimeElapsed, 0.f, 0.f));
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Pos: " << pTransform->Get_Pos().x << ", " << pTransform->Get_Pos().y << ", " << pTransform->Get_Pos().z << endl;
+			}
+		}
+	}
+	if (GetAsyncKeyState('5') & 0x8000)
+	{
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(0.f, -10.f * fTimeElapsed, 0.f));
+				else
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(0.f, 10.f * fTimeElapsed, 0.f));
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Pos: " << pTransform->Get_Pos().x << ", " << pTransform->Get_Pos().y << ", " << pTransform->Get_Pos().z << endl;
+			}
+		}
+	}
+	if (GetAsyncKeyState('6') & 0x8000)
+	{
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
+		CWeapon* pWeapon = nullptr;
+		for (int i = 0; i < pvWeapon->size(); ++i)
+		{
+			pWeapon = (CWeapon*)(*pvWeapon)[i];
+			if (pWeapon->get_Player())
+			{
+				if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(0.f, 0.f, -10.f * fTimeElapsed));
+				else
+					pWeapon->Get_Transform()->MovePos(XMFLOAT3(0.f, 0.f, 10.f * fTimeElapsed));
+				CTransform* pTransform = pWeapon->Get_Transform();
+				cout << "Pos: " << pTransform->Get_Pos().x << ", " << pTransform->Get_Pos().y << ", " << pTransform->Get_Pos().z << endl;
+			}
+		}
+	}
 	/*float fSpeed = 500.f * fTimeElapsed;
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{

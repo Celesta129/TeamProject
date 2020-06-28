@@ -66,8 +66,7 @@ bool CPlayer::collision_weapon(int* pIndex)
 		{
 			if (pIndex)
 				*pIndex = i;
-			pWeaponTransform->Set_Pos(XMFLOAT3(0.f, 0.f, -0.f));
-			pWeaponTransform->Rotate(0.f, -90.f, 0.f);
+			
 			pWeapon->set_Player(this);
 			
 			cout << "collision_Weapon" << endl;
@@ -101,8 +100,6 @@ bool CPlayer::collision_flag()
 
 		if (dist <= 50.f)
 		{
-			pWeaponTransform->Set_Pos(XMFLOAT3(0.f, 0.f, -0.f));
-			pWeaponTransform->Rotate(0.f, -90.f, 0.f);
 			pWeapon->set_Player(this);
 
 			cout << "collision_Flag" << endl;

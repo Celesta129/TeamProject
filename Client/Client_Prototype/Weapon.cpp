@@ -4,7 +4,44 @@
 void CWeapon::set_Player(CPlayer * pPlayer)
 {
 	m_pPlayer = pPlayer;
+	set_Type(m_type);
 
+	XMFLOAT3 pos = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 rotate = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 scale = XMFLOAT3(2.f, 2.f, 2.f);
+	if (m_pPlayer != nullptr)
+	{
+		m_pTransform->Set_Pos(pos);
+		m_pTransform->Set_Rotate(rotate.x, rotate.y, rotate.z);
+		m_pTransform->Set_Scale(scale);
+		switch (m_type)
+		{
+		case WEAPON_SWORD:
+			pos = XMFLOAT3(32.f, -33.f, -11.f);
+			rotate = XMFLOAT3(90.f, 0.f, 0.f);
+			scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
+			break;
+		case WEAPON_HAMMER:
+			rotate = XMFLOAT3(0.f, -90.f, 90.f);
+			scale = XMFLOAT3(1.f, 1.f, 1.f);
+			break;
+		case WEAPON_BLOCK:
+
+			break;
+		case WEAPON_SNACK:
+			
+			break;
+		case FLAG:
+			pos = XMFLOAT3(5.f, -33.f, -14.f);
+			rotate = XMFLOAT3(0.f, -90.f, 0.f);
+			scale = XMFLOAT3(1.f, 1.f, 1.f);
+			break;
+		}
+
+		m_pTransform->Set_Pos(pos);
+		m_pTransform->Set_Rotate(rotate.x, rotate.y, rotate.z);
+		m_pTransform->Set_Scale(scale);
+	}
 }
 
 void CWeapon::set_Type(UINT weapontype)
@@ -12,11 +49,21 @@ void CWeapon::set_Type(UINT weapontype)
 	m_type = weapontype;
 	wstring modeltag = L"Component_Model_Sword";
 	wstring texturetag = L"Texture_Sword_diffuse";
+
+	
+	XMFLOAT3 rotate = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 scale = XMFLOAT3(2.f, 2.f, 2.f);
 	switch (weapontype)
 	{
+	case WEAPON_SWORD:
+		
+		scale = XMFLOAT3(1.f, 1.f, 1.f);
+		break;
 	case WEAPON_HAMMER:
 		modeltag = L"Component_Model_Hammer";
 		texturetag = L"Texture_Hammer_diffuse";
+
+
 		break;
 	case WEAPON_BLOCK:
 		modeltag = L"Component_Model_Block";
@@ -25,14 +72,22 @@ void CWeapon::set_Type(UINT weapontype)
 	case WEAPON_SNACK:
 		modeltag = L"Component_Model_Snack";
 		texturetag = L"Texture_Snack_diffuse";
+
+		rotate = XMFLOAT3(90.f, 0.f, 0.f);
+		scale = XMFLOAT3(1.5f, 1.5f, 1.5f);
 		break;
 	case FLAG:
 		modeltag = L"Component_Model_Flag";
 		texturetag = L"Texture_Flag";
+
+		rotate = XMFLOAT3(90.f, 0.f, 0.f);
+		scale = XMFLOAT3(2.f, 2.f, 2.f);
 		break;
 	default:
 		break;
 	}
+	m_pTransform->Set_Rotate(rotate.x, rotate.y, rotate.z);
+	m_pTransform->Set_Scale(scale);
 
 	m_pModel[m_AnimIndex] = GET_COMPONENT(LoadModel*, this, modeltag);
 	pMaterial = GET_COMPONENT(CMaterial*, this, texturetag);

@@ -66,6 +66,11 @@ const XMFLOAT3 CTransform::Get_Dir(void)
 	return Direction;
 }
 
+const XMFLOAT3 CTransform::Get_Rotate(void)
+{
+	return XMFLOAT3(m_fPitch, m_fYaw, m_fRoll);
+}
+
 void CTransform::Set_Scale(const XMFLOAT3& pScale)
 {
 	XMFLOAT3 vRight, vUp, vLook;
@@ -86,11 +91,20 @@ void CTransform::Set_Scale(const XMFLOAT3& pScale)
 	memcpy(&m_xmf4x4World.m[INFO_LOOK][0], &vLook, sizeof(XMFLOAT3));
 }
 
-void CTransform::Rotate(float fRoll, float fPitch, float fYaw)
+void CTransform::Rotate(float fPitch, float fYaw, float fRoll)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fRoll),
-		XMConvertToRadians(fPitch), XMConvertToRadians(fYaw));
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch),
+		XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+
+	m_fPitch += fPitch;
+	m_fYaw += fYaw;
+	m_fRoll += fRoll;
+}
+
+void CTransform::Rotate(const XMFLOAT3 & rotate)
+{
+	Rotate(rotate.x, rotate.y, rotate.z);
 }
 
 void CTransform::MovePos(const XMFLOAT3& Pos)
@@ -113,17 +127,23 @@ void CTransform::Set_Pos(const XMFLOAT3& Pos)
 	memcpy(m_xmf4x4World.m[3], &Pos, sizeof(XMFLOAT3));
 }
 
-void CTransform::Set_Rotate(float fRoll, float fPitch ,float fYaw)
+void CTransform::Set_Rotate(float fPitch, float  fYaw,float fRoll)
 {
 	XMFLOAT3 vPos;
 	memcpy(&vPos, &m_xmf4x4World.m[3][0], sizeof(XMFLOAT3));
 
 	XMFLOAT3 vScale = Get_Scale();
+	m_fRoll = 0.f; m_fPitch = 0.f;  m_fYaw = 0.f;
 
 	m_xmf4x4World = Matrix4x4::Identity();
 	MovePos(vPos);
 	Set_Scale(vScale);
-	Rotate(fRoll, fPitch, fYaw);
+	Rotate(fPitch, fYaw, fRoll);
+}
+
+void CTransform::Set_Rotate(const XMFLOAT3 & rotate)
+{
+	Set_Rotate(rotate.x, rotate.y, rotate.z);
 }
 
 void CTransform::Set_Look(XMFLOAT3 & xmf3Look)
