@@ -20,6 +20,7 @@ public:
 	bool collision_weapon(int* pIndex = nullptr);
 	bool collision_flag();
 
+
 	virtual int Update(float fTimeElapsed);
 public:
 	void SetPos(float x, float y, float z);
