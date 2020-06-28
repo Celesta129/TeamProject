@@ -15,5 +15,7 @@ using namespace chrono;
 #include<MSWSock.h>
 #include<Windows.h>
 
+#include "def.h"
+
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "mswsock.lib")

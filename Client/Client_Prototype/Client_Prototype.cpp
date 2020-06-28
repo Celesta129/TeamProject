@@ -358,43 +358,46 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 
 		if (m_Player->GetWeapon_grab() == false) {
 			if (index == -1 && type == -1) {
-				if (m_Player->collision_weapon()) {
+				if (m_Player->collision_weapon(&index)) {
 					cout << "무기줍기\n";
+					vector<CGameObject*> *pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+					CWeapon* temp_weapon = (CWeapon*)(*pvWeapon)[index];
+					type = temp_weapon->get_Type();
 					m_pSocket->sendPacket(CS_ITEM, type, index, 0);
 				}
 				else if (m_Player->collision_flag()) {
 					cout << "깃발줍기\n";
 					m_pSocket->sendPacket(CS_ITEM, 4, 0, 0);
 				}
-			}
-			else
-			{
-				if (attack_count < 2) {
-					KEY temp;
-					temp.key = KEY_A;
-					temp.time = chrono::high_resolution_clock::now();
-					if (attack_count == 0) {
-						attack_time = chrono::high_resolution_clock::now();
-						m_Player->Set_status(PLAYER_STATE::ATTACK);
-					}
-					key_buffer.push_back(temp);
-
-					bool key = KEY_A;
-					chrono::high_resolution_clock::time_point start = attack_time;
-
-					auto t = find_if(key_buffer.begin(), key_buffer.end(), [&key, &start](const KEY& k) {
-						auto temp1 = chrono::duration_cast<chrono::milliseconds>(k.time - start).count();
-						if (temp1 >= chrono::duration_cast<chrono::milliseconds>(0ms).count()) {
-							if (temp1 < chrono::duration_cast<chrono::milliseconds>(800ms).count()) {
-								return true;
-							}
+				else
+				{
+					if (attack_count < 2) {
+						KEY temp;
+						temp.key = KEY_A;
+						temp.time = chrono::high_resolution_clock::now();
+						if (attack_count == 0) {
+							attack_time = chrono::high_resolution_clock::now();
+							m_Player->Set_status(PLAYER_STATE::ATTACK);
 						}
-						return false;
-					});
+						key_buffer.push_back(temp);
 
-					if (t != key_buffer.end()) {
-						attack_count += 1;
-						m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+						bool key = KEY_A;
+						chrono::high_resolution_clock::time_point start = attack_time;
+
+						auto t = find_if(key_buffer.begin(), key_buffer.end(), [&key, &start](const KEY& k) {
+							auto temp1 = chrono::duration_cast<chrono::milliseconds>(k.time - start).count();
+							if (temp1 >= chrono::duration_cast<chrono::milliseconds>(0ms).count()) {
+								if (temp1 < chrono::duration_cast<chrono::milliseconds>(800ms).count()) {
+									return true;
+								}
+							}
+							return false;
+						});
+
+						if (t != key_buffer.end()) {
+							attack_count += 1;
+							m_pSocket->sendPacket(CS_ATTACK, 1, attack_count, 0);
+						}
 					}
 				}
 			}
@@ -543,6 +546,18 @@ void CGameFramework_Client::processPacket(char* buf)
 		sc_packet_remove_weapon* p_remove_weapon = reinterpret_cast<sc_packet_remove_weapon*>(buf);
 		int weapon_type = p_remove_weapon->weapon_type;
 		int weapon_index = p_remove_weapon->weapon_index;
+
+		vector<CGameObject*> *pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+		vector<CGameObject*> *pvFlag = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_FLAG);
+
+		if (weapon_type == 4) {//flag
+			CWeapon* flag = (CWeapon*)(*pvFlag)[weapon_index];
+			flag->set_Invisible(true);
+		}
+		else {
+			CWeapon* weapon = (CWeapon*)(*pvWeapon)[weapon_index];
+			weapon->set_Invisible(true);
+		}
 	}
 		break;
 	case SC_UNPICK_WEAPON:

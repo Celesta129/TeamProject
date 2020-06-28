@@ -5,7 +5,6 @@
 #include "CPlayer.h"
 #include "CObject.h"
 #include "CWeapon.h"
-#include "def.h"
 #include "protocol.h"
 
 //global
@@ -435,37 +434,53 @@ void process_packet(int user_id, char* buf) {
 		char index = packet->weapon_index;
 
 		if (type != WEAPON_FLAG) {
-			clients[user_id].playerinfo->m_weapon_type = type;
-			clients[user_id].playerinfo->m_weapon_index = index;
-			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::PICK_UP;
-			if (type == WEAPON_HAMMER) {
-				clients[user_id].playerinfo->m_weapon_count = 2;
-			}
-			else if (type == WEAPON_SWORD) {
-				clients[user_id].playerinfo->m_weapon_count = 4;
-			}
-			else if (type == WEAPON_SNACK) {
-				clients[user_id].playerinfo->m_weapon_count = 1;
-			}
-			else if (type == WEAPON_BLOCK) {
-				clients[user_id].playerinfo->m_weapon_count = 1;
+			if (g_weapon_list[index].drop == true) {
+				clients[user_id].playerinfo->m_weapon_type = type;
+				clients[user_id].playerinfo->m_weapon_index = index;
+				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::PICK_UP;
+
+				g_weapon_list[index].owner = user_id;
+				g_weapon_list[index].drop = false;
+
+				if (type == WEAPON_HAMMER) {
+					clients[user_id].playerinfo->m_weapon_count = 2;
+				}
+				else if (type == WEAPON_SWORD) {
+					clients[user_id].playerinfo->m_weapon_count = 4;
+				}
+				else if (type == WEAPON_SNACK) {
+					clients[user_id].playerinfo->m_weapon_count = 1;
+				}
+				else if (type == WEAPON_BLOCK) {
+					clients[user_id].playerinfo->m_weapon_count = 1;
+				}
+
+				for (auto& cl : clients) {
+					if (cl.m_connected == true) {
+						send_pick_weapon_packet(cl.m_id, user_id, type, index);
+					}
+				}
 			}
 		}
 		else { //깃발
-			clients[user_id].playerinfo->m_flag = true;
-			clients[user_id].playerinfo->flag_time = FLAG_LIMIT_TIME;
-			g_Flag.drop = false;
-			g_Flag.owner = user_id;
+			if (g_Flag.drop == true) {
+				clients[user_id].playerinfo->m_flag = true;
+				clients[user_id].playerinfo->flag_time = FLAG_LIMIT_TIME;
+				g_Flag.drop = false;
+				g_Flag.owner = user_id;
 
-			add_timer(user_id, OP_FLAG_TIME, chrono::high_resolution_clock::now() + 1s);
-		}
+				add_timer(user_id, OP_FLAG_TIME, chrono::high_resolution_clock::now() + 1s);
 
-		for (auto& cl : clients) {
-			if (cl.m_connected == true) {
-				send_pick_weapon_packet(cl.m_id, user_id, type, index);
-				send_remove_weapon_packet(cl.m_id, type, index);
+				for (auto& cl : clients) {
+					if (cl.m_connected == true) {
+						send_pick_weapon_packet(cl.m_id, user_id, type, index);
+						//send_remove_weapon_packet(cl.m_id, type, index);
+					}
+				}
 			}
 		}
+
+
 	}
 		break;
 	default:
@@ -874,19 +889,21 @@ void timer_process()
 			break;
 		case OP_FLAG_TIME:
 		{
-			clients[ev.obj_id].playerinfo->flag_time--;
+			if (clients[ev.obj_id].playerinfo->m_flag == true) {
+				clients[ev.obj_id].playerinfo->flag_time--;
 
-			for (int i = 0; i < MAX_USER; ++i) {
-				if (clients[i].m_connected == true) {
-					send_flag_timer_packet(i, ev.obj_id, clients[ev.obj_id].playerinfo->flag_time);
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (clients[i].m_connected == true) {
+						send_flag_timer_packet(i, ev.obj_id, clients[ev.obj_id].playerinfo->flag_time);
+					}
 				}
-			}
 
-			if (clients[ev.obj_id].playerinfo->flag_time > 0) {
-				add_timer(ev.obj_id, OP_FLAG_TIME, chrono::high_resolution_clock::now() + 1s);
-			}
-			else { //끝
-				add_timer(0, OP_END, chrono::high_resolution_clock::now());
+				if (clients[ev.obj_id].playerinfo->flag_time > 0) {
+					add_timer(ev.obj_id, OP_FLAG_TIME, chrono::high_resolution_clock::now() + 1s);
+				}
+				else { //끝
+					add_timer(0, OP_END, chrono::high_resolution_clock::now());
+				}
 			}
 		}
 			break;
@@ -933,10 +950,16 @@ void client_update_process()
 								hp = 0;
 
 								if (clients[i].playerinfo->m_flag) {
-									clients[clients[i].playerinfo->last_hit].playerinfo->m_flag = true;
+									int next_flag = clients[i].playerinfo->last_hit;
+									clients[next_flag].playerinfo->m_flag = true;
+									clients[next_flag].playerinfo->flag_time = FLAG_LIMIT_TIME;
 									clients[i].playerinfo->m_flag = false;
 
-									add_timer(clients[i].playerinfo->last_hit, OP_FLAG_TIME, chrono::high_resolution_clock::now() + 1s);
+									add_timer(next_flag, OP_FLAG_TIME, chrono::high_resolution_clock::now());
+
+									for (int i = 0; i < MAX_USER; ++i) {
+										send_pick_weapon_packet(i, next_flag, WEAPON_FLAG, 0);
+									}
 								}
 
 								//사망후 애니메이션

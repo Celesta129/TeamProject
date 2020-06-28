@@ -109,8 +109,6 @@ bool CPlayer::collision_flag()
 		}
 
 	}
-	if (pIndex)
-		*pIndex = -1;
 	return false;
 }
 
