@@ -74,6 +74,8 @@ bool CPlayer::collision_weapon(int* pIndex)
 		}
 			
 	}
+	if (pIndex)
+		*pIndex = -1;
 	return false;
 }
 
