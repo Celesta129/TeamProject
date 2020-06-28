@@ -357,9 +357,15 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		int index = m_Player->GetWeaponIndex();  //무기 번호
 
 		if (m_Player->GetWeapon_grab() == false) {
-			if (index == -1 && type == -1 && m_Player->collision_weapon()) {
-				cout << "무기줍기\n";
-				m_pSocket->sendPacket(CS_ITEM, type, index, 0);
+			if (index == -1 && type == -1) {
+				if (m_Player->collision_weapon()) {
+					cout << "무기줍기\n";
+					m_pSocket->sendPacket(CS_ITEM, type, index, 0);
+				}
+				else if (m_Player->collision_flag()) {
+					cout << "깃발줍기\n";
+					m_pSocket->sendPacket(CS_ITEM, 4, 0, 0);
+				}
 			}
 			else
 			{
@@ -518,6 +524,18 @@ void CGameFramework_Client::processPacket(char* buf)
 		int other_id = p_pick_weapon->id;
 		int weapon_index = p_pick_weapon->weapon_index;
 		int weapon_type = p_pick_weapon->weapon_type;
+
+		vector<CGameObject*> *pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+		vector<CGameObject*> *pvFlag = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_FLAG);
+
+		if (weapon_type == 4) {//flag
+			CWeapon* flag = (CWeapon*)(*pvFlag)[weapon_index];
+			flag->set_Player(m_pScene->getplayer(other_id));
+		}
+		else {
+			CWeapon* weapon = (CWeapon*)(*pvWeapon)[weapon_index];
+			weapon->set_Player(m_pScene->getplayer(other_id));
+		}
 	}
 		break;
 	case SC_REMOVE_WEAPON:
@@ -546,6 +564,8 @@ void CGameFramework_Client::processPacket(char* buf)
 		sc_packet_flag_timer* p_flag_timer = reinterpret_cast<sc_packet_flag_timer*>(buf);
 		int other_id = p_flag_timer->id;
 		int timer = p_flag_timer->timer;
+
+		cout << other_id+1 << "플레이어 깃발유지" << timer << "남음\n";
 	}
 		break;
 	case SC_WIN:

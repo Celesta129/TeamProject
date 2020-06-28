@@ -41,9 +41,46 @@ HRESULT CPlayer::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 	return S_OK;
 }
 
-bool CPlayer::collision_weapon()
+bool CPlayer::collision_weapon(int* pIndex)
 {
 	vector<CGameObject*>* pvWeapons = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
+	for (UINT i = 0; i < pvWeapons->size(); ++i) {
+		CWeapon* pWeapon = (CWeapon*)(*pvWeapons)[i];
+		if (pWeapon->get_Invisible() == true)
+			continue;
+
+		if (pWeapon->get_Player())
+			continue;
+
+		CTransform* pWeaponTransform = pWeapon->Get_Transform();
+		float dist = 0;
+
+		XMFLOAT3 weaponPos = pWeaponTransform->Get_Pos();
+		XMFLOAT3 pos = m_pTransform->Get_Pos();
+
+		dist = sqrtf((weaponPos.x - pos.x) * (weaponPos.x - pos.x) +
+			(weaponPos.z - pos.z) * (weaponPos.z - pos.z));
+
+		if (dist <= 50.f)
+		{
+			if (pIndex)
+				*pIndex = i;
+			pWeaponTransform->Set_Pos(XMFLOAT3(0.f, 0.f, -0.f));
+			pWeaponTransform->Rotate(0.f, -90.f, 0.f);
+			pWeapon->set_Player(this);
+			
+			cout << "collision_Weapon" << endl;
+			return true;
+		}
+	}
+	if (pIndex)
+		*pIndex = -1;
+	return false;
+}
+
+bool CPlayer::collision_flag()
+{
+	vector<CGameObject*>* pvWeapons = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_FLAG);
 	for (UINT i = 0; i < pvWeapons->size(); ++i) {
 		CWeapon* pWeapon = (CWeapon*)(*pvWeapons)[i];
 		if (pWeapon->get_Invisible() == true)
@@ -66,11 +103,11 @@ bool CPlayer::collision_weapon()
 			pWeaponTransform->Set_Pos(XMFLOAT3(0.f, 0.f, -0.f));
 			pWeaponTransform->Rotate(0.f, -90.f, 0.f);
 			pWeapon->set_Player(this);
-			
-			cout << "collision_Weapon" << endl;
+
+			cout << "collision_Flag" << endl;
 			return true;
 		}
-			
+
 	}
 	return false;
 }

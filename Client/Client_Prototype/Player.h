@@ -17,7 +17,8 @@ public:
 
 public:
 	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	bool collision_weapon();
+	bool collision_weapon(int* pIndex = nullptr);
+	bool collision_flag();
 
 	virtual int Update(float fTimeElapsed);
 public:
