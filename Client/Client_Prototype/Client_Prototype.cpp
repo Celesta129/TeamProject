@@ -357,7 +357,7 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		int index = m_Player->GetWeaponIndex();  //무기 번호
 
 		if (m_Player->GetWeapon_grab() == false) {
-			if (index != -1 && type != -1 && m_Player->collision_weapon()) {
+			if (index == -1 && type == -1 && m_Player->collision_weapon()) {
 				cout << "무기줍기\n";
 				m_pSocket->sendPacket(CS_ITEM, type, index, 0);
 			}
