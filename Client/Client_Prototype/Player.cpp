@@ -83,7 +83,7 @@ int CPlayer::Update(float fTimeElapsed)
 
 	bool handcheck = set_hand();
 	// weapon 검색 후 collision 체크
-	collision_weapon();
+	//collision_weapon();
 
 	return result;
 }

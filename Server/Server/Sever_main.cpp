@@ -151,7 +151,7 @@ void send_put_weapon_packet(int user_id, char type, char index, const gmtl::Poin
 	p.size = sizeof(p);
 	p.type = SC_PUT_WEAPON;
 	p.weapon_index = index;
-	p.type = type;
+	p.weapon_type = type;
 	p.x = pos.mData[0];
 	p.y = pos.mData[1];
 	p.z = pos.mData[2];
@@ -196,7 +196,7 @@ void send_setting_weapon(int user_id) {
 		if (clients[user_id].m_connected == true) {
 			char type = g_weapon_list[i].weapon_index;
 			gmtl::Point3f pos = g_weapon_list[i].pos;
-
+			
 			send_put_weapon_packet(user_id, type, i, pos);
 		}
 	}
@@ -326,9 +326,9 @@ void process_packet(int user_id, char* buf) {
 
 		send_connected_packet(user_id);
 
-		send_setting_weapon(user_id);
-
 		enter_game(user_id);
+
+		send_setting_weapon(user_id);
 	}
 		break;
 	case CS_MOVEMENT: {

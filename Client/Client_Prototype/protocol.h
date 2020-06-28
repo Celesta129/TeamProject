@@ -120,7 +120,7 @@ struct sc_packet_put_weapon {
 	char type;
 	char weapon_type;
 	char weapon_index;
-	char x, y, z;
+	int x, y, z;
 };
 
 struct sc_packet_remove_weapon {
