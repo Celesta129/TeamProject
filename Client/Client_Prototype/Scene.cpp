@@ -87,18 +87,20 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 {
 	if (GetAsyncKeyState('1') & 0x8000)
 	{
-		if (m_vCameras[0])
-			m_pCurrentCamera = m_vCameras[0];
+		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
+		CWeapon_Hammer* pWeapon = new CWeapon_Hammer;
+		pWeapon->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+		pvWeapon->push_back(pWeapon);
+		pWeapon->Get_Transform()->Set_Pos(XMFLOAT3(300.f,0.f,300.f));
+		m_vShaders[1]->Push_Object(pWeapon);
 	}
 	if (GetAsyncKeyState('2') & 0x8000)
 	{
-		if (m_vCameras[1])
-			m_pCurrentCamera = m_vCameras[1];
+		
 	}
 	if (GetAsyncKeyState('3') & 0x8000)
 	{
-		if (m_vCameras[2])
-			m_pCurrentCamera = m_vCameras[2];
+		
 	}
 
 	/*float fSpeed = 500.f * fTimeElapsed;
@@ -288,6 +290,15 @@ void CScene::Render(ID3D12GraphicsCommandList * cmdList, UINT64& nFenceValue)
 void CScene::OnResize(float fAspectRatio)
 {
 	m_pCurrentCamera->Update(0);
+}
+
+CShader * CScene::Get_Shader(UINT index)
+{
+	CShader* pShader = nullptr;
+	if(index > m_vShaders.size())
+		return pShader;
+
+	return &pShader[index];
 }
 
 void CScene::ReleaseScene(void)

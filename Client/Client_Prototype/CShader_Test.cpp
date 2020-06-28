@@ -664,5 +664,6 @@ void Shader_Test::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 
 int Shader_Test::Free(void)
 {
+	CShader::Free();
 	return 0;
 }

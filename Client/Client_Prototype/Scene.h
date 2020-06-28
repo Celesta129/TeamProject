@@ -40,6 +40,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT64& nFenceValue);
 
 	void OnResize(float fAspectRatio);
+	CShader* Get_Shader(UINT index);
 
 	// ------------for release-------------------
 	virtual void ReleaseScene(void);
