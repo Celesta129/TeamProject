@@ -199,9 +199,9 @@ void CGameFramework_Client::Update(const CTimer & gt)
 	for (int i = 0; i < MAX_USER; ++i) {
 		if (m_pScene->m_player[i]->Getconnected())
 		{
-			CModelObject* pObj = m_pScene->m_player[i]->getObject();
+			CPlayer* status = m_pScene->m_player[i];
 
-			if (pObj->getAnimStatus() == LOOP_END)
+			if (status->getAnimStatus() == LOOP_END)
 			{
 				char status = m_pScene->m_player[i]->Get_Status();
 				if (status == PLAYER_STATE::ATTACK) {
