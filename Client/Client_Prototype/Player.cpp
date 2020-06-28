@@ -36,6 +36,7 @@ HRESULT CPlayer::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 	AddModel(L"Component_Model_attack");
 
 	AddModel(L"Component_Model_hit");
+	AddModel(L"Component_Model_pick_up");
 
 	set_hand();
 	return S_OK;

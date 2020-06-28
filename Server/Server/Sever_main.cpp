@@ -401,7 +401,7 @@ void process_packet(int user_id, char* buf) {
 	case CS_ATTACK: {
 		cs_packet_motion* packet = reinterpret_cast<cs_packet_motion*>(buf);
 
-		if (packet->key == 1) {
+		if (packet->key == 1) { // 근접공격
 			if (packet->count == 1) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
@@ -420,6 +420,12 @@ void process_packet(int user_id, char* buf) {
 
 			//피격 - 공격 상태 전환
 			clients[user_id].playerinfo->m_state = PLAYER_STATE::ATTACK;
+		}
+		else if (packet->key == 2) { //망치
+
+		}
+		else if (packet->key == 3) { //검
+
 		}
 
 		for (auto& cl : clients) {
@@ -454,6 +460,8 @@ void process_packet(int user_id, char* buf) {
 				else if (type == WEAPON_BLOCK) {
 					clients[user_id].playerinfo->m_weapon_count = 1;
 				}
+
+				add_timer(user_id, OP_FREE, chrono::high_resolution_clock::now() + 600ms);
 
 				for (auto& cl : clients) {
 					if (cl.m_connected == true) {
