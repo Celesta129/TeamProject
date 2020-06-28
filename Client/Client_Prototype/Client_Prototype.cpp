@@ -5,6 +5,7 @@
 #include "Component_Manager.h"
 #include "ModelObject.h"
 #include "Scene.h"
+#include "Weapon.h"
 
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 
@@ -199,9 +200,9 @@ void CGameFramework_Client::Update(const CTimer & gt)
 	for (int i = 0; i < MAX_USER; ++i) {
 		if (m_pScene->m_player[i]->Getconnected())
 		{
-			CModelObject* pObj = m_pScene->m_player[i]->getObject();
+			CPlayer* status = m_pScene->m_player[i];
 
-			if (pObj->getAnimStatus() == LOOP_END)
+			if (status->getAnimStatus() == LOOP_END)
 			{
 				char status = m_pScene->m_player[i]->Get_Status();
 				if (status == PLAYER_STATE::ATTACK) {
@@ -355,9 +356,11 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		int type = m_Player->GetWeapontype();	//무기 종류
 		int index = m_Player->GetWeaponIndex();  //무기 번호
 
+		//cout << m_Player->collision_weapon() << endl;
 
 		if (m_Player->GetWeapon_grab() == false) {
 			if (index != -1 && type != -1) {
+				cout << "무기줍기\n";
 				m_pSocket->sendPacket(CS_ITEM, type, index, 0);
 			}
 			else
@@ -495,20 +498,15 @@ void CGameFramework_Client::processPacket(char* buf)
 		int y = p_put_weapon->y;
 		int z = p_put_weapon->z;
 
-		if (index == 0) {//SWORD;
+		vector<CGameObject*> *pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+		vector<CGameObject*> *pvFlag = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_FLAG);
 
+		if (type == 4) {//flag
+			(*pvFlag)[index]->Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
+			
 		}
-		else if (index == 1) {//HAMMER
-
-		}
-		else if (index == 2) {//SNACK
-
-		}
-		else if (type == 3) {//BLOCK
-
-		} 
-		else if (type == 10) { 	//flag
-
+		else {
+			(*pvWeapon)[index]->Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
 		}
 	}
 		break;

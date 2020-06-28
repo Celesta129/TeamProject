@@ -95,7 +95,7 @@ CObject g_Object[8];
 CWeapon g_weapon_list[10];
 CFlag g_Flag;
 volatile  bool game_start = false;
-int g_timer = 180;
+int g_timer = 120;
 
 
 void add_timer(int obj_id, ENUMOP op_type, high_resolution_clock::time_point duration, char attack_count = 0)
@@ -202,7 +202,7 @@ void send_setting_weapon(int user_id) {
 	}
 	//flag
 	if (g_Flag.drop == true)
-		send_put_weapon_packet(user_id, 10, 10, g_Flag.pos);
+		send_put_weapon_packet(user_id, 4, 0, g_Flag.pos);
 }
 
 void send_update_state(int user_id, int player_id, int hp) {
