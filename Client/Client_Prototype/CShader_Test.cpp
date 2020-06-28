@@ -628,7 +628,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	//Flag
-	pObject = new CFlag;
+	pObject = new CWeapon(CWeapon::FLAG);
 	pObject->Initialize(pDevice, pd3dCommandList);
 	pvFlag->push_back(pObject);
 	Push_Object(pObject);
@@ -637,7 +637,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	// hammer
-	pObject = new CWeapon_Hammer;
+	pObject = new CWeapon(CWeapon::WEAPON_SNACK);
 	pObject->Initialize(pDevice, pd3dCommandList);
 	pvWeapon->push_back(pObject);
 	Push_Object(pObject);

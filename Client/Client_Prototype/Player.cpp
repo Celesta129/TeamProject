@@ -44,7 +44,7 @@ HRESULT CPlayer::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 bool CPlayer::collision_weapon()
 {
 	vector<CGameObject*>* pvWeapons = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
-	for (int i = 0; i < pvWeapons->size(); ++i) {
+	for (UINT i = 0; i < pvWeapons->size(); ++i) {
 		CWeapon* pWeapon = (CWeapon*)(*pvWeapons)[i];
 
 		if (pWeapon->get_Player())

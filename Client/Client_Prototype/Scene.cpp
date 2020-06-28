@@ -88,7 +88,7 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 	if (GetAsyncKeyState('1') & 0x8000)
 	{
 		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
-		CWeapon_Hammer* pWeapon = new CWeapon_Hammer;
+		CWeapon* pWeapon = new CWeapon(rand() % 4);
 		pWeapon->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 		pvWeapon->push_back(pWeapon);
 		pWeapon->Get_Transform()->Set_Pos(XMFLOAT3(300.f,0.f,300.f));
@@ -428,6 +428,21 @@ void CScene::BuildComponents(void)
 	m_pComponent_Manager->Add_Component(L"Component_Model_Hammer", pComponent);
 	pComponent = new CMaterial(L"resources/dds/hammer_diffuse.dds", L"Texture_Hammer_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Hammer_diffuse", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/sword.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_Sword", pComponent);
+	pComponent = new CMaterial(L"resources/dds/sword_diffuse.dds", L"Texture_Sword_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Sword_diffuse", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/snack.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_Snack", pComponent);
+	pComponent = new CMaterial(L"resources/dds/snack_diffuse.dds", L"Texture_Snack_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Snack_diffuse", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/block.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_Block", pComponent);
+	pComponent = new CMaterial(L"resources/dds/block_red_diffuse.dds", L"Texture_Block_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Block_diffuse", pComponent);
 }
 
 
