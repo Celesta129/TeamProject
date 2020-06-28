@@ -4,6 +4,7 @@
 void CWeapon::set_Player(CPlayer * pPlayer)
 {
 	m_pPlayer = pPlayer;
+
 }
 
 void CWeapon::set_Type(UINT weapontype)
@@ -84,6 +85,9 @@ HRESULT CWeapon::Initialize(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList
 
 int CWeapon::Update(float fTimeElapsed)
 {
+	if (m_bInvisible == true)
+		return 0;
+
 	switch (m_type)
 	{
 	default:
@@ -107,4 +111,12 @@ int CWeapon::Update(float fTimeElapsed)
 	}
 
 	return 0;
+}
+
+void CWeapon::Render(ID3D12GraphicsCommandList * pCommandList)
+{
+	if (m_bInvisible == true)
+		return;
+
+	CModelObject::Render(pCommandList);
 }

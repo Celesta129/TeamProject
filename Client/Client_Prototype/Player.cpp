@@ -46,6 +46,8 @@ bool CPlayer::collision_weapon()
 	vector<CGameObject*>* pvWeapons = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
 	for (UINT i = 0; i < pvWeapons->size(); ++i) {
 		CWeapon* pWeapon = (CWeapon*)(*pvWeapons)[i];
+		if (pWeapon->get_Invisible() == true)
+			continue;
 
 		if (pWeapon->get_Player())
 			continue;
