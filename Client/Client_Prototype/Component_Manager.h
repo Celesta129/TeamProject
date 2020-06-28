@@ -19,6 +19,7 @@ public:
 
 	void Clear_Component(void);
 
+	map<const wstring, CComponent*>* Get_Map(void) { return &m_mapComponent; }
 private:
 	CComponent* Find_Component(const wstring& tag);
 private:

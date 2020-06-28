@@ -229,17 +229,7 @@ void Shader_Test::CreateFrameResources(ID3D12Device * pd3dDevice)
 
 void Shader_Test::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 {
-	UINT nNumDescriptor = 0;
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
-	{
-		if (*m_vpObjects[i] == nullptr)
-			continue;
-
-		if ((*m_vpObjects[i])->GetMaterial() != nullptr)
-		{
-			nNumDescriptor++;
-		}
-	}
+	UINT nNumDescriptor = 255;
 	//
 	// Create the SRV heap.
 	//
@@ -253,30 +243,39 @@ void Shader_Test::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	//
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_CbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	CD3DX12_GPU_DESCRIPTOR_HANDLE hGPUDescriptor(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
+
+	map<const wstring, CComponent*>* pmapCom = m_pComponent_Manager->Get_Map();
+	map<const wstring, CComponent*>::iterator iter = pmapCom->begin();
+	for (UINT i = 0; i < pmapCom->size(); ++i)
 	{
-		CModelObject* pObject = *m_vpObjects[i];
-		if (pObject == nullptr)
+		if (iter == pmapCom->end())
+			break;
+
+		CMaterial* pMaterial = dynamic_cast<CMaterial*>(iter->second);
+		if (pMaterial == nullptr){
+			iter++;
 			continue;
-		CMaterial* pMaterial = pObject->GetMaterial();
-		if (pMaterial == nullptr)
+		}
+		CPUSRVHANDLEMAP srviter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
+		if (srviter != m_mapTextureCPUSrvHandle.end()) {
+			iter++;
 			continue;
-		CPUSRVHANDLEMAP iter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
-		if (iter != m_mapTextureCPUSrvHandle.end())
-			continue;
+		}
 
 		ID3D12Resource* pResource = pMaterial->m_pTexture->m_pd3dTextures.Get();
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pObject->GetMaterial()->m_pTexture->m_srvDesc;
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pMaterial->m_pTexture->m_srvDesc;
 
 		pd3dDevice->CreateShaderResourceView(pResource, &srvDesc, hDescriptor);
-		
+
 		m_mapTextureCPUSrvHandle.insert(make_pair(pMaterial->Name, hDescriptor));
 		m_mapTextureGPUSrvHandle.insert(make_pair(pMaterial->Name, hGPUDescriptor));
 
 		hDescriptor.Offset(g_CbvSrvUavDescriptorSize);
 		hGPUDescriptor.Offset(g_CbvSrvUavDescriptorSize);
-	}
 
+		iter++;
+	}
+	
 }
 
 void Shader_Test::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -637,7 +636,7 @@ void Shader_Test::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDe
 	pObject->Get_Transform()->Set_Scale(XMFLOAT3(1.f, 1.f, 1.f));
 
 	// hammer
-	pObject = new CWeapon(CWeapon::WEAPON_SNACK);
+	pObject = new CWeapon(CWeapon::WEAPON_SWORD);
 	pObject->Initialize(pDevice, pd3dCommandList);
 	pvWeapon->push_back(pObject);
 	Push_Object(pObject);
@@ -660,10 +659,4 @@ void Shader_Test::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 	auto passCB = m_CurrFrameResource->PassCB->Resource();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(0, passCB->GetGPUVirtualAddress());
 	//pd3dCommandList->SetGraphicsRootDescriptorTable(0, passCbvHandle);		// 서술자 테이블을 파이프라인에 묶는다. // Pass RootDescriptor는 0번
-}
-
-int Shader_Test::Free(void)
-{
-	CShader::Free();
-	return 0;
 }

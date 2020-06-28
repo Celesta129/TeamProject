@@ -6,6 +6,9 @@ CShader::CShader()
 {
 	m_pObject_Manager = CObject_Manager::GetInstance();
 	m_pObject_Manager->AddRef();
+
+	m_pComponent_Manager = CComponent_Manager::GetInstance();
+	m_pComponent_Manager->AddRef();
 }
 
 
@@ -181,7 +184,7 @@ int CShader::Free(void)
 
 
 	Safe_Release(m_pObject_Manager);
-
+	Safe_Release(m_pComponent_Manager);
 	return 0;
 }
 

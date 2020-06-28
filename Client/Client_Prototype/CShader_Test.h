@@ -37,7 +37,6 @@ protected:
 	virtual void BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 
-	virtual int Free(void);
 private:
 	map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE> m_mapTextureCPUSrvHandle;
 	map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE> m_mapTextureGPUSrvHandle;

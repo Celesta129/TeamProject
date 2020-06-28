@@ -100,4 +100,5 @@ protected:
 	wchar_t m_filename[100] = L"Shaders\\color.hlsl";
 
 	CObject_Manager* m_pObject_Manager = nullptr;
+	CComponent_Manager* m_pComponent_Manager = nullptr;
 };
