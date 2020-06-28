@@ -6,7 +6,7 @@ class CWeapon : public CModelObject
 {
 public:
 	enum enum_type {
-		WEAPON_SWORD, WEAPON_HAMMER, WEAPON_SNACK, WEAPON_BLOCK, FLAG
+		WEAPON_SWORD, WEAPON_HAMMER, WEAPON_SNACK, WEAPON_BLOCK, FLAG, TYPE_END
 	};
 public:
 	CWeapon(UINT weapontype = WEAPON_HAMMER) { m_type = weapontype; };
@@ -16,7 +16,7 @@ public:
 	void set_Player(CPlayer* pPlayer);
 	CPlayer* get_Player(void) { return m_pPlayer; }
 
-	void set_Type(UINT weapontype) { m_type = weapontype; }
+	void set_Type(UINT weapontype);
 
 	virtual HRESULT Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual int Update(float fTimeElapsed);

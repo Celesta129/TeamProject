@@ -92,11 +92,8 @@ void CPlayer::SetPos(float x, float y, float z)
 	m_posY = y;
 	m_posZ = z;
 
-	if (m_pObjectInstance != nullptr)
-	{
-		m_pObjectInstance->Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
-		m_pObjectInstance->DirtyFrames();
-	}
+	Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
+	DirtyFrames();
 }
 
 void CPlayer::GetPos(float * x, float * y, float * z)
@@ -111,18 +108,15 @@ void CPlayer::SetVelocity(float x, float y, float z)
 	m_velocityX = x;
 	m_velocityY = y;
 	m_velocityZ = z;
-	if (m_pObjectInstance != nullptr)
+
+	XMFLOAT3 velocity = XMFLOAT3(-m_velocityX, m_velocityY, -m_velocityZ);
+
+	if (IsEqual(velocity.x, 0.0f) && IsEqual(velocity.z, 0.0f))
 	{
-		CTransform* pTransform = m_pObjectInstance->Get_Transform();
-		XMFLOAT3 velocity = XMFLOAT3(-m_velocityX, m_velocityY, -m_velocityZ);
-		
-		if (IsEqual(velocity.x, 0.0f) && IsEqual(velocity.z, 0.0f))
-		{
-			return;
-		}
-		pTransform->Set_Look(velocity);
-		m_pObjectInstance->DirtyFrames();
+		return;
 	}
+	m_pTransform->Set_Look(velocity);
+	DirtyFrames();
 }
 
 void CPlayer::GetVelocity(float * x, float * y, float * z)
@@ -135,10 +129,8 @@ void CPlayer::GetVelocity(float * x, float * y, float * z)
 void CPlayer::SetAnimation_index(int animation_index)
 {
 	m_animation_index = animation_index;
-	if (m_pObjectInstance != nullptr)
-	{
-		m_pObjectInstance->ChangeAnim(animation_index);
-	}
+
+	ChangeAnim(animation_index);
 }
 
 void CPlayer::GetAnimation_index(int *animation_index)

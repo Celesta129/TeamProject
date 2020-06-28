@@ -65,8 +65,7 @@ void CScene::BuildShaders()
 	m_vShaders.push_back(pShader);
 	for (int i = 0; i < MAX_USER; ++i)
 	{
-		m_player[i] = new CPlayer();	// 이부분 수정요망. 뭔지는 내가 보면 암.
-		m_player[i]->SetObjectInstance((CModelObject*)(*pPlayerLayer)[i]);
+		m_player[i] = (CPlayer*)(*pPlayerLayer)[i];
 	}
 
 	pShader = new Shader_Test;
@@ -88,8 +87,10 @@ bool CScene::OnKeyboardInput(const float & fTimeElapsed)
 	if (GetAsyncKeyState('1') & 0x8000)
 	{
 		vector<CGameObject*>* pvWeapon = m_pObject_Manager->Get_Layer(CObject_Manager::LAYER_WEAPON);
-		CWeapon* pWeapon = new CWeapon(rand() % 4);
+		CWeapon* pWeapon = new CWeapon();
+		
 		pWeapon->Initialize(m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+		pWeapon->set_Type(rand() % 4);
 		pvWeapon->push_back(pWeapon);
 		pWeapon->Get_Transform()->Set_Pos(XMFLOAT3(300.f,0.f,300.f));
 		m_vShaders[1]->Push_Object(pWeapon);

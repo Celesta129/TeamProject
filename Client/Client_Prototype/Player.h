@@ -44,13 +44,7 @@ public:
 	void Set_HP(int hp) { m_hp = hp; }
 	void Set_status(char status) { m_status = status; }
 
-	void SetObjectInstance(CModelObject* pObject) {
-		m_pObjectInstance = pObject;
-	}
-	CModelObject* getObject(void) {
-		return m_pObjectInstance;
-	}
-
+	
 	XMFLOAT4X4 get_Hand(void);
 private:
 	
@@ -70,6 +64,5 @@ private:
 	bool weapon_grab = false;
 	char m_status = PLAYER_STATE::NORMAL;
 
-	CModelObject* m_pObjectInstance = nullptr;
 };
 
