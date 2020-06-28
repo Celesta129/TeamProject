@@ -39,6 +39,8 @@ public:
 	char m_weapon_count;
 
 	char last_hit;
+	char flag_time;
+
 	volatile bool m_flag;
 	volatile bool m_dashed;
 

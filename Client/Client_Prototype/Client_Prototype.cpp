@@ -495,10 +495,36 @@ void CGameFramework_Client::processPacket(char* buf)
 		int y = p_put_weapon->y;
 		int z = p_put_weapon->z;
 
-		//flag
-		if (type == 10) {
+		if (index == 0) {//SWORD;
 
 		}
+		else if (index == 1) {//HAMMER
+
+		}
+		else if (index == 2) {//SNACK
+
+		}
+		else if (type == 3) {//BLOCK
+
+		} 
+		else if (type == 10) { 	//flag
+
+		}
+	}
+		break;
+	case SC_PICK_WEAPON:
+	{
+		sc_packet_pick_weapon* p_pick_weapon = reinterpret_cast<sc_packet_pick_weapon*>(buf);
+		int other_id = p_pick_weapon->id;
+		int weapon_index = p_pick_weapon->weapon_index;
+		int weapon_type = p_pick_weapon->weapon_type;
+	}
+		break;
+	case SC_REMOVE_WEAPON:
+	{
+		sc_packet_remove_weapon* p_remove_weapon = reinterpret_cast<sc_packet_remove_weapon*>(buf);
+		int weapon_type = p_remove_weapon->weapon_type;
+		int weapon_index = p_remove_weapon->weapon_index;
 	}
 		break;
 	case SC_UNPICK_WEAPON:

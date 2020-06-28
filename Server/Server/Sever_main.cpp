@@ -29,8 +29,9 @@ gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
 	gmtl::Point3f(130.f, 0.f, 470.f)
 };
 
-enum ENUMOP { OP_RECV, OP_SEND, OP_ACCEPT,
-			OP_FREE, OP_HIT, OP_PICK, OP_REVIVE, OP_TIME
+enum ENUMOP {
+	OP_RECV, OP_SEND, OP_ACCEPT,
+	OP_FREE, OP_HIT, OP_PICK, OP_REVIVE, OP_TIME, OP_END
 };
 
 struct event_type {
@@ -93,6 +94,8 @@ CTimer GameTimer;
 CObject g_Object[8];
 CWeapon g_weapon_list[10];
 CFlag g_Flag;
+volatile  bool game_start = false;
+int g_timer = 180;
 
 
 void add_timer(int obj_id, ENUMOP op_type, high_resolution_clock::time_point duration, char attack_count = 0)
@@ -185,7 +188,7 @@ void send_unpick_weapon_packet(int user_id, char player_id, char type, char inde
 	p.weapon_index = index;
 	p.weapon_type = type;
 
-	//send_packet(user_id, &p);
+	send_packet(user_id, &p);
 }
 
 void send_setting_weapon(int user_id) {
@@ -257,7 +260,11 @@ void enter_game(int user_id) {
 				send_enter_packet(user_id, i);
 				send_enter_packet(i, user_id);
 
-				//send_setting_weapon(user_id);
+				//2명이상 접속
+				if (game_start == false) {
+					game_start = true;
+					add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
+				}
 			}
 	}
 }
@@ -318,6 +325,8 @@ void process_packet(int user_id, char* buf) {
 		printf("%s(%d) 접속완료 \n", clients[user_id].player_id, user_id);
 
 		send_connected_packet(user_id);
+
+		send_setting_weapon(user_id);
 
 		enter_game(user_id);
 	}
@@ -518,9 +527,9 @@ void worker_thread() {
 			clients[user_id].m_socket = client_socket;
 
 			//컨텐츠 초기화
-			clients[user_id].playerinfo->m_posX = 0;
-			clients[user_id].playerinfo->m_posY = 0;
-			clients[user_id].playerinfo->m_posZ = 0;
+			clients[user_id].playerinfo->m_posX = Player_map1_Init_pos[user_id].mData[0];
+			clients[user_id].playerinfo->m_posY = Player_map1_Init_pos[user_id].mData[1];
+			clients[user_id].playerinfo->m_posZ = Player_map1_Init_pos[user_id].mData[2];
 			DWORD flags = 0;
 
 			//로그인 정보 수신
@@ -822,9 +831,33 @@ void timer_process()
 		}
 			break;
 		case OP_TIME:
+		{
+			g_timer--;
+			//cout << g_timer << "초" << endl;
 
-
+			if (g_timer > 0) {
+				add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
+			}
+			else {
+				add_timer(0, OP_END, chrono::high_resolution_clock::now());
+			}
+		}
 			break;
+		case OP_END:
+		{
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].playerinfo->m_flag) {
+					send_win_flag_packet(i);
+				}
+				else {
+					send_lose_flag_packet(i);
+				}
+			}
+		}
+			break;
+		default:
+			printf("Event Code Error \n");
+			while (true);
 		}
 	}
 	
@@ -868,6 +901,7 @@ void client_update_process()
 						}
 
 						clients[i].playerinfo->m_hp = hp;
+						std::cout << i << "캐릭" << clients[i].playerinfo->m_hp << "체력\n";
 
 						for (int j = 0; j < MAX_USER; ++j) {
 							if (clients[j].m_connected == true) {
@@ -876,7 +910,7 @@ void client_update_process()
 						}
 					}
 
-					clients[i].playerinfo->m_hitted == false;
+					clients[i].playerinfo->m_hitted = false;
 				}
 			}
 		}
@@ -900,7 +934,6 @@ void logic()
 			AccumulatedTime -= FixedDeltaTimeInNano;
 			float DeltaTime = FixedDeltaTimeInNano.count() * 1e-9f;
 
-			//입력처리
 			timer_process();
 
 			//이동충돌처리
