@@ -30,7 +30,7 @@ gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
 
 enum ENUMOP {
 	OP_RECV, OP_SEND, OP_ACCEPT,
-	OP_FREE, OP_HIT, OP_PICK, OP_REVIVE, OP_TIME, OP_FLAG_TIME, OP_END
+	OP_FREE, OP_HIT, OP_PICK, OP_REVIVE, OP_TIME, OP_FLAG_TIME, OP_END, OP_RESTART
 };
 
 struct event_type {
@@ -917,6 +917,66 @@ void timer_process()
 					send_lose_flag_packet(i);
 				}
 			}
+
+			add_timer(0, OP_RESTART, chrono::high_resolution_clock::now() + 5s);
+		}
+			break;
+		case OP_RESTART:
+		{
+			//플레이어 초기화
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true) {
+					clients[i].attack_count = 0;
+					clients[i].playerinfo->m_posX = Player_map1_Init_pos[i].mData[0];
+					clients[i].playerinfo->m_posY = Player_map1_Init_pos[i].mData[1];
+					clients[i].playerinfo->m_posZ = Player_map1_Init_pos[i].mData[2];
+
+					clients[i].playerinfo->m_hp = 100;
+					clients[i].playerinfo->m_state = PLAYER_STATE::NORMAL;
+					clients[i].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
+					clients[i].playerinfo->m_dashed = false;
+
+					clients[i].playerinfo->m_weapon_type = -1;
+					clients[i].playerinfo->m_weapon_index = -1;
+					clients[i].playerinfo->m_weapon_count = 0;
+
+					clients[i].playerinfo->m_flag = false;
+					clients[i].playerinfo->last_hit = -1;
+					clients[i].playerinfo->flag_time = FLAG_LIMIT_TIME;
+
+					clients[i].playerinfo->m_collide_flag = false;
+					clients[i].playerinfo->m_collide_weapon = false;
+					clients[i].playerinfo->m_hitted = false;
+				}
+			}
+
+			//글로벌 변수
+			g_timer = 120;
+			g_Flag.drop = true;
+			g_Flag.owner = -1;
+			g_Flag.pos = gmtl::Point3f(0.f, 0.f, 0.f);
+
+			setting_weapon();
+			for (int i = 0; i < MAX_WEAPON; ++i) {
+				g_weapon_list[i].drop = true;
+				g_weapon_list[i].owner = -1;
+			}
+
+			//broadcast
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true) {
+					for (int j = 0; j < MAX_USER; ++j) {
+						if (clients[j].m_connected == true) {
+							send_move_packet(i, j);
+							send_update_state(i, j, 100);
+						}
+					}
+
+					send_setting_weapon(i);
+				}
+			}
+			
+			add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
 		}
 			break;
 		default:
