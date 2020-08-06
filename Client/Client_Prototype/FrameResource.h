@@ -49,7 +49,13 @@ struct Vertex
 	DirectX::XMFLOAT3 Normal;
 	DirectX::XMFLOAT2 TexC;
 };
+struct UI_Constants
+{
+	XMFLOAT2 xmf2ScreenPos;
+	XMFLOAT2 xmf2ScreenSize;
 
+	XMUINT2 xmn2UISize;
+};
 struct FrameResource
 {
 public:
@@ -68,6 +74,7 @@ public:
 	std::unique_ptr<UploadBuffer<MaterialConstants>> MaterialCB = nullptr;
 	std::unique_ptr<UploadBuffer<SkinnedConstants>> SkinnedCB = nullptr;
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
+	std::unique_ptr<UploadBuffer<UI_Constants>> UICB = nullptr;
 
 	// Fence는 현재 울타리 지점까지의 명령들을 표시하는 값
 	// 이 값은 GPU가 아직 이 프레임 자원들을 사용하고있는지 판정하는 용도로 사용한다.

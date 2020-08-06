@@ -58,7 +58,9 @@ int CModelObject::Update(float fTimeElapsed)
 	int result = 0;
 
 	result = CGameObject::Update(fTimeElapsed);
-	Animate(fTimeElapsed);
+	
+	if(m_bAnimStop != true)
+		Animate(fTimeElapsed);
 
 	return result;
 }

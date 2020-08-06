@@ -35,6 +35,13 @@ public:
 		return m_AnimStatus;
 	};
 
+	void setAnimStop(bool trigger) {
+		m_bAnimStop = trigger;
+	}
+	bool getAnimStop(void) {
+		return m_bAnimStop;
+	}
+
 protected:
 	void Animate(const float fTimeElapsed);
 protected:
@@ -45,6 +52,7 @@ protected:
 	UINT m_nMeshes = 0;
 
 	UINT m_AnimStatus;
+	bool m_bAnimStop = false;
 
 	vector<XMFLOAT4X4> m_Bones;
 	Material* m_pMaterial = nullptr;

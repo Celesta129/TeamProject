@@ -77,12 +77,17 @@ void CUI_Shader::UpdateMaterialCB(void)
 {
 }
 
+void CUI_Shader::UpdateUICB(void)
+{
+
+}
+
 D3D12_INPUT_LAYOUT_DESC CUI_Shader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 7;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
-	//정점 정보를 위한 입력 원소이다. 현재 VertexData의 구조는 차례대로 pos, normal, tan, tex, bornindex,weights, texnum이다.
+	//정점 정보를 위한 입력 원소이다. 현재 UI Data의 구조는 차례대로 pos, uv
 
 	pd3dInputElementDescs[0] = { "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	0,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -91,6 +96,9 @@ D3D12_INPUT_LAYOUT_DESC CUI_Shader::CreateInputLayout()
 	pd3dInputElementDescs[4] = { "BORNINDEX",	0, DXGI_FORMAT_R32G32B32A32_UINT,	0,	44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[5] = { "WEIGHT",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[6] = { "TEXINDEX",	0, DXGI_FORMAT_R32_UINT,			0,	72, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	/*pd3dInputElementDescs[0] = { "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	0,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };*/
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -127,16 +135,45 @@ D3D12_RASTERIZER_DESC CUI_Shader::CreateRasterizerState()
 
 D3D12_BLEND_DESC CUI_Shader::CreateBlendState()
 {
-	return CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+
+	d3dBlendDesc.AlphaToCoverageEnable = false;
+	d3dBlendDesc.IndependentBlendEnable = false;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = true;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = false;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return d3dBlendDesc;
 }
 
 D3D12_DEPTH_STENCIL_DESC CUI_Shader::CreateDepthStencilState()
 {
-	CD3DX12_DEPTH_STENCIL_DESC depth_stencil_desc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	D3D12_DEPTH_STENCIL_DESC desc;
+	::ZeroMemory(&desc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 
-	depth_stencil_desc.DepthEnable = false;
-	
-	return depth_stencil_desc;
+	desc.DepthEnable = false;
+	desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	desc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	desc.StencilEnable = false;
+	desc.StencilReadMask = 0x00;
+	desc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	desc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	desc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	desc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_LESS;
+	desc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	desc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	desc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	desc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_LESS;
+
+	return desc;
 }
 
 void CUI_Shader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int index)
