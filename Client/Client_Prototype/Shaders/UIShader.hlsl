@@ -10,11 +10,9 @@ SamplerState gsamAnisotropicClamp : register(s5);
 
 #define NUM_MAX_UITEXTURE 4
 
-Texture2D gUITextures1 : register(t9);
-Texture2D gUITextures2 : register(t10);
-Texture2D gUITextures3 : register(t11);
-Texture2D gUITextures4 : register(t12);
-Texture2D gUITextures5 : register(t13);
+
+#include "LightingUtil.hlsl"
+
 
 cbuffer cbPass : register(b0)
 {
@@ -34,6 +32,7 @@ cbuffer cbPass : register(b0)
 	float gDeltaTime;
 	float4 gAmbientLight;
 
+	Light gLights[MaxLights];
 };
 
 cbuffer cbPerObject : register(b1)
@@ -48,89 +47,75 @@ cbuffer cbMaterial  : register(b2)
 	float    gRoughness;
 	float4x4 gMatTransform;
 }
-cbuffer cbUI : register(b3)
-{
-	float2 f2ScreenPos;
-	float2 f2ScreenSize;
 
-	uint2 n2Size;
-	//float2 f2Scale;
-}
 struct VertexIn
 {
-	float3 position : POSITION; // 
-	float2 uv : TEXCOORD; // 
+	float3 PosL : POSITION;
+	float3 NormalL : NORMAL;
+	float3 TangentL : TANGENT;
+	float2 TexC : TEXCOORD;
+	uint4 BoneIndices : BORNINDEX;
+	float3 BoneWeights : WEIGHT;
+	uint texindex : TEXINDEX;
 };
 
 struct VertexOut
 {
-	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
+	float4 PosH    : SV_POSITION;
+	float3 PosW    : POSITION;
+	float3 NormalW : NORMAL;
+	float2 TexC    : TEXCOORD;
+	float3 TangentW : TANGENT;
 };
 
 
 VertexOut VS(VertexIn vin)
 {
-	VertexOut output = (VertexOut)0.0f;
+	VertexOut vout = (VertexOut)0.0f;
 
-	float2 screenpos = (float2) 0.0f;
-	screenpos.x = (gxmf2ScreenPos.x - gxmf2ScreenSize.x / 2.0f) / (gxmf2ScreenSize.x / 2.0f);
-	screenpos.y = (gxmf2ScreenPos.y - gxmf2ScreenSize.y / 2.0f) / (gxmf2ScreenSize.y / 2.0f);
+	// Transform to homogeneous clip space. // 세계공간으로 변환한다.
+	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
+	vout.PosW = posW.xyz;
 
-	float2 size = (float2) 0.0f;
-	size.x = ((float)gnSize.x / gxmf2ScreenSize.x) * gfScale.x;
-	size.y = ((float)gnSize.y / gxmf2ScreenSize.y) * gfScale.y;
+	// Assumes nonuniform scaling; otherwise, need to use inverse-transpose of world matrix.
+	vout.NormalW = mul(vin.NormalL, (float3x3)gWorld);
 
-	if (nVertexID == 0)
-	{
-		output.uv = (float2(0.0f, 0.0f)); // 스크린 왼쪽 위 
-		output.position = float4(screenpos.x - size.x, screenpos.y + size.y, 0.0f, 1.0f);
-	}
-	if (nVertexID == 1)
-	{
-		output.uv = (float2(1.0f, 0.0f)); // 스크린 오른쪽 위
-		output.position = float4(screenpos.x + size.x, screenpos.y + size.y, 0.0f, 1.0f);
+	vout.TangentW = mul(vin.TangentL, (float3x3)gWorld);
 
-	}
-	if (nVertexID == 2)
-	{
-		output.uv = (float2(1.0f, 1.0f)); // 스크린 오른쪽 아래
-		output.position = float4(screenpos.x + size.x, screenpos.y - size.y, 0.0f, 1.0f);
+	// Transform to homogeneous clip space.	 동차절단공간으로 변환한다.
+	vout.PosH = mul(posW, gViewProj);
 
-	}
-	if (nVertexID == 3)
-	{
-		output.uv = (float2(0.0f, 0.0f)); // 스크린 왼쪽 위
-		output.position = float4(screenpos.x - size.x, screenpos.y + size.y, 0.0f, 1.0f);
+	// Output vertex attributes for interpolation across triangle.
+	float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform);
+	vout.TexC = mul(texC, gMatTransform).xy;
 
-	}
-	if (nVertexID == 4)
-	{
-		output.uv = (float2(1.0f, 1.0f)); // 스크린 왼쪽 아래
-		output.position = float4(screenpos.x + size.x, screenpos.y - size.y, 0.0f, 1.0f);
-
-	}
-	if (nVertexID == 5)
-	{
-		output.uv = (float2(0.0f, 1.0f)); // 스크린 오른쪽 아래
-		output.position = float4(screenpos.x - size.x, screenpos.y - size.y, 0.0f, 1.0f);
-	}
-
-	return output;
+	return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	float4 finalColor = (float4) 0.0f;
-	float2 uv = pin.uv;
+	float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.TexC) * gDiffuseAlbedo;
 
-	uv = float2(
-	input.uv.x / gnNumSprite.x + float(gnNowSprite.x) / float(gnNumSprite.x),
-	input.uv.y / gnNumSprite.y + float(gnNowSprite.y) / float(gnNumSprite.y)
-	);
 
-	finalColor = gDiffuseMap.Sample(gDefaultSamplerState, uv);
-	finalColor.a *= gfAlpha;
+	// Interpolating normal can unnormalize it, so renormalize it.
+	pin.NormalW = normalize(pin.NormalW);
 
-	return finalColor;
+	// Vector from point being lit to eye. // 조명되는 점에서 눈으로의 벡터.
+	float3 toEyeW = normalize(gEyePosW - pin.PosW);
+
+	// Light terms.		// 조명계산에 포함되는 항들
+	float4 ambient = gAmbientLight * diffuseAlbedo;
+
+	const float shininess = 1.0f - gRoughness;
+	Material mat = { diffuseAlbedo, gFresnelR0, shininess };
+	float3 shadowFactor = 1.0f;
+	float4 directLight = ComputeLighting(gLights, mat, pin.PosW,
+		pin.NormalW, toEyeW, shadowFactor);
+
+	float4 litColor = ambient + directLight;
+
+	// Common convention to take alpha from diffuse albedo.
+	litColor.a = diffuseAlbedo.a;
+
+	return litColor;
 }
