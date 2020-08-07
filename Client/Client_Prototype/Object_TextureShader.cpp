@@ -252,7 +252,7 @@ void CObject_TextureShader::UpdateShaderVariables(const CTimer & timer, CCamera 
 	auto currSkinnedCB = m_CurrFrameResource->SkinnedCB.get();
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		CModelObject* pObject = *m_vpObjects[i];
+		CModelObject* pObject = dynamic_cast<CModelObject*>(*m_vpObjects[i]);
 		if (pObject == nullptr)
 			continue;
 

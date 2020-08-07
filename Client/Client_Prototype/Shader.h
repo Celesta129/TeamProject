@@ -25,8 +25,8 @@ public:
 	virtual int Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
-	bool Push_Object(CModelObject* pObject);
-	vector<CModelObject**>& Get_Vector(void) {
+	bool Push_Object(CGameObject* pObject);
+	vector<CGameObject**>& Get_Vector(void) {
 		return m_vpObjects;
 	};
 
@@ -61,7 +61,7 @@ protected:
 	virtual void UpdateMainPassCB(CCamera* pCamera);
 	virtual void UpdateObjectCBs();
 
-	virtual void BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 private:
@@ -71,7 +71,7 @@ private:
 	};
 
 protected:
-	vector<CModelObject**>	m_vpObjects;
+	vector<CGameObject**>	m_vpObjects;
 	UINT m_nObjects = 0;
 	
 protected:

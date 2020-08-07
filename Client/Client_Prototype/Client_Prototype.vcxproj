@@ -169,7 +169,6 @@
     <ClInclude Include="..\Common\GeometryGenerator.h" />
     <ClInclude Include="..\Common\MathHelper.h" />
     <ClInclude Include="Animation.h" />
-    <ClInclude Include="AxisShader.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client_Prototype.h" />
@@ -215,7 +214,6 @@
     <ClCompile Include="..\Common\GeometryGenerator.cpp" />
     <ClCompile Include="..\Common\MathHelper.cpp" />
     <ClCompile Include="Animation.cpp" />
-    <ClCompile Include="AxisShader.cpp" />
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client_Prototype.cpp" />

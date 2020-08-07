@@ -51,10 +51,15 @@ struct Vertex
 };
 struct UI_Constants
 {
-	XMFLOAT2 xmf2ScreenPos;
-	XMFLOAT2 xmf2ScreenSize;
+	XMFLOAT2 xmf2ScreenPos = XMFLOAT2(0.f,0.f);		// 화면상 좌표
+	//XMFLOAT2 xmf2ScreenSize = XMFLOAT2(0.f,0.f);	// 화면 사이즈
 
-	XMUINT2 xmn2UISize;
+	XMFLOAT2 xmf2UISize = XMFLOAT2(0.f,0.f);			// UI 사이즈
+	XMFLOAT2 xmf2Scale = XMFLOAT2(1.f, 1.f);		//
+
+	float alpha = 1.f;
+
+	float data = 0.f;
 };
 struct FrameResource
 {

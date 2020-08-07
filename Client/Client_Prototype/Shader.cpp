@@ -35,11 +35,11 @@ int CShader::Update(const CTimer& timer, ID3D12Fence * pFence, CCamera* pCamera)
 	}
 }
 
-bool CShader::Push_Object(CModelObject * pObject)
+bool CShader::Push_Object(CGameObject * pObject)
 {
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		CModelObject** m_value_pObject = m_vpObjects[i];
+		CGameObject** m_value_pObject = m_vpObjects[i];
 		if (*m_value_pObject == nullptr)
 		{
 			*m_value_pObject = pObject;
@@ -380,10 +380,10 @@ void CShader::Initialize_ShaderFileName(const WCHAR* pszShaderFileName)
 	wcscpy_s(m_filename, pszShaderFileName);
 
 	m_nObjects = MAX_OBJECT;
-	m_vpObjects = vector<CModelObject**>(m_nObjects);
+	m_vpObjects = vector<CGameObject**>(m_nObjects);
 	for (auto& ppObject : m_vpObjects)
 	{
-		ppObject = new CModelObject*;
+		ppObject = new CGameObject*;
 		*ppObject = nullptr;
 	}
 
@@ -459,7 +459,7 @@ void CShader::UpdateObjectCBs()
 	}
 }
 
-void CShader::BuildObjects(vector<CModelObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device* pDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 }
@@ -490,7 +490,7 @@ void CShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCam
 	OnPrepareRender(pd3dCommandList);
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
 	{
-		CModelObject* pObject = *(m_vpObjects[index]);
+		CGameObject* pObject = *(m_vpObjects[index]);
 
 		if (pObject == nullptr)
 			continue;

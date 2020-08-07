@@ -74,9 +74,6 @@
     <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel">
       <UniqueIdentifier>{35f2af59-f1dc-4fad-9cce-7171516368b2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Utility\06.Shader\02. AxisShader">
-      <UniqueIdentifier>{a4b63839-c008-4677-b1a2-a67f1b3cb3aa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02.Utility\04.Component\04.Model\01.LoadModel\Animation">
       <UniqueIdentifier>{04a31cb2-6e46-4d9b-a501-cc1c4dd6b2e9}</UniqueIdentifier>
     </Filter>
@@ -182,9 +179,6 @@
     <ClInclude Include="ObjectShader.h">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
     </ClInclude>
-    <ClInclude Include="AxisShader.h">
-      <Filter>02.Utility\06.Shader\02. AxisShader</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>
     </ClInclude>
@@ -271,9 +265,6 @@
     <ClCompile Include="CSocket.cpp" />
     <ClCompile Include="ObjectShader.cpp">
       <Filter>02.Utility\06.Shader\01.ObjectShader</Filter>
-    </ClCompile>
-    <ClCompile Include="AxisShader.cpp">
-      <Filter>02.Utility\06.Shader\02. AxisShader</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>02.Utility\04.Component\04.Model\00.Mesh</Filter>

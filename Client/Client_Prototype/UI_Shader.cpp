@@ -22,13 +22,13 @@ int CUI_Shader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCa
 void CUI_Shader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
 {
 	OnPrepareRender(pd3dCommandList);
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	UINT UICBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(UI_Constants));
 	UINT matCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
-	auto objectCB = m_CurrFrameResource->ObjectCB->Resource();
+	auto UICB = m_CurrFrameResource->UICB->Resource();
 	auto matCB = m_CurrFrameResource->MaterialCB->Resource();
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
 	{
-		CModelObject* pObject = (CModelObject*)*(m_vpObjects[index]);
+		CUI_Object* pObject = (CUI_Object*)*(m_vpObjects[index]);
 
 		if (pObject == nullptr)
 			continue;
@@ -41,12 +41,11 @@ void CUI_Shader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * p
 		if (gpuHandle == m_mapTextureGPUSrvHandle.end())
 			continue;
 
-		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + index * objCBByteSize;
+		D3D12_GPU_VIRTUAL_ADDRESS UICBAddress = UICB->GetGPUVirtualAddress() + index * UICBByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + index * matCBByteSize;
 
-		pd3dCommandList->SetGraphicsRootConstantBufferView(1, objCBAddress);
-		pd3dCommandList->SetGraphicsRootConstantBufferView(2, matCBAddress);
-		pd3dCommandList->SetGraphicsRootDescriptorTable(3, gpuHandle->second);
+		pd3dCommandList->SetGraphicsRootConstantBufferView(1, UICBAddress);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(2, gpuHandle->second);
 
 		pObject->Render(pd3dCommandList);
 	}
@@ -84,21 +83,10 @@ void CUI_Shader::UpdateUICB(void)
 
 D3D12_INPUT_LAYOUT_DESC CUI_Shader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 0;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
-	//정점 정보를 위한 입력 원소이다. 현재 UI Data의 구조는 차례대로 pos, uv
-
-	pd3dInputElementDescs[0] = { "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	0,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "TANGENT",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[3] = { "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0,	36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[4] = { "BORNINDEX",	0, DXGI_FORMAT_R32G32B32A32_UINT,	0,	44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[5] = { "WEIGHT",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[6] = { "TEXINDEX",	0, DXGI_FORMAT_R32_UINT,			0,	72, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	/*pd3dInputElementDescs[0] = { "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	0,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };*/
+	//정점 정보를 위한 입력 원소이다. UI Vertex의 정보를 비워서 넘긴다.  셰이더에서 다 처리할예정
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -221,10 +209,11 @@ void CUI_Shader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	UINT nNumDescriptor = 0;
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		if (*m_vpObjects[i] == nullptr)
+		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
+		if (pObject == nullptr)
 			continue;
 
-		if ((*m_vpObjects[i])->GetMaterial() != nullptr)
+		if (pObject->GetMaterial() != nullptr)
 		{
 			nNumDescriptor++;
 		}
@@ -244,7 +233,7 @@ void CUI_Shader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	CD3DX12_GPU_DESCRIPTOR_HANDLE hGPUDescriptor(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		CModelObject* pObject = *m_vpObjects[i];
+		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
 		if (pObject == nullptr)
 			continue;
 		CMaterial* pMaterial = pObject->GetMaterial();
@@ -269,7 +258,7 @@ void CUI_Shader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 
 void CUI_Shader::CreateRootSignature(ID3D12Device * pd3dDevice)
 {
-	UINT numSlot = 4;
+	UINT numSlot = 3;
 
 	CD3DX12_DESCRIPTOR_RANGE texTable;
 	texTable.Init(
@@ -278,14 +267,13 @@ void CUI_Shader::CreateRootSignature(ID3D12Device * pd3dDevice)
 		0); // register t0
 
 	// Root parameter can be a table, root descriptor or root constants.
-	CD3DX12_ROOT_PARAMETER slotRootParameter[4];
+	CD3DX12_ROOT_PARAMETER slotRootParameter[3];
 
 	// Perfomance TIP: Order from most frequent to least frequent.
 
 	slotRootParameter[0].InitAsConstantBufferView(0); // register b0 : pass
-	slotRootParameter[1].InitAsConstantBufferView(1); // register b1 : objectcb
-	slotRootParameter[2].InitAsConstantBufferView(2); // register b2 : material
-	slotRootParameter[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[1].InitAsConstantBufferView(1); // register b1 : UIcb
+	slotRootParameter[2].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// A root signature is an array of root parameters.
 
@@ -331,27 +319,17 @@ void CUI_Shader::CreateConstantBufferViews(ID3D12Device * pDevice)
 void CUI_Shader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 {
 	UpdateMainPassCB(pCamera);
-	auto currObjectCB = m_CurrFrameResource->ObjectCB.get();
-	auto currMaterialCB = m_CurrFrameResource->MaterialCB.get();
 
+	auto currUICB = m_CurrFrameResource->UICB.get();
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		CModelObject* pObject = *m_vpObjects[i];
+		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
 		if (pObject == nullptr)
 			continue;
 
 		if (pObject->GetFramesDirty() > 0)
 		{
-			currObjectCB->CopyData(i, pObject->GetObjectConstants());
-
-			CMaterial* material = pObject->GetMaterial();
-			if (material == nullptr)
-				continue;
-
-			XMMATRIX matTransform = XMLoadFloat4x4(&material->MatTransform);
-
-			MaterialConstants matConstants = material->getMaterialConst();
-			currMaterialCB->CopyData(i, matConstants);
+			currUICB->CopyData(i, pObject->Get_UIConstants());		// updateUICB
 
 			pObject->DecreaseFramesDirty();
 		}
@@ -417,11 +395,13 @@ void CUI_Shader::UpdateObjectCBs()
 
 void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
-	CUI_Timer* pUIObject = nullptr;
-	CTransform* pTransform = nullptr;
+	CUI_Object* pUIObject = nullptr;
 
-	pUIObject = new CUI_Timer;
-	pUIObject->Initialize(L"Texture_HPedge", pDevice, pd3dCommandList);
+	
+	pUIObject = new CUI_HPBar;
+	((CUI_HPBar*)pUIObject)->Initialize();
+	pUIObject->SetTarget(m_pObject_Manager->Get_Object(CObject_Manager::LAYER_PLAYER, 0));
+
 	vObjects.push_back(pUIObject);
 	Push_Object(pUIObject);
 

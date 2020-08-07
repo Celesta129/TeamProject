@@ -395,8 +395,7 @@ void CObjectShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera 
 	OnPrepareRender(pd3dCommandList);
 	for (UINT index = 0; index < m_vpObjects.size(); ++index)
 	{
-		CModelObject* pObject = *(m_vpObjects[index]);
-
+		CModelObject* pObject = dynamic_cast<CModelObject*>(*m_vpObjects[index]);
 		if (pObject == nullptr)
 			continue;
 

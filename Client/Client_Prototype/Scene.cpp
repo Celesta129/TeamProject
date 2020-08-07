@@ -4,7 +4,6 @@
 #include "Camera.h"
 
 #include "ObjectShader.h"
-#include "AxisShader.h"
 #include "UI_Shader.h"
 #include "Object_TextureShader.h"
 #include "CShader_Test.h"

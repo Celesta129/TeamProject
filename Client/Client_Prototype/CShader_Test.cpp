@@ -345,7 +345,7 @@ void Shader_Test::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
-		CModelObject* pObject = *m_vpObjects[i];
+		CModelObject* pObject = dynamic_cast<CModelObject*>(*m_vpObjects[i]);
 		if (pObject == nullptr)
 			continue;
 		
