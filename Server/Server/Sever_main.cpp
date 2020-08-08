@@ -413,7 +413,7 @@ void process_packet(int user_id, char* buf) {
 			else if (packet->count == 2) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_count = 2;
-				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1100ms, 2);
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1000ms, 2);
 				printf("2타호출 \n");
 				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 740ms, 0);
 			}
@@ -422,9 +422,38 @@ void process_packet(int user_id, char* buf) {
 			clients[user_id].playerinfo->m_state = PLAYER_STATE::ATTACK;
 		}
 		else if (packet->key == 2) { //망치
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::HAMMER_ATTACK;
+			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
+			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1330ms, 1);
+			add_timer(user_id, OP_HIT, clients[user_id].attack_time + 560ms, 0);
 
+			//피격 - 공격 상태 전환
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::ATTACK;
 		}
 		else if (packet->key == 3) { //검
+			if (packet->count == 1) {
+				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::SWORD_ATTACK;
+				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
+				clients[user_id].attack_count = 1;
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 500ms, 1);
+				printf("검1타호출 \n");
+				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 440ms, 0);
+			}
+			else if (packet->count == 2) {
+				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::SWORD_ATTACK;
+				clients[user_id].attack_count = 2;
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1070ms, 2);
+				printf("검2타호출 \n");
+				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 600ms, 0);
+			}
+
+			//피격 - 공격 상태 전환
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::ATTACK;
+		}
+		else if (packet->key == 4) {
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::SNACK_ATTACK;
+			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
+			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 2s, 1);
 
 		}
 
@@ -489,6 +518,29 @@ void process_packet(int user_id, char* buf) {
 		}
 
 
+	}
+		break;
+	case CS_GUARD: {
+		cs_packet_motion* packet = reinterpret_cast<cs_packet_motion*>(buf);
+
+		if (packet->key == 1) {//가드활성화
+			clients[user_id].playerinfo->m_guard = true;
+			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::GUARD;
+			cout << "가드 활성화\n";
+			
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::DEFENSE;
+		}
+		else {//가드 비활성화
+			clients[user_id].playerinfo->m_guard = false;
+			add_timer(user_id, OP_FREE, chrono::high_resolution_clock::now() + 840ms, 1);
+			clients[user_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
+			cout << "가드 비활성화\n";
+		}
+
+		for (auto& cl : clients) {
+			if (true == cl.m_connected)
+				send_motion_packet(cl.m_id, user_id);
+		}
 	}
 		break;
 	default:
@@ -849,6 +901,25 @@ void timer_process()
 			clients[ev.obj_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
 			clients[ev.obj_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
 			clients[ev.obj_id].attack_count = 0;
+
+			//아이템 사용
+			if (clients[ev.obj_id].playerinfo->m_weapon_type != -1) {
+				clients[ev.obj_id].playerinfo->m_weapon_count -= 1;
+				if (clients[ev.obj_id].playerinfo->m_weapon_count <= 0) {
+					char type = clients[ev.obj_id].playerinfo->m_weapon_type;
+					char index = clients[ev.obj_id].playerinfo->m_weapon_index;
+
+					for (int i = 0; i < MAX_USER; ++i) {
+						if (clients[i].m_connected == true) {
+							send_unpick_weapon_packet(i, ev.obj_id, type, index);
+						}
+					}
+
+					clients[ev.obj_id].playerinfo->m_weapon_index = -1;
+					clients[ev.obj_id].playerinfo->m_weapon_type = -1;
+				}
+			}
+			
 		}
 		break;
 		case OP_HIT:
@@ -874,6 +945,8 @@ void timer_process()
 		{
 			clients[ev.obj_id].playerinfo->m_hp = 100;
 			clients[ev.obj_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
+			clients[ev.obj_id].playerinfo->m_Animation_index = ANIM_INDEX::GETUP;
+			add_timer(ev.obj_id, OP_FREE, high_resolution_clock::now() + 2s, 1);
 
 			for (int j = 0; j < MAX_USER; ++j) {
 				if (clients[j].m_connected == true) {
@@ -920,9 +993,11 @@ void timer_process()
 			for (int i = 0; i < MAX_USER; ++i) {
 				if (clients[i].playerinfo->m_flag) {
 					send_win_flag_packet(i);
+					clients[i].playerinfo->m_Animation_index = ANIM_INDEX::WIN;
 				}
 				else {
 					send_lose_flag_packet(i);
+					clients[i].playerinfo->m_Animation_index = ANIM_INDEX::LOSE;
 				}
 			}
 
@@ -1031,11 +1106,11 @@ void client_update_process()
 								}
 
 								//사망후 애니메이션
-								//clients[i].playerinfo->m_Animation_index = ANIM_INDEX::DEATH
+								clients[i].playerinfo->m_Animation_index = ANIM_INDEX::ANI_STUN;
 								std::cout << i << "Player 기절\n";
 								clients[i].playerinfo->m_state = PLAYER_STATE::STUN;
-								//타이머로 10초뒤에 부활
-								add_timer(i, OP_REVIVE, high_resolution_clock::now() + 10000ms);
+								//타이머로 5초뒤에 부활
+								add_timer(i, OP_REVIVE, high_resolution_clock::now() + 5000ms);
 
 							}
 						}

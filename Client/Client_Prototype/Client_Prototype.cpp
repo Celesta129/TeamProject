@@ -387,7 +387,7 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 						auto t = find_if(key_buffer.begin(), key_buffer.end(), [&key, &start](const KEY& k) {
 							auto temp1 = chrono::duration_cast<chrono::milliseconds>(k.time - start).count();
 							if (temp1 >= chrono::duration_cast<chrono::milliseconds>(0ms).count()) {
-								if (temp1 < chrono::duration_cast<chrono::milliseconds>(800ms).count()) {
+								if (temp1 < chrono::duration_cast<chrono::milliseconds>(600ms).count()) {
 									return true;
 								}
 							}
@@ -403,7 +403,44 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 			}
 		}
 		else {	//맨손아닐때
+			if (type == 0) { // 검
+				if (attack_count < 2) {
+					KEY temp;
+					temp.key = KEY_A;
+					temp.time = chrono::high_resolution_clock::now();
+					if (attack_count == 0) {
+						attack_time = chrono::high_resolution_clock::now();
+						m_Player->Set_status(PLAYER_STATE::ATTACK);
+					}
+					key_buffer.push_back(temp);
 
+					bool key = KEY_A;
+					chrono::high_resolution_clock::time_point start = attack_time;
+
+					auto t = find_if(key_buffer.begin(), key_buffer.end(), [&key, &start](const KEY& k) {
+						auto temp1 = chrono::duration_cast<chrono::milliseconds>(k.time - start).count();
+						if (temp1 >= chrono::duration_cast<chrono::milliseconds>(0ms).count()) {
+							if (temp1 < chrono::duration_cast<chrono::milliseconds>(600ms).count()) {
+								return true;
+							}
+						}
+						return false;
+					});
+
+					if (t != key_buffer.end()) {
+						attack_count += 1;
+						m_pSocket->sendPacket(CS_ATTACK, 3, attack_count, 0);
+					}
+				}
+			}
+			else if (type == 1) { //망치
+				m_pSocket->sendPacket(CS_ATTACK, 2, attack_count, 0);
+				cout << "망치공격" << endl;
+			}
+			else if (type == 2) { // 과자
+				m_pSocket->sendPacket(CS_ATTACK, 4, attack_count, 0);
+				cout << "과자 공격" << endl;
+			}
 		}
 		attack_state = true;
 	}
@@ -412,6 +449,15 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 		attack_state = false;
 	}
 
+	if (GetAsyncKeyState(0x53) & 0x8000 && !guard_state) {
+		guard_state = true;
+		m_pSocket->sendPacket(CS_GUARD, 1, 0, 0);
+	}
+	if (GetAsyncKeyState(0x53) == 0 && guard_state)
+	{
+		guard_state = false;
+		m_pSocket->sendPacket(CS_GUARD, 0, 0, 0);
+	}
 
 
 	////일정시간동안 아무키도 안눌리면 00 초기화
@@ -486,6 +532,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		int other_id = p_motion->id;
 
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_motion->ani_index);
+		printf("%d\n", p_motion->ani_index);
 
 	}
 		break;
@@ -541,6 +588,9 @@ void CGameFramework_Client::processPacket(char* buf)
 		else {
 			CWeapon* weapon = (CWeapon*)(*pvWeapon)[weapon_index];
 			weapon->set_Player(m_pScene->getplayer(other_id));
+			m_pScene->getplayer(other_id)->SetWeaponType(weapon_type);
+			m_pScene->getplayer(other_id)->SetWeaponIndex(weapon_index);
+			m_pScene->getplayer(other_id)->SetWeapon_grab(true);
 		}
 	}
 		break;
@@ -567,8 +617,18 @@ void CGameFramework_Client::processPacket(char* buf)
 	{
 		sc_packet_unpick_weapon* p_unpick_weapon = reinterpret_cast<sc_packet_unpick_weapon*>(buf);
 		int other_id = p_unpick_weapon->id;
-		int type = p_unpick_weapon->weapon_type;
-		int index = p_unpick_weapon->weapon_index;
+		int weapon_type = p_unpick_weapon->weapon_type;
+		int weapon_index = p_unpick_weapon->weapon_index;
+
+		vector<CGameObject*> *pvWeapon = CObject_Manager::GetInstance()->Get_Layer(CObject_Manager::LAYER_WEAPON);
+
+		CWeapon* weapon = (CWeapon*)(*pvWeapon)[weapon_index];
+		weapon->set_Player(nullptr);
+
+		m_pScene->getplayer(other_id)->SetWeaponType(weapon_type);
+		m_pScene->getplayer(other_id)->SetWeaponIndex(weapon_index);
+		m_pScene->getplayer(other_id)->SetWeapon_grab(false);
+
 	}
 		break;
 	case SC_TIMER:

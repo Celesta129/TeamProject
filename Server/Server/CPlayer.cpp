@@ -39,6 +39,7 @@ CPlayer::CPlayer()
 	m_collide_flag = false;
 	m_collide_weapon = false;
 	m_hitted = false;
+	m_guard = false;
 }
 
 

@@ -454,6 +454,33 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/hit_Anim.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_hit", pComponent);
 	
+	pComponent = new LoadModel("resources/fbx/character_baby_sword_attack.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_sword_attack", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_hammer_attack.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_hammer_attack", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_snack.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_snack", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_block.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_block", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_guard.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_guard", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_stun.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_stun", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_getup.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_getup", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_baby_win.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_win", pComponent);
+
+	pComponent = new LoadModel("resources/fbx/character_Baby_lose.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Component_Model_lose", pComponent);
+
 	pComponent = new LoadModel("resources/fbx/character_baby_pickup.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_pick_up", pComponent);
 

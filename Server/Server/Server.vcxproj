@@ -122,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="CObject.cpp" />
     <ClCompile Include="CPlayer.cpp" />
+    <ClCompile Include="CRoom.cpp" />
     <ClCompile Include="CWeapon.cpp" />
     <ClCompile Include="Sever_main.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -129,6 +130,7 @@
   <ItemGroup>
     <ClInclude Include="CObject.h" />
     <ClInclude Include="CPlayer.h" />
+    <ClInclude Include="CRoom.h" />
     <ClInclude Include="CWeapon.h" />
     <ClInclude Include="def.h" />
     <ClInclude Include="pch.h" />

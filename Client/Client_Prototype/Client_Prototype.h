@@ -39,6 +39,7 @@ public:
 	//좌우상하
 	bool movement_state[4] = { false, false, false, false };
 	bool attack_state = false;
+	bool guard_state = false;
 	char attack_count = 0;
 	chrono::high_resolution_clock::time_point attack_time;
 

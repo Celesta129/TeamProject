@@ -17,7 +17,11 @@ enum ANIM_INDEX {
 	SWORD_ATTACK,
 	SNACK_ATTACK,
 	BLOCK_ATTACK,
-	GUARD
+	GUARD,
+	ANI_STUN,
+	GETUP,
+	WIN,
+	LOSE
 };
 
 class CPlayer
@@ -43,6 +47,7 @@ public:
 
 	volatile bool m_flag;
 	volatile bool m_dashed;
+	volatile bool m_guard;
 
 	volatile bool m_hitted;
 	volatile bool m_collide_flag;
