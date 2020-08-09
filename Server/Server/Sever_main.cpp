@@ -905,7 +905,7 @@ void timer_process()
 			//아이템 사용
 			if (clients[ev.obj_id].playerinfo->m_weapon_type != -1) {
 				clients[ev.obj_id].playerinfo->m_weapon_count -= 1;
-				if (clients[ev.obj_id].playerinfo->m_weapon_count <= 0) {
+				if (clients[ev.obj_id].playerinfo->m_weapon_count < 0) {
 					char type = clients[ev.obj_id].playerinfo->m_weapon_type;
 					char index = clients[ev.obj_id].playerinfo->m_weapon_index;
 
