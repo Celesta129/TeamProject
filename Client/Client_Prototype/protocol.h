@@ -42,6 +42,8 @@ constexpr int SC_GUARD = 13;
 constexpr int SC_WIN = 21;
 constexpr int SC_LOSE = 22;
 
+constexpr int SC_WAITROOM = 31;
+constexpr int SC_START = 32;
 
 #pragma pack(push ,1)
 struct cs_packet_connect {
@@ -92,6 +94,18 @@ struct sc_packet_login_ok {
 	char type;
 	int id;
 	float posX, posY, posZ;
+};
+
+struct sc_packet_waitroom {
+	char size;
+	char type;
+	char id;
+	char name[15];
+};
+
+struct sc_packet_start {
+	char size;
+	char type;
 };
 
 struct sc_packet_enter {

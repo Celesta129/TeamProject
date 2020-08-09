@@ -315,6 +315,29 @@ void send_guard_packet(int user_id, int mover, char flag) {
 	send_packet(user_id, &p);
 }
 
+void send_waitroom_packet(int user_id, int o_id) {
+	sc_packet_waitroom p;
+	p.size = sizeof(p);
+	p.type = SC_WAITROOM;
+	p.id = o_id;
+	strcpy_s(p.name, clients[o_id].player_id);
+
+	send_packet(user_id, &p);
+}
+
+void stay_waitroom(int user_id) {
+	clients[user_id].m_connected = true;
+
+	for (int i = 0; i < MAX_USER; i++) {
+		if (true == clients[i].m_connected)
+			if (user_id != i) {
+				send_enter_packet(user_id, i);
+				send_enter_packet(i, user_id);
+			}
+	}
+}
+
+
 void send_motion_packet(int user_id, int mover) {
 	sc_packet_motion p;
 	p.id = mover;
@@ -334,6 +357,8 @@ void process_packet(int user_id, char* buf) {
 
 		strcpy_s(clients[user_id].player_id, packet->id);
 		printf("%s(%d) 접속완료 \n", clients[user_id].player_id, user_id);
+
+		
 
 		send_connected_packet(user_id);
 
@@ -1036,13 +1061,17 @@ void timer_process()
 		case OP_TIME:
 		{
 			g_timer--;
-			//cout << g_timer << "초" << endl;
 
 			if (g_timer > 0) {
 				add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
 			}
 			else {
 				add_timer(0, OP_END, chrono::high_resolution_clock::now());
+			}
+
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true)
+					send_timer_packet(i, g_timer);
 			}
 		}
 			break;
