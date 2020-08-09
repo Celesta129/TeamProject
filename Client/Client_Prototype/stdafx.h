@@ -78,3 +78,7 @@ const int NUM_FRAME_RESOURCE = 3;		// for d3dUtil:: extern const int NUM_FRAMERE
 #include "Functor.h"
 
 #define KEY_A 10
+#define STATE_LOGIN 1
+#define STATE_WAITROOM 2
+#define STATE_GAME 3
+#define STATE_GAMEEND 4

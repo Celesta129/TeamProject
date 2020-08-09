@@ -418,9 +418,9 @@ void process_packet(int user_id, char* buf) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
 				clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
 				clients[user_id].attack_count = 1;
-				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 370ms, 1);
+				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 380ms, 1);	//370
 				printf("1타호출 \n");
-				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 70ms, 0);
+				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 80ms, 0);		//70
 			}
 			else if (packet->count == 2) {
 				clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::BASIC_ATTACK;
