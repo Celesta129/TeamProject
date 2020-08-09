@@ -39,12 +39,14 @@ public:
 	int GetWeapontype() { return weapon_type; }
 	int Get_HP() { return m_hp; }
 	char Get_Status() { return m_status; }
+	bool Get_guard() { return m_guard; }
 
 	void SetWeapon_grab(bool flag) { weapon_grab = flag; }
 	void SetWeaponIndex(int index) { weapon_index = index; }
 	void SetWeaponType(int type) { weapon_type = type; }
 	void Set_HP(int hp) { m_hp = hp; }
 	void Set_status(char status) { m_status = status; }
+	void Set_guard(bool flag) { m_guard = flag; }
 
 	
 	XMFLOAT4X4 get_Hand(void);
@@ -64,6 +66,7 @@ private:
 	int weapon_type = -1;
 	int weapon_index = -1;
 	bool weapon_grab = false;
+	bool m_guard = false;
 	char m_status = PLAYER_STATE::NORMAL;
 
 };
