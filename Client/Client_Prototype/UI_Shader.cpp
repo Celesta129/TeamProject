@@ -504,6 +504,7 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 
 	pUIObject = new CUI_ReadyStart;
 	pUIObject->Initialize();
+	pUIObject->SetInvisible(true);
 	vObjects.push_back(pUIObject);
 	Push_Object(pUIObject, PSO_ETC);
 

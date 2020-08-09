@@ -86,7 +86,7 @@ protected:
 	bool m_bMinimized = false;
 	bool m_bMaximized = false;		// 최대화됐는가?
 	bool m_bResizing = false; // 창 테두리를 끌고있는가?
-	bool m_bFullScreenState = false;	// 전체화면 활성화 여부
+	BOOL m_bFullScreenState = false;	// 전체화면 활성화 여부
 
 	bool m_b4xMsaaState = false;
 	UINT m_n4xMsaaQuality = 0;

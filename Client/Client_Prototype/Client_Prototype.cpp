@@ -195,6 +195,8 @@ int CGameFramework_Client::Run()
 {
 	MSG msg = { 0 };
 
+	
+
 	m_Timer.Reset();
 
 	RecvThread = thread(process_data);

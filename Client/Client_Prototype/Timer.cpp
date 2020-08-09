@@ -5,7 +5,8 @@
 
 CTimer::CTimer()
 	: m_SecondsPerCount(0.0), m_DeltaTime(-1.0), m_BaseTime(0),
-	m_PausedTime(0), m_PrevTime(0), m_CurrTime(0), m_bStopped(false)
+	m_PausedTime(0), m_PrevTime(0),
+	m_StopTime(0), m_CurrTime(0), m_bStopped(false)
 {
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
@@ -20,6 +21,10 @@ CTimer::~CTimer()
 
 void CTimer::Tick(float fFPS)
 {
+	__int64 currTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+	m_CurrTime = currTime;
+	m_DeltaTime = (m_CurrTime - m_PrevTime)*m_SecondsPerCount;
 	if (m_bStopped)
 	{
 		m_DeltaTime = 0.0;
