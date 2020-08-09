@@ -12,7 +12,10 @@ public:
 	void Set_Time(int time);
 
 	virtual UI_Constants Get_UIConstants(void);
+	virtual int Update(float fTimeElapsed);
+
+	virtual void Render(ID3D12GraphicsCommandList * pCommandList);
 private:
-	int m_iTime = 0;
+	float m_fTime = 0.f;
 };
 
