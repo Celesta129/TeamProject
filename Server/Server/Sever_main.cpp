@@ -30,7 +30,7 @@ gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
 
 enum ENUMOP {
 	OP_RECV, OP_SEND, OP_ACCEPT,
-	OP_FREE, OP_HIT, OP_PICK, OP_REVIVE, OP_TIME, OP_FLAG_TIME, OP_END, OP_RESTART
+	OP_FREE, OP_HIT, OP_PICK, OP_WEAPON_ATTACK, OP_REVIVE, OP_TIME, OP_FLAG_TIME, OP_END, OP_RESTART
 };
 
 struct event_type {
@@ -425,6 +425,7 @@ void process_packet(int user_id, char* buf) {
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::HAMMER_ATTACK;
 			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
 			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1330ms, 1);
+			add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 1340ms, 1);
 			add_timer(user_id, OP_HIT, clients[user_id].attack_time + 560ms, 0);
 
 			//피격 - 공격 상태 전환
@@ -454,6 +455,7 @@ void process_packet(int user_id, char* buf) {
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::SNACK_ATTACK;
 			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
 			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 2s, 1);
+			add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 2010ms, 1);
 
 		}
 
@@ -487,7 +489,7 @@ void process_packet(int user_id, char* buf) {
 					clients[user_id].playerinfo->m_weapon_count = 1;
 				}
 				else if (type == WEAPON_BLOCK) {
-					clients[user_id].playerinfo->m_weapon_count = 1;
+					clients[user_id].playerinfo->m_weapon_count = 2;
 				}
 
 				add_timer(user_id, OP_FREE, chrono::high_resolution_clock::now() + 600ms);
@@ -900,26 +902,7 @@ void timer_process()
 
 			clients[ev.obj_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
 			clients[ev.obj_id].playerinfo->m_Animation_index = ANIM_INDEX::IDLE;
-			clients[ev.obj_id].attack_count = 0;
-
-			//아이템 사용
-			if (clients[ev.obj_id].playerinfo->m_weapon_type != -1) {
-				clients[ev.obj_id].playerinfo->m_weapon_count -= 1;
-				if (clients[ev.obj_id].playerinfo->m_weapon_count < 0) {
-					char type = clients[ev.obj_id].playerinfo->m_weapon_type;
-					char index = clients[ev.obj_id].playerinfo->m_weapon_index;
-
-					for (int i = 0; i < MAX_USER; ++i) {
-						if (clients[i].m_connected == true) {
-							send_unpick_weapon_packet(i, ev.obj_id, type, index);
-						}
-					}
-
-					clients[ev.obj_id].playerinfo->m_weapon_index = -1;
-					clients[ev.obj_id].playerinfo->m_weapon_type = -1;
-				}
-			}
-			
+			clients[ev.obj_id].attack_count = 0;			
 		}
 		break;
 		case OP_HIT:
@@ -940,6 +923,28 @@ void timer_process()
 		}
 		break;
 		case OP_PICK:
+			break;
+		case OP_WEAPON_ATTACK:
+		{
+			//아이템 사용
+			if (clients[ev.obj_id].playerinfo->m_weapon_type != -1) {
+				clients[ev.obj_id].playerinfo->m_weapon_count -= 1;
+				if (clients[ev.obj_id].playerinfo->m_weapon_count <= 0) {
+					char type = clients[ev.obj_id].playerinfo->m_weapon_type;
+					char index = clients[ev.obj_id].playerinfo->m_weapon_index;
+
+					g_weapon_list[index].owner = -1;
+					clients[ev.obj_id].playerinfo->m_weapon_index = -1;
+					clients[ev.obj_id].playerinfo->m_weapon_type = -1;
+
+					for (int i = 0; i < MAX_USER; ++i) {
+						if (clients[i].m_connected == true) {
+							send_unpick_weapon_packet(i, ev.obj_id, type, index);
+						}
+					}
+				}
+			}
+		}
 			break;
 		case OP_REVIVE:
 		{

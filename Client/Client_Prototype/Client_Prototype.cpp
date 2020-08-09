@@ -624,9 +624,10 @@ void CGameFramework_Client::processPacket(char* buf)
 
 		CWeapon* weapon = (CWeapon*)(*pvWeapon)[weapon_index];
 		weapon->set_Player(nullptr);
+		weapon->set_Invisible(true);
 
-		m_pScene->getplayer(other_id)->SetWeaponType(weapon_type);
-		m_pScene->getplayer(other_id)->SetWeaponIndex(weapon_index);
+		m_pScene->getplayer(other_id)->SetWeaponType(-1);
+		m_pScene->getplayer(other_id)->SetWeaponIndex(-1);
 		m_pScene->getplayer(other_id)->SetWeapon_grab(false);
 
 	}
