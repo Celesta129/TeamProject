@@ -29,7 +29,7 @@ void CWeapon::set_Player(CPlayer * pPlayer)
 
 			break;
 		case WEAPON_SNACK:
-			
+			scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
 			break;
 		case FLAG:
 			pos = XMFLOAT3(5.f, -33.f, -14.f);

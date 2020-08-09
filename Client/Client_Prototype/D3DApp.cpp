@@ -239,6 +239,21 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_KEYUP:
+		if (wParam == VK_F9)
+		{
+			m_dxgiSwapChain->GetFullscreenState(&m_bFullScreenState, NULL);
+			m_dxgiSwapChain->SetFullscreenState(!m_bFullScreenState, NULL);
+			DXGI_MODE_DESC dxgiTargetParameters;
+			dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			dxgiTargetParameters.Width = m_ClientWidth;
+			dxgiTargetParameters.Height = m_ClientHeight;
+			dxgiTargetParameters.RefreshRate.Numerator = 60;
+			dxgiTargetParameters.RefreshRate.Denominator = 1;
+			dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+			dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+			m_dxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+			OnResize();
+		}
 		if (wParam == VK_ESCAPE)
 		{
 			PostQuitMessage(0);
