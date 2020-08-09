@@ -41,7 +41,9 @@ public:
 	bool getAnimStop(void) {
 		return m_bAnimStop;
 	}
-
+	float getNowTime(void) {
+		return m_Animtime;
+	}
 protected:
 	void Animate(const float fTimeElapsed);
 protected:
