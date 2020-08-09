@@ -954,10 +954,10 @@ void timer_process()
 								}
 							}
 
-							clients[i].playerinfo->m_Animation_index = ANIM_INDEX::ANI_STUN;
-							std::cout << i << "Player 기절\n";
-							clients[i].playerinfo->m_state = PLAYER_STATE::STUN;
-							add_timer(i, OP_REVIVE, high_resolution_clock::now() + 5000ms);
+							clients[trg].playerinfo->m_Animation_index = ANIM_INDEX::ANI_STUN;
+							std::cout << trg << "Player 기절\n";
+							clients[trg].playerinfo->m_state = PLAYER_STATE::STUN;
+							add_timer(trg, OP_REVIVE, high_resolution_clock::now() + 5000ms);
 						}
 						else { // 이외의 장비로 맞았을때
 							clients[trg].playerinfo->last_hit = i;

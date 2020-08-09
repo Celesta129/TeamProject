@@ -9,7 +9,7 @@ constexpr int WEAPON_SNACK = 2;
 constexpr int WEAPON_BLOCK = 3;
 constexpr int WEAPON_FLAG = 4;
 
-constexpr int FLAG_LIMIT_TIME = 15;
+constexpr int FLAG_LIMIT_TIME = 20;
 
 constexpr int MAX_ROOM_NAME_LEN = 10;
 constexpr int MAX_ROOM_USER = 8;
