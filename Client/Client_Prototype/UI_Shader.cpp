@@ -230,6 +230,10 @@ void CUI_Shader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int i
 		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS_HPBar");
 		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
 		break;
+	case PSO_Timer:
+		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS_Timer");
+		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
+		break;
 	default:
 		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS");
 		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
@@ -520,11 +524,11 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 	pUIObject->Initialize();
 	vObjects.push_back(pUIObject);
 	Push_Object(pUIObject, PSO_ETC);
-/*
-	pUIObject = new CUI_WinLose;
+
+	pUIObject = new CUI_Timer;
 	pUIObject->Initialize();
 	vObjects.push_back(pUIObject);
-	Push_Object(pUIObject, PSO_ETC);*/
+	Push_Object(pUIObject, PSO_Timer);
 }
 
 void CUI_Shader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)

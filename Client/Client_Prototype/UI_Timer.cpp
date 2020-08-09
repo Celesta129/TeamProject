@@ -20,7 +20,7 @@ HRESULT CUI_Timer::Initialize(void)
 	Add_Material(L"Texture_Number");
 
 
-	float Width = 48.f * 5.f;
+	float Width = 48.f * 4.f;
 	float Height = 48.f;
 
 	m_xmf2Pos = XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
@@ -31,13 +31,29 @@ HRESULT CUI_Timer::Initialize(void)
 
 void CUI_Timer::Set_Time(int time)
 {
-	m_iTime = time;
+	m_fTime = time;
 }
 
 UI_Constants CUI_Timer::Get_UIConstants(void)
 {
 	UI_Constants result = CUI_Object::Get_UIConstants();
-	result.data = m_iTime;
+	result.data = m_fTime;
 
 	return result;
+}
+
+int CUI_Timer::Update(float fTimeElapsed)
+{
+	m_fTime += fTimeElapsed;
+	DirtyFrames();
+	return CUI_Object::Update(fTimeElapsed);
+}
+
+void CUI_Timer::Render(ID3D12GraphicsCommandList * pCommandList)
+{
+	if (m_bInvisible)
+	{
+		pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pCommandList->DrawInstanced(6*4, 1, 0, 0);
+	}
 }

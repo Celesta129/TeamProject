@@ -45,6 +45,7 @@ private:
 	enum PSO_INDEX {
 		PSO_Edge,
 		PSO_HPBar,
+		PSO_Timer,
 		PSO_ETC,
 		PSO_END
 	};
