@@ -25,7 +25,7 @@ public:
 	virtual int Update(const CTimer& timer, ID3D12Fence* pFence, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 
-	bool Push_Object(CGameObject* pObject);
+	virtual bool Push_Object(CGameObject* pObject, UINT PSOindex = 0);
 	vector<CGameObject**>& Get_Vector(void) {
 		return m_vpObjects;
 	};

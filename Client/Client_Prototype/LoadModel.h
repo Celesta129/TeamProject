@@ -74,6 +74,9 @@ public:
 	UINT getNumAnimations(void) {
 		return m_vAnimation.size();
 	}
+	float Get_NowTime(void) {
+		return m_vAnimation[m_currAnimIndex].Get_NowTime();
+	}
 private:
 	void ReadNodeHeirarchy(const UINT& Animindex, float AnimationTime, const aiNode* pNode, const XMMATRIX& ParentTransform);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string& NodeName);

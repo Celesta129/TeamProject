@@ -11,6 +11,7 @@ public:
 	CUI_Object();
 	~CUI_Object();
 public:
+	virtual HRESULT Initialize(void);
 	virtual HRESULT Initialize(const wstring& texturetag);
 
 	virtual int Update(float fTimeElapsed);
@@ -26,53 +27,24 @@ public:
 	XMFLOAT2 GetSize(void);
 
 	virtual UI_Constants Get_UIConstants(void);
+
+	void SetMaterialIndex(UINT index);
 	CMaterial* GetMaterial(void);
+	vector<CMaterial*>* GetAllMaterial(void) {
+		return &pMaterial;
+	};
 
 	virtual void SetTarget(CGameObject* pTarget) {};
 protected:
-	XMFLOAT2 m_xmf2Pos = XMFLOAT2(0.f, 0.f);
+	void Add_Material(const wstring& texturetag);
+
+	XMFLOAT2 m_xmf2Pos = XMFLOAT2(0.f, 0.f);		// pos는 y가 아래서부터 0임.(셰이더코드)
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(100.f, 100.f);
 
-	CMaterial* pMaterial = nullptr;
+	vector<CMaterial*> pMaterial;
+	UINT m_nCurrMatIndex = 0;
 
 	bool m_bInvisible = true;
 };
 
-class CUI_HPBar
-	: public CUI_Object
-{
-public:
-	CUI_HPBar();
-	~CUI_HPBar();
-public:
-	virtual HRESULT Initialize(void);
-
-	virtual int Update(float fTimeElapsed);
-	//virtual void Render(ID3D12GraphicsCommandList* pCommandList);
-
-	virtual UI_Constants Get_UIConstants(void);
-
-public:
-	virtual void SetTarget(CGameObject* pTarget);
-private:
-	CPlayer* m_pTarget = nullptr;
-	float m_fHP = 0.f;
-};
-
-class CUI_Timer :
-	public CModelObject
-{
-public:
-	CUI_Timer();
-	virtual ~CUI_Timer();
-
-public:
-	virtual HRESULT Initialize(const wstring& texturetag, ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-
-	virtual int Update(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pCommandList);
-
-private:
-	float m_fTimer = 10.f;
-};
 

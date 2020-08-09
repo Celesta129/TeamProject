@@ -22,6 +22,8 @@ public:
 	float					m_fNow_time = 0.f;  //현재 프레임
 	float					m_fPosible_skip = 0.f; //애니메이션을 강제 종료하고 다음 애니메이션 실행 가능한 프레임
 
+public:
+	float Get_NowTime(void) { return m_fNow_time; }
 private:
 	aiAnimation* m_pAnimation = nullptr;
 

@@ -1,6 +1,11 @@
 #include "UI_Shader.h"
 
 #include "UIObject.h"
+#include "UI_HPBar.h"
+#include "UI_HPBackground.h"
+#include "UI_ReadyStart.h"
+#include "UI_Timer.h"
+#include "UI_WinLose.h"
 
 CUI_Shader::CUI_Shader()
 {
@@ -22,34 +27,46 @@ int CUI_Shader::Update(const CTimer & timer, ID3D12Fence * pFence, CCamera * pCa
 void CUI_Shader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT64 nFenceValue)
 {
 	OnPrepareRender(pd3dCommandList);
-	UINT UICBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(UI_Constants));
-	UINT matCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
-	auto UICB = m_CurrFrameResource->UICB->Resource();
-	auto matCB = m_CurrFrameResource->MaterialCB->Resource();
-	for (UINT index = 0; index < m_vpObjects.size(); ++index)
+	
+
+	for (int pso = 0; pso < PSO_END; pso++)
 	{
-		CUI_Object* pObject = (CUI_Object*)*(m_vpObjects[index]);
+		pd3dCommandList->SetPipelineState(m_pPSOs[pso].Get());
 
-		if (pObject == nullptr)
-			continue;
+		auto passCB = m_CurrFrameResource->PassCB->Resource();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(0, passCB->GetGPUVirtualAddress());
 
-		CMaterial* pMaterial = pObject->GetMaterial();
-		if (pMaterial == nullptr)
-			continue;
+		UINT UICBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(UI_Constants));
+		UINT matCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
+		auto UICB = m_CurrFrameResource->UICB->Resource();
+		auto matCB = m_CurrFrameResource->MaterialCB->Resource();
 
-		GPUSRVHANDLEMAP gpuHandle = m_mapTextureGPUSrvHandle.find(pMaterial->Name);
-		if (gpuHandle == m_mapTextureGPUSrvHandle.end())
-			continue;
+		for (UINT index = 0; index < m_vObjectVector[pso].size(); index++)
+		{
+			CUI_Object* pObject = (CUI_Object*)*(m_vObjectVector[pso][index]);
 
-		D3D12_GPU_VIRTUAL_ADDRESS UICBAddress = UICB->GetGPUVirtualAddress() + index * UICBByteSize;
-		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + index * matCBByteSize;
+			if (pObject == nullptr)
+				continue;
 
-		pd3dCommandList->SetGraphicsRootConstantBufferView(1, UICBAddress);
-		pd3dCommandList->SetGraphicsRootDescriptorTable(2, gpuHandle->second);
+			CMaterial* pMaterial = pObject->GetMaterial();
+			if (pMaterial == nullptr)
+				continue;
 
-		pObject->Render(pd3dCommandList);
+			GPUSRVHANDLEMAP gpuHandle = m_mapTextureGPUSrvHandle.find(pMaterial->Name);
+			if (gpuHandle == m_mapTextureGPUSrvHandle.end())
+				continue;
+
+		
+
+			D3D12_GPU_VIRTUAL_ADDRESS UICBAddress = UICB->GetGPUVirtualAddress() + (pso * m_vObjectVector[pso].size() + index)  * UICBByteSize;
+
+			pd3dCommandList->SetGraphicsRootConstantBufferView(1, UICBAddress);
+			pd3dCommandList->SetGraphicsRootDescriptorTable(2, gpuHandle->second);
+
+			pObject->Render(pd3dCommandList);
+		}
 	}
-
+	
 	m_CurrFrameResource->Fence = nFenceValue;
 }
 
@@ -57,7 +74,19 @@ void CUI_Shader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * 
 {
 	CShader::Initialize_ShaderFileName(pszShaderFileName);
 
-	CreatePipeLineParts(1);
+	m_nObjects = MAX_OBJECT * PSO_END;
+	
+	for (int i = 0; i < PSO_END; ++i)
+	{
+		m_vObjectVector[i] = vector<CGameObject**>(m_nObjects / PSO_END);
+		for (auto& ppObject : m_vObjectVector[i])
+		{
+			ppObject = new CGameObject*;
+			*ppObject = nullptr;
+		}
+	}
+
+	CreatePipeLineParts(PSO_END);
 	CreateRootSignature(pDevice);
 	BuildObjects(vObjects, pDevice, pd3dCommandList);
 	CreateDescriptorHeaps(pDevice);
@@ -65,7 +94,22 @@ void CUI_Shader::Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * 
 	CreateFrameResources(pDevice);
 	CreateConstantBufferViews(pDevice);
 
-	CreatePSO(pDevice, 1, PSO_OBJECT);
+	for(int i = 0; i < PSO_END; i++)
+		CreatePSO(pDevice, 1, i);
+}
+
+bool CUI_Shader::Push_Object(CGameObject * pObject, UINT PSOindex)
+{
+	for (UINT i = 0; i < m_vObjectVector[PSOindex].size(); ++i)
+	{
+		CGameObject** m_value_pObject = m_vObjectVector[PSOindex][i];
+		if (*m_value_pObject == nullptr)
+		{
+			*m_value_pObject = pObject;
+			return true;
+		}
+	}
+	return false;
 }
 
 void CUI_Shader::LoadTextures(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
@@ -102,8 +146,8 @@ D3D12_RASTERIZER_DESC CUI_Shader::CreateRasterizerState()
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	//d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
-	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	//d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
@@ -169,18 +213,30 @@ void CUI_Shader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int i
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	::ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
-	//
-	// PSO for opaque objects.
-	//
+
 	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	psoDesc.InputLayout = CreateInputLayout();
-	psoDesc.pRootSignature = m_RootSignature[index].Get();
+	psoDesc.pRootSignature = m_RootSignature[0].Get();
 
-	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS");
-	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
 
+	switch (index)
+	{
+	case PSO_Edge:
+		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS");
+		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
+	
+		break;
+	case PSO_HPBar:
+		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS_HPBar");
+		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
+		break;
+	default:
+		psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, "VS");
+		psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
+	}
+	
 	psoDesc.RasterizerState = CreateRasterizerState();
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CreateBlendState();
 	psoDesc.DepthStencilState = CreateDepthStencilState();
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -191,6 +247,7 @@ void CUI_Shader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int i
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	ThrowIfFailed(pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(m_pPSOs[index].GetAddressOf())));
+
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
@@ -200,24 +257,29 @@ void CUI_Shader::CreateFrameResources(ID3D12Device * pd3dDevice)
 	for (int i = 0; i < NUM_FRAME_RESOURCE; ++i)
 	{
 		m_vFrameResources.push_back(std::make_unique<FrameResource>(pd3dDevice,
-			1, (UINT)m_vpObjects.size()));
+			1, m_nObjects));
 	}
 }
 
 void CUI_Shader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 {
-	UINT nNumDescriptor = 0;
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
-	{
-		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
-		if (pObject == nullptr)
-			continue;
+	UINT nNumDescriptor = m_nObjects;
 
-		if (pObject->GetMaterial() != nullptr)
+	/*for (UINT PSOindex = 0; PSOindex < PSO_END; ++PSOindex)
+	{
+		for (UINT i = 0; i < m_vObjectVector[PSOindex].size(); ++i)
 		{
-			nNumDescriptor++;
+			CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vObjectVector[PSOindex][i]);
+			if (pObject == nullptr)
+				continue;
+
+			if (pObject->GetMaterial() != nullptr)
+			{
+				nNumDescriptor++;
+			}
 		}
-	}
+	}*/
+	
 	//
 	// Create the SRV heap.
 	//
@@ -231,29 +293,40 @@ void CUI_Shader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	//
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_CbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	CD3DX12_GPU_DESCRIPTOR_HANDLE hGPUDescriptor(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
+	for (UINT PSOindex = 0; PSOindex < PSO_END; ++PSOindex)
 	{
-		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
-		if (pObject == nullptr)
-			continue;
-		CMaterial* pMaterial = pObject->GetMaterial();
-		if (pMaterial == nullptr)
-			continue;
-		CPUSRVHANDLEMAP iter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
-		if (iter != m_mapTextureCPUSrvHandle.end())
-			continue;
+		for (UINT i = 0; i < m_vObjectVector[PSOindex].size(); ++i)
+		{
+			CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vObjectVector[PSOindex][i]);
 
-		ID3D12Resource* pResource = pMaterial->m_pTexture->m_pd3dTextures.Get();
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pObject->GetMaterial()->m_pTexture->m_srvDesc;
 
-		pd3dDevice->CreateShaderResourceView(pResource, &srvDesc, hDescriptor);
+			if (pObject == nullptr)
+				continue;
+			vector<CMaterial*>* vMaterial = pObject->GetAllMaterial();
+			if (vMaterial->empty())
+				continue;
 
-		m_mapTextureCPUSrvHandle.insert(make_pair(pMaterial->Name, hDescriptor));
-		m_mapTextureGPUSrvHandle.insert(make_pair(pMaterial->Name, hGPUDescriptor));
+			for (int i = 0; i < vMaterial->size(); ++i)
+			{
+				CMaterial* pMaterial = (*vMaterial)[i];
+				CPUSRVHANDLEMAP iter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
+				if (iter != m_mapTextureCPUSrvHandle.end())
+					continue;
 
-		hDescriptor.Offset(g_CbvSrvUavDescriptorSize);
-		hGPUDescriptor.Offset(g_CbvSrvUavDescriptorSize);
+				ID3D12Resource* pResource = pMaterial->m_pTexture->m_pd3dTextures.Get();
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pObject->GetMaterial()->m_pTexture->m_srvDesc;
+
+				pd3dDevice->CreateShaderResourceView(pResource, &srvDesc, hDescriptor);
+
+				m_mapTextureCPUSrvHandle.insert(make_pair(pMaterial->Name, hDescriptor));
+				m_mapTextureGPUSrvHandle.insert(make_pair(pMaterial->Name, hGPUDescriptor));
+
+				hDescriptor.Offset(g_CbvSrvUavDescriptorSize);
+				hGPUDescriptor.Offset(g_CbvSrvUavDescriptorSize);
+			}
+		}
 	}
+	
 }
 
 void CUI_Shader::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -279,11 +352,30 @@ void CUI_Shader::CreateRootSignature(ID3D12Device * pd3dDevice)
 
 	auto staticSamplers = GetStaticSamplers();
 
+	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc;
+	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC));
+	d3dSamplerDesc = CD3DX12_STATIC_SAMPLER_DESC(
+		0,
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		0.0f,
+		1,
+		D3D12_COMPARISON_FUNC_ALWAYS,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,
+		0.0f,
+		D3D12_FLOAT32_MAX,
+		D3D12_SHADER_VISIBILITY_PIXEL
+	);
+
 	// A root signature is an array of root parameters.
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(numSlot, slotRootParameter,
 		(UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSigDesc.NumStaticSamplers = 1;
+	rootSigDesc.pStaticSamplers = &d3dSamplerDesc;
 
 	// create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;
@@ -301,7 +393,7 @@ void CUI_Shader::CreateRootSignature(ID3D12Device * pd3dDevice)
 		0,
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),
-		IID_PPV_ARGS(m_RootSignature[PSO_OBJECT].GetAddressOf())));
+		IID_PPV_ARGS(m_RootSignature[0].GetAddressOf())));
 }
 
 void CUI_Shader::CreateShader(ID3D12Device * pd3dDevice, ID3D12RootSignature * pd3dGraphicsRootSignature)
@@ -321,19 +413,23 @@ void CUI_Shader::UpdateShaderVariables(const CTimer & timer, CCamera * pCamera)
 	UpdateMainPassCB(pCamera);
 
 	auto currUICB = m_CurrFrameResource->UICB.get();
-	for (UINT i = 0; i < m_vpObjects.size(); ++i)
+	for (UINT PSOindex = 0; PSOindex < PSO_END; ++PSOindex)
 	{
-		CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vpObjects[i]);
-		if (pObject == nullptr)
-			continue;
-
-		if (pObject->GetFramesDirty() > 0)
+		for (UINT i = 0; i < m_vObjectVector[PSOindex].size(); ++i)
 		{
-			currUICB->CopyData(i, pObject->Get_UIConstants());		// updateUICB
+			CUI_Object* pObject = dynamic_cast<CUI_Object*>(*m_vObjectVector[PSOindex][i]);
+			if (pObject == nullptr)
+				continue;
 
-			pObject->DecreaseFramesDirty();
+			if (pObject->GetFramesDirty() > 0)
+			{
+				currUICB->CopyData(PSOindex * m_vObjectVector[PSOindex].size() + i, pObject->Get_UIConstants());		// updateUICB
+				
+				pObject->DecreaseFramesDirty();
+			}
 		}
 	}
+	
 }
 
 void CUI_Shader::ReleaseShaderVariables()
@@ -397,30 +493,50 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 {
 	CUI_Object* pUIObject = nullptr;
 
+	int index = 0;
+	for (int width = 0; width < 4; ++width)
+	{
+		for (int height = 0; height < 2; ++height)
+		{
+			// HP Edge
+			pUIObject = new CUI_HPBackground;
+			pUIObject->Initialize();
+			pUIObject->SetPos(XMFLOAT2(175 + 300 * width , 150 + height * -100));
+			pUIObject->SetMaterialIndex(index);
+			vObjects.push_back(pUIObject);
+			Push_Object(pUIObject, PSO_Edge);
+
+			// HP Bar
+			pUIObject = new CUI_HPBar;
+			((CUI_HPBar*)pUIObject)->Initialize();
+			pUIObject->SetPos(XMFLOAT2(175 + 300 * width, 150 + height * -100));
+			pUIObject->SetTarget(m_pObject_Manager->Get_Object(CObject_Manager::LAYER_PLAYER, index++));
+			vObjects.push_back(pUIObject);
+			Push_Object(pUIObject, PSO_HPBar);
+		}
+	}
 	
-	pUIObject = new CUI_HPBar;
-	((CUI_HPBar*)pUIObject)->Initialize();
-	pUIObject->SetTarget(m_pObject_Manager->Get_Object(CObject_Manager::LAYER_PLAYER, 0));
-
+	pUIObject = new CUI_ReadyStart;
+	pUIObject->Initialize();
 	vObjects.push_back(pUIObject);
-	Push_Object(pUIObject);
-
+	Push_Object(pUIObject, PSO_ETC);
+/*
+	pUIObject = new CUI_WinLose;
+	pUIObject->Initialize();
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_ETC);*/
 }
 
 void CUI_Shader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)
 {
+
+	if (m_RootSignature[0])		// 루트서명을 Set하는 순간 모든 바인딩이 사라진다. 여기서부터 새 루트서명이 기대하는 자원을 묶기 시작한다.
+		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[0].Get());
+
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvSrvDescriptorHeap.Get() };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps); //pd3dCommandList->SetDescriptorHeaps(1, m_CbvHeap.GetAddressOf());
 
-	//pd3dCommandList->SetGraphicsRootSignature(m_RootSignature->Get());
-	if (m_RootSignature[PSO_OBJECT])		// 루트서명을 Set하는 순간 모든 바인딩이 사라진다. 여기서부터 새 루트서명이 기대하는 자원을 묶기 시작한다.
-		pd3dCommandList->SetGraphicsRootSignature(m_RootSignature[PSO_OBJECT].Get());
-
-	if (m_pPSOs[PSO_OBJECT])
-		pd3dCommandList->SetPipelineState(m_pPSOs[PSO_OBJECT].Get());
-
-	auto passCB = m_CurrFrameResource->PassCB->Resource();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(0, passCB->GetGPUVirtualAddress());
+	
 }
 
 array<const CD3DX12_STATIC_SAMPLER_DESC, 6> CUI_Shader::GetStaticSamplers()

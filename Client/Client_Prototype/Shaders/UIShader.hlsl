@@ -1,12 +1,7 @@
 
 Texture2D    gDiffuseMap : register(t0);
 
-SamplerState gsamPointWrap        : register(s0);
-SamplerState gsamPointClamp       : register(s1);
-SamplerState gsamLinearWrap       : register(s2);
-SamplerState gsamLinearClamp      : register(s3);
-SamplerState gsamAnisotropicWrap  : register(s4);
-SamplerState gsamAnisotropicClamp : register(s5);
+SamplerState gDefaultSampler        : register(s0);
 
 #define NUM_MAX_UITEXTURE 4
 
@@ -38,7 +33,11 @@ cbuffer cbUI : register(b1)
 	float2 f2Size;	// 기본 UI 크기
 	float2 f2Scale;	// UI크기가 유동적으로 변해야할때.
 
+	int2 nowSprite;	// 현재 스프라이트
+	int2 numSprite;	// 전체 스프라이트
+
 	float alpha;
+	float fData;
 }
 struct VertexIn
 {
@@ -65,6 +64,7 @@ VertexOut VS(uint nVertexID : SV_VertexID)
 	size.x = ((float)f2Size.x / gRenderTargetSize.x) * f2Scale.x;
 	size.y = ((float)f2Size.y / gRenderTargetSize.y) * f2Scale.y;
 
+
 	if (nVertexID == 0)
 	{
 		output.uv = (float2(0.0f, 0.0f)); // 스크린 왼쪽 위 
@@ -90,13 +90,13 @@ VertexOut VS(uint nVertexID : SV_VertexID)
 	}
 	if (nVertexID == 4)
 	{
-		output.uv = (float2(1.0f, 1.0f)); // 스크린 왼쪽 아래
+		output.uv = (float2(1.0f, 1.0f)); // 스크린 오른쪽 아래
 		output.position = float4(screenpos.x + size.x, screenpos.y - size.y, 0.0f, 1.0f);
 
 	}
 	if (nVertexID == 5)
 	{
-		output.uv = (float2(0.0f, 1.0f)); // 스크린 오른쪽 아래
+		output.uv = (float2(0.0f, 1.0f)); // 스크린 왼쪽 아래
 		output.position = float4(screenpos.x - size.x, screenpos.y - size.y, 0.0f, 1.0f);
 	}
 
@@ -113,8 +113,59 @@ float4 PS(VertexOut pin) : SV_Target
 	//input.uv.y / gnNumSprite.y + float(gnNowSprite.y) / float(gnNumSprite.y)
 	//);
 
-	finalColor = gDiffuseMap.Sample(gsamAnisotropicWrap, uv);
+	finalColor = gDiffuseMap.Sample(gDefaultSampler, uv);
 	finalColor.a *= alpha;
 
 	return finalColor;
+}
+
+VertexOut VS_HPBar(uint nVertexID : SV_VertexID)
+{
+	VertexOut output = (VertexOut)0.0f;
+
+	float2 screenpos = (float2) 0.0f;
+	screenpos.x = (f2ScreenPos.x - gRenderTargetSize.x / 2.0f) / (gRenderTargetSize.x / 2.0f);
+	screenpos.y = (f2ScreenPos.y - gRenderTargetSize.y / 2.0f) / (gRenderTargetSize.y / 2.0f);
+
+	float2 size = (float2) 0.0f;
+	size.x = ((float)f2Size.x / gRenderTargetSize.x) * f2Scale.x;
+	size.y = ((float)f2Size.y / gRenderTargetSize.y) * f2Scale.y;
+
+	float hpRatio = fData * 2.f;
+	if (nVertexID == 0)
+	{
+		output.uv = (float2(0.0f, 0.0f)); // 스크린 왼쪽 위 
+		output.position = float4(screenpos.x - size.x, screenpos.y + size.y, 0.0f, 1.0f);
+	}
+	if (nVertexID == 1)
+	{
+		output.uv = (float2(1.0f, 0.0f)); // 스크린 오른쪽 위
+		output.position = float4(screenpos.x + (hpRatio - 1) * size.x, screenpos.y + size.y, 0.0f, 1.0f);
+
+	}
+	if (nVertexID == 2)
+	{
+		output.uv = (float2(1.0f, 1.0f)); // 스크린 오른쪽 아래
+		output.position = float4(screenpos.x + (hpRatio - 1) * size.x, screenpos.y - size.y, 0.0f, 1.0f);
+
+	}
+	if (nVertexID == 3)
+	{
+		output.uv = (float2(0.0f, 0.0f)); // 스크린 왼쪽 위
+		output.position = float4(screenpos.x - size.x, screenpos.y + size.y, 0.0f, 1.0f);
+
+	}
+	if (nVertexID == 4)
+	{
+		output.uv = (float2(1.0f, 1.0f)); // 스크린 오른쪽 아래
+		output.position = float4(screenpos.x + (hpRatio - 1) * size.x, screenpos.y - size.y, 0.0f, 1.0f);
+
+	}
+	if (nVertexID == 5)
+	{
+		output.uv = (float2(0.0f, 1.0f)); // 스크린 왼쪽 아래
+		output.position = float4(screenpos.x - size.x, screenpos.y - size.y, 0.0f, 1.0f);
+	}
+
+	return output;
 }

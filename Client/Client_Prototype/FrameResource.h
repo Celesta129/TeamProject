@@ -57,6 +57,9 @@ struct UI_Constants
 	XMFLOAT2 xmf2UISize = XMFLOAT2(0.f,0.f);			// UI ªÁ¿Ã¡Ó
 	XMFLOAT2 xmf2Scale = XMFLOAT2(1.f, 1.f);		//
 
+	XMINT2 nowSprite = XMINT2(0, 0);
+	XMINT2 numSprite = XMINT2(0, 0);
+
 	float alpha = 1.f;
 
 	float data = 0.f;

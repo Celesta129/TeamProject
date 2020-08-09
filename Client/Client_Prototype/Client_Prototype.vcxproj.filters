@@ -98,6 +98,21 @@
     <Filter Include="02.Utility\03.Object\01.ModelObject\03.Weapon">
       <UniqueIdentifier>{6c7ff6bb-eab6-4370-9742-8a5322737ff4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\01.HPBackground">
+      <UniqueIdentifier>{ccd662d4-d169-42ea-aff8-7da0d1dac674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\02.HPBar">
+      <UniqueIdentifier>{ac27da54-15ec-4d57-9673-1a4420ccd685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\04.ReadyStart">
+      <UniqueIdentifier>{22c201aa-ed4b-433b-bf5b-fa475ee1a38f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\05.WInLose">
+      <UniqueIdentifier>{3cb48a3a-0bdf-4de8-8bec-7337660f9240}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer">
+      <UniqueIdentifier>{aa2dd04f-0c68-4a08-b38a-c170c1bc601e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -212,6 +227,21 @@
     <ClInclude Include="Weapon.h">
       <Filter>02.Utility\03.Object\01.ModelObject\03.Weapon</Filter>
     </ClInclude>
+    <ClInclude Include="UI_HPBar.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\02.HPBar</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_HPBackground.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\01.HPBackground</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_ReadyStart.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\04.ReadyStart</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_WinLose.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\05.WInLose</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_Timer.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -307,6 +337,21 @@
     </ClCompile>
     <ClCompile Include="Weapon.cpp">
       <Filter>02.Utility\03.Object\01.ModelObject\03.Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_HPBar.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\02.HPBar</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_HPBackground.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\01.HPBackground</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_ReadyStart.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\04.ReadyStart</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_WinLose.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\05.WInLose</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_Timer.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

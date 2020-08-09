@@ -11,6 +11,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT64 nFenceValue);
 	virtual void Initialize(ID3D12Device * pDevice, ID3D12GraphicsCommandList * pd3dCommandList, const WCHAR * pszShaderFileName, vector<CGameObject*>& vObjects) override;
 
+	virtual bool Push_Object(CGameObject* pObject, UINT PSOindex);
 protected:
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateMaterialCB(void);
@@ -42,7 +43,9 @@ protected:
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 private:
 	enum PSO_INDEX {
-		PSO_OBJECT,
+		PSO_Edge,
+		PSO_HPBar,
+		PSO_ETC,
 		PSO_END
 	};
 
@@ -59,5 +62,7 @@ private:
 	typedef map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE>::iterator CPUSRVHANDLEMAP;
 	typedef map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE>::iterator GPUSRVHANDLEMAP;
 	int m_iMaterialCbvOffset;
+
+	vector<CGameObject**> m_vObjectVector[PSO_END];
 };
 

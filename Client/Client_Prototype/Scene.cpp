@@ -537,12 +537,48 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/fbx/1x1_plane.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_UIPlane", pComponent);
 
-	pComponent = new CMaterial(L"resources/dds/HPedge.dds", L"Texture_HPedge", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Texture_HPedge", pComponent);
-	pComponent = new CMaterial(L"resources/dds/HPbar.dds", L"Texture_HPbar", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new CMaterial(L"resources/ui/HpEdge_1.dds", L"Texture_HpEdge1", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge1", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_2.dds", L"Texture_HpEdge2", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge2", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_3.dds", L"Texture_HpEdge3", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge3", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_4.dds", L"Texture_HpEdge4", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge4", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_5.dds", L"Texture_HpEdge5", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge5", pComponent); 
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_6.dds", L"Texture_HpEdge6", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge6", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_7.dds", L"Texture_HpEdge7", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge7", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HpEdge_8.dds", L"Texture_HpEdge8", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_HpEdge8", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/HPbar.dds", L"Texture_HPbar", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_HPbar", pComponent);
 
+	pComponent = new CMaterial(L"resources/ui/before_ready.dds", L"Texture_Ready", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Ready", pComponent);
 	
+	pComponent = new CMaterial(L"resources/ui/before_start.dds", L"Texture_Start", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Start", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/number.dds", L"Texture_Number", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Number", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/you_lose.dds", L"Texture_Lose", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Lose", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/you_win.dds", L"Texture_Win", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_Win", pComponent);
+
 	pComponent = new LoadModel("resources/fbx/hammer.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_Hammer", pComponent);
 	pComponent = new CMaterial(L"resources/dds/hammer_diffuse.dds", L"Texture_Hammer_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());

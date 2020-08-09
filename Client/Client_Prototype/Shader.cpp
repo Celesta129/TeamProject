@@ -35,7 +35,7 @@ int CShader::Update(const CTimer& timer, ID3D12Fence * pFence, CCamera* pCamera)
 	}
 }
 
-bool CShader::Push_Object(CGameObject * pObject)
+bool CShader::Push_Object(CGameObject * pObject, UINT PSOindex)
 {
 	for (UINT i = 0; i < m_vpObjects.size(); ++i)
 	{
@@ -193,7 +193,7 @@ void CShader::CreatePipeLineParts(UINT nPSO)
 	m_nPSO = nPSO;
 	if (m_nPSO > 0) {
 		m_pPSOs = new ComPtr<ID3D12PipelineState>[m_nPSO];
-		m_RootSignature = new ComPtr<ID3D12RootSignature>[m_nPSO];
+		m_RootSignature = new ComPtr<ID3D12RootSignature>[0];
 
 	}
 }
@@ -207,6 +207,7 @@ void CShader::CreatePSO(ID3D12Device * pd3dDevice, UINT nRenderTargets, int inde
 	psoDesc.pRootSignature = m_RootSignature[index].Get();
 	psoDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob,"VS");
 	psoDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, "PS");
+
 	psoDesc.RasterizerState = CreateRasterizerState();
 	psoDesc.BlendState = CreateBlendState();
 	psoDesc.DepthStencilState = CreateDepthStencilState();
