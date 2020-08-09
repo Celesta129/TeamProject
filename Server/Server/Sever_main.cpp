@@ -976,7 +976,8 @@ void timer_process()
 		{
 			//과자 회복
 			if (clients[ev.obj_id].playerinfo->m_weapon_type == WEAPON_SNACK) {
-				clients[ev.obj_id].playerinfo->m_hp += 20;
+				if(clients[ev.obj_id].playerinfo->m_hp <100)
+					clients[ev.obj_id].playerinfo->m_hp += 20;
 
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (clients[i].m_connected == true) {
@@ -1037,6 +1038,11 @@ void timer_process()
 		{
 			g_timer--;
 			//cout << g_timer << "초" << endl;
+
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true)
+					send_timer_packet(i, g_timer);
+			}
 
 			if (g_timer > 0) {
 				add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
