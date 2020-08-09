@@ -37,6 +37,7 @@ constexpr int SC_FLAG_TIMER = 10;
 
 constexpr int SC_MOVEMENT = 11;
 constexpr int SC_ATTACK = 12;
+constexpr int SC_GUARD = 13;
 
 constexpr int SC_WIN = 21;
 constexpr int SC_LOSE = 22;
@@ -67,6 +68,14 @@ struct cs_packet_motion {
 	char type;
 	char key;
 	char count;
+};
+
+struct sc_packet_guard {
+	char size;
+	char type;
+	char id;
+	char flag;
+	char ani_index;
 };
 
 struct cs_packet_weapon {

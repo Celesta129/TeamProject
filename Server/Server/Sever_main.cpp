@@ -30,7 +30,7 @@ gmtl::Point3f Weapon_map1_Init_pos[MAX_WEAPON] = {
 
 enum ENUMOP {
 	OP_RECV, OP_SEND, OP_ACCEPT,
-	OP_FREE, OP_HIT, OP_PICK, OP_WEAPON_ATTACK, OP_REVIVE, OP_TIME, OP_FLAG_TIME, OP_END, OP_RESTART
+	OP_FREE, OP_HIT, OP_PICK, OP_WEAPON_ATTACK, OP_REVIVE, OP_RESPAWN_WEAPON, OP_TIME, OP_FLAG_TIME, OP_END, OP_RESTART
 };
 
 struct event_type {
@@ -303,6 +303,18 @@ void send_move_packet(int user_id, int mover) {
 	send_packet(user_id, &p);
 }
 
+void send_guard_packet(int user_id, int mover, char flag) {
+	sc_packet_guard p;
+	p.size = sizeof(p);
+	p.type = SC_GUARD;
+	p.id = mover;
+	p.flag = flag;
+	p.ani_index = clients[mover].playerinfo->m_Animation_index;
+
+	//통째로 보내면 메모리에 안좋으므로 &붙이자
+	send_packet(user_id, &p);
+}
+
 void send_motion_packet(int user_id, int mover) {
 	sc_packet_motion p;
 	p.id = mover;
@@ -424,6 +436,7 @@ void process_packet(int user_id, char* buf) {
 		else if (packet->key == 2) { //망치
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::HAMMER_ATTACK;
 			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
+			clients[user_id].attack_count = 1;
 			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1330ms, 1);
 			add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 1340ms, 1);
 			add_timer(user_id, OP_HIT, clients[user_id].attack_time + 560ms, 0);
@@ -438,6 +451,7 @@ void process_packet(int user_id, char* buf) {
 				clients[user_id].attack_count = 1;
 				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 500ms, 1);
 				printf("검1타호출 \n");
+				add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 510ms, 1);
 				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 440ms, 0);
 			}
 			else if (packet->count == 2) {
@@ -445,6 +459,7 @@ void process_packet(int user_id, char* buf) {
 				clients[user_id].attack_count = 2;
 				add_timer(user_id, OP_FREE, clients[user_id].attack_time + 1070ms, 2);
 				printf("검2타호출 \n");
+				add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 1080ms, 2);
 				add_timer(user_id, OP_HIT, clients[user_id].attack_time + 600ms, 0);
 			}
 
@@ -454,8 +469,8 @@ void process_packet(int user_id, char* buf) {
 		else if (packet->key == 4) {
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::SNACK_ATTACK;
 			clients[user_id].attack_time = chrono::high_resolution_clock::now();	//공격시작
-			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 2s, 1);
-			add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 2010ms, 1);
+			add_timer(user_id, OP_FREE, clients[user_id].attack_time + 2s, 0);
+			add_timer(user_id, OP_WEAPON_ATTACK, clients[user_id].attack_time + 1990ms, 0);
 
 		}
 
@@ -528,20 +543,19 @@ void process_packet(int user_id, char* buf) {
 		if (packet->key == 1) {//가드활성화
 			clients[user_id].playerinfo->m_guard = true;
 			clients[user_id].playerinfo->m_Animation_index = ANIM_INDEX::GUARD;
-			cout << "가드 활성화\n";
-			
 			clients[user_id].playerinfo->m_state = PLAYER_STATE::DEFENSE;
 		}
 		else {//가드 비활성화
 			clients[user_id].playerinfo->m_guard = false;
-			add_timer(user_id, OP_FREE, chrono::high_resolution_clock::now() + 840ms, 1);
+			add_timer(user_id, OP_FREE, chrono::high_resolution_clock::now() + 600ms, 0);
 			clients[user_id].playerinfo->m_state = PLAYER_STATE::NORMAL;
-			cout << "가드 비활성화\n";
 		}
+
+		char flag = clients[user_id].playerinfo->m_guard;
 
 		for (auto& cl : clients) {
 			if (true == cl.m_connected)
-				send_motion_packet(cl.m_id, user_id);
+				send_guard_packet(cl.m_id, user_id, flag);
 		}
 	}
 		break;
@@ -827,9 +841,9 @@ int player_hit(int user_id) {
 		float hit_dist = 10.f;
 		int type = clients[user_id].playerinfo->m_weapon_type;
 		if (type == WEAPON_SWORD)
-			hit_dist = 20.f;
-		if (type = WEAPON_HAMMER)
 			hit_dist = 15.f;
+		if (type = WEAPON_HAMMER)
+			hit_dist = 20.f;
 		
 		//user
 		float Amax_x = Pos.mData[0] + Look.mData[0] * hit_dist + clients[user_id].playerinfo->m_sizeX;
@@ -839,6 +853,16 @@ int player_hit(int user_id) {
 
 		for (int j = 0; j < MAX_USER; ++j) {
 			if (clients[j].m_connected == true) {
+				if (clients[j].playerinfo->m_guard == true) {
+					if (clients[j].playerinfo->m_weapon_type != WEAPON_SWORD) {
+						gmtl::Vec3f trg_Look = clients[user_id].playerinfo->m_look;
+						
+						if ((trg_Look.mData[0] + Look.mData[0] == 0) && (trg_Look.mData[1] + Look.mData[1] == 0) && (trg_Look.mData[2] + Look.mData[2] == 0)) {
+							return -1;
+						}
+					}
+				}
+
 				float Bmax_x = clients[j].playerinfo->m_posX + clients[j].playerinfo->m_sizeX;
 				float Bmin_x = clients[j].playerinfo->m_posX - clients[j].playerinfo->m_sizeX;
 				float Bmax_z = clients[j].playerinfo->m_posZ + clients[j].playerinfo->m_sizeZ;
@@ -912,12 +936,36 @@ void timer_process()
 			//PostQueuedCompletionStatus(g_iocp, 1, ev.obj_id, &over->overlapped);
 
 			for (int i = 0; i < MAX_USER; ++i) {
-				if (player_hit(i) != -1) {
-					int trg = player_hit(i);
-					clients[trg].playerinfo->last_hit = i;
-					clients[trg].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
-					clients[trg].playerinfo->m_state = PLAYER_STATE::HITTED;
-					clients[trg].playerinfo->m_hitted = true;
+				if(clients[i].m_connected == true){
+					if (player_hit(i) != -1) {
+						int trg = player_hit(i);
+
+						if (clients[i].playerinfo->m_weapon_type == WEAPON_HAMMER) { // 망치로 맞았을때
+							if (clients[trg].playerinfo->m_flag) {
+								clients[i].playerinfo->m_flag = true;
+								clients[i].playerinfo->flag_time = FLAG_LIMIT_TIME;
+								clients[trg].playerinfo->m_flag = false;
+
+								add_timer(i, OP_FLAG_TIME, chrono::high_resolution_clock::now());
+
+								for (int j = 0; j < MAX_USER; ++j) {
+									if(clients[j].m_connected == true)
+										send_pick_weapon_packet(j, i, WEAPON_FLAG, 0);
+								}
+							}
+
+							clients[i].playerinfo->m_Animation_index = ANIM_INDEX::ANI_STUN;
+							std::cout << i << "Player 기절\n";
+							clients[i].playerinfo->m_state = PLAYER_STATE::STUN;
+							add_timer(i, OP_REVIVE, high_resolution_clock::now() + 5000ms);
+						}
+						else { // 이외의 장비로 맞았을때
+							clients[trg].playerinfo->last_hit = i;
+							clients[trg].playerinfo->m_Animation_index = ANIM_INDEX::HIT;
+							clients[trg].playerinfo->m_state = PLAYER_STATE::HITTED;
+							clients[trg].playerinfo->m_hitted = true;
+						}
+					}
 				}
 			}
 		}
@@ -926,6 +974,17 @@ void timer_process()
 			break;
 		case OP_WEAPON_ATTACK:
 		{
+			//과자 회복
+			if (clients[ev.obj_id].playerinfo->m_weapon_type == WEAPON_SNACK) {
+				clients[ev.obj_id].playerinfo->m_hp += 20;
+
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (clients[i].m_connected == true) {
+						send_update_state(i, ev.obj_id, clients[ev.obj_id].playerinfo->m_hp);
+					}
+				}
+			}
+
 			//아이템 사용
 			if (clients[ev.obj_id].playerinfo->m_weapon_type != -1) {
 				clients[ev.obj_id].playerinfo->m_weapon_count -= 1;
@@ -936,6 +995,7 @@ void timer_process()
 					g_weapon_list[index].owner = -1;
 					clients[ev.obj_id].playerinfo->m_weapon_index = -1;
 					clients[ev.obj_id].playerinfo->m_weapon_type = -1;
+					add_timer(index, OP_RESPAWN_WEAPON, high_resolution_clock::now() + 15s);
 
 					for (int i = 0; i < MAX_USER; ++i) {
 						if (clients[i].m_connected == true) {
@@ -957,6 +1017,19 @@ void timer_process()
 				if (clients[j].m_connected == true) {
 					send_update_state(j, ev.obj_id, clients[ev.obj_id].playerinfo->m_hp);
 				}
+			}
+		}
+			break;
+		case OP_RESPAWN_WEAPON:
+		{
+			if (g_weapon_list[ev.obj_id].drop == false && g_weapon_list[ev.obj_id].owner == -1) {
+				g_weapon_list[ev.obj_id].weapon_index = rand() % (MAX_WEAPON_TYPE - 1);
+				g_weapon_list[ev.obj_id].drop = true;
+			}
+
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (clients[i].m_connected == true)
+					send_put_weapon_packet(i, g_weapon_list[ev.obj_id].weapon_index, ev.obj_id, g_weapon_list[ev.obj_id].pos);
 			}
 		}
 			break;
@@ -1105,8 +1178,9 @@ void client_update_process()
 
 									add_timer(next_flag, OP_FLAG_TIME, chrono::high_resolution_clock::now());
 
-									for (int i = 0; i < MAX_USER; ++i) {
-										send_pick_weapon_packet(i, next_flag, WEAPON_FLAG, 0);
+									for (int j = 0; j < MAX_USER; ++i) {
+										if (clients[j].m_connected == true)
+											send_pick_weapon_packet(j, next_flag, WEAPON_FLAG, 0);
 									}
 								}
 

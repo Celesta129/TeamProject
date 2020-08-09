@@ -376,7 +376,7 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 						temp.key = KEY_A;
 						temp.time = chrono::high_resolution_clock::now();
 						if (attack_count == 0) {
-							attack_time = chrono::high_resolution_clock::now();
+							attack_time = temp.time;
 							m_Player->Set_status(PLAYER_STATE::ATTACK);
 						}
 						key_buffer.push_back(temp);
@@ -435,11 +435,9 @@ void CGameFramework_Client::OnKeyboardInput(const CTimer & gt)
 			}
 			else if (type == 1) { //망치
 				m_pSocket->sendPacket(CS_ATTACK, 2, attack_count, 0);
-				cout << "망치공격" << endl;
 			}
 			else if (type == 2) { // 과자
 				m_pSocket->sendPacket(CS_ATTACK, 4, attack_count, 0);
-				cout << "과자 공격" << endl;
 			}
 		}
 		attack_state = true;
@@ -532,8 +530,24 @@ void CGameFramework_Client::processPacket(char* buf)
 		int other_id = p_motion->id;
 
 		m_pScene->getplayer(other_id)->SetAnimation_index(p_motion->ani_index);
-		printf("%d\n", p_motion->ani_index);
 
+	}
+		break;
+	case SC_GUARD:
+	{
+		sc_packet_guard* p_guard = reinterpret_cast<sc_packet_guard*>(buf);
+		int other_id = p_guard->id;
+		bool flag = p_guard->flag;
+
+		m_pScene->getplayer(other_id)->Set_guard(flag);
+		m_pScene->getplayer(other_id)->SetAnimation_index(p_guard->ani_index);
+
+		if (flag == 1) {
+			m_pScene->getplayer(other_id)->setAnimStop(true);
+		}
+		else {
+			m_pScene->getplayer(other_id)->setAnimStop(false);
+		}
 	}
 		break;
 	case SC_UPDATE_STATE:
@@ -568,6 +582,7 @@ void CGameFramework_Client::processPacket(char* buf)
 			(*pvWeapon)[index]->Get_Transform()->Set_Pos(XMFLOAT3(x, y, z));
 			CWeapon* weapon = (CWeapon*)(*pvWeapon)[index];
 			weapon->set_Type(type);
+			weapon->set_Invisible(false);
 		}
 	}
 		break;

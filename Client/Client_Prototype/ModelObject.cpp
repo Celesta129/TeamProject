@@ -61,6 +61,11 @@ int CModelObject::Update(float fTimeElapsed)
 	
 	if(m_bAnimStop != true)
 		Animate(fTimeElapsed);
+	else {
+		if (m_Animtime <= 2.4f) {
+			Animate(fTimeElapsed);
+		}
+	}
 
 	return result;
 }

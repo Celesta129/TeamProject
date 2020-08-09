@@ -46,7 +46,7 @@ public:
 	void SetWeaponType(int type) { weapon_type = type; }
 	void Set_HP(int hp) { m_hp = hp; }
 	void Set_status(char status) { m_status = status; }
-	void Set_guard(bool flag) { m_guard = flag; }
+	void Set_guard(bool flag) { m_guard = flag;}
 
 	
 	XMFLOAT4X4 get_Hand(void);
