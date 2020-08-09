@@ -125,13 +125,13 @@ LRESULT CD3DApp::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
-			m_bAppPaused = true;
-			m_Timer.Stop();
+			//m_bAppPaused = true;
+			//m_Timer.Stop();
 		}
 		else
 		{
-			m_bAppPaused = false;
-			m_Timer.Start();
+			//m_bAppPaused = false;
+			//m_Timer.Start();
 		}
 		return 0;
 

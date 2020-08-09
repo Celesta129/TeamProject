@@ -19,6 +19,7 @@ HRESULT CUI_Timer::Initialize(void)
 		return hr;
 	Add_Material(L"Texture_Number");
 
+	m_nNumIndex = 4;
 
 	float Width = 48.f * 4.f;
 	float Height = 48.f;
@@ -44,16 +45,6 @@ UI_Constants CUI_Timer::Get_UIConstants(void)
 
 int CUI_Timer::Update(float fTimeElapsed)
 {
-	m_fTime += fTimeElapsed;
 	DirtyFrames();
 	return CUI_Object::Update(fTimeElapsed);
-}
-
-void CUI_Timer::Render(ID3D12GraphicsCommandList * pCommandList)
-{
-	if (m_bInvisible)
-	{
-		pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		pCommandList->DrawInstanced(6*4, 1, 0, 0);
-	}
 }

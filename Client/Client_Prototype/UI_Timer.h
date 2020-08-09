@@ -13,8 +13,6 @@ public:
 
 	virtual UI_Constants Get_UIConstants(void);
 	virtual int Update(float fTimeElapsed);
-
-	virtual void Render(ID3D12GraphicsCommandList * pCommandList);
 private:
 	float m_fTime = 0.f;
 };

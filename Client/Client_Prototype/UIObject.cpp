@@ -43,10 +43,10 @@ int CUI_Object::Update(float fTimeElapsed)
 void CUI_Object::Render(ID3D12GraphicsCommandList * pCommandList)
 {
 	//pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_d3dCbvGPUDescriptorHandle);
-	if (m_bInvisible)
+	if (!m_bInvisible)
 	{
 		pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		pCommandList->DrawInstanced(6, 1, 0, 0);
+		pCommandList->DrawInstanced(6 * m_nNumIndex, 1, 0, 0);
 	}
 }
 

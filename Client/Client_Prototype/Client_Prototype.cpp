@@ -6,6 +6,7 @@
 #include "ModelObject.h"
 #include "Scene.h"
 #include "Weapon.h"
+#include "UI_Timer.h"
 
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 
@@ -696,6 +697,9 @@ void CGameFramework_Client::processPacket(char* buf)
 	{
 		sc_packet_timer* p_timer = reinterpret_cast<sc_packet_timer*>(buf);
 		int timer = p_timer->timer;
+
+		CUI_Timer* pUI = (CUI_Timer*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 0);
+		pUI->Set_Time(timer);
 	}
 		break;
 	case SC_FLAG_TIMER:

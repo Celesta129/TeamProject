@@ -44,7 +44,9 @@ protected:
 	vector<CMaterial*> pMaterial;
 	UINT m_nCurrMatIndex = 0;
 
-	bool m_bInvisible = true;
+	bool m_bInvisible = false;
+
+	int m_nNumIndex = 1;
 };
 
 

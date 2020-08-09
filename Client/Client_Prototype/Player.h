@@ -50,6 +50,8 @@ public:
 
 	
 	XMFLOAT4X4 get_Hand(void);
+
+	bool m_connected;
 private:
 	
 	bool set_hand(void);
@@ -61,7 +63,7 @@ private:
 
 	int m_hp = 100;
 
-	bool m_connected;
+	
 
 	int weapon_type = -1;
 	int weapon_index = -1;

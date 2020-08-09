@@ -497,6 +497,22 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 {
 	CUI_Object* pUIObject = nullptr;
 
+	pUIObject = new CUI_Timer;
+	pUIObject->Initialize();
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_Timer);
+
+	pUIObject = new CUI_ReadyStart;
+	pUIObject->Initialize();
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_ETC);
+
+	pUIObject = new CUI_WinLose;
+	pUIObject->Initialize();
+	pUIObject->SetInvisible(true);
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_ETC);
+
 	int index = 0;
 	for (int width = 0; width < 4; ++width)
 	{
@@ -520,15 +536,8 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 		}
 	}
 	
-	pUIObject = new CUI_ReadyStart;
-	pUIObject->Initialize();
-	vObjects.push_back(pUIObject);
-	Push_Object(pUIObject, PSO_ETC);
 
-	pUIObject = new CUI_Timer;
-	pUIObject->Initialize();
-	vObjects.push_back(pUIObject);
-	Push_Object(pUIObject, PSO_Timer);
+	
 }
 
 void CUI_Shader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)

@@ -31,12 +31,11 @@ int CUI_HPBar::Update(float fTimeElapsed)
 {
 	if (m_pTarget != nullptr)
 	{
-		m_fHP = m_pTarget->Get_HP();
-		if (m_fHP > 0.f)
-			m_pTarget->Set_HP(m_fHP - 10 * fTimeElapsed);
-
-		m_fHP = m_pTarget->Get_HP();
-		DirtyFrames();
+		if (m_pTarget->m_connected)
+		{
+			m_fHP = m_pTarget->Get_HP();
+			DirtyFrames();
+		}
 	}
 	return 0;
 }
