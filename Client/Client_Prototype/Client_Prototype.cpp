@@ -18,6 +18,21 @@ CGameFramework_Client* GameFramework = nullptr;
 thread RecvThread;
 bool Server_disconnect = true;
 
+//핸들
+HWND hMainWnd, hGameWnd;
+int state = STATE_LOGIN;
+bool Is_Host = false;
+
+//비트맵
+HBITMAP Login_Image, Wait_Room_Image;
+HBITMAP Lobby_player_1, Lobby_player_2, Lobby_player_3, Lobby_player_4, Lobby_player_5, Lobby_player_6, Lobby_player_7, Lobby_player_8;
+HBITMAP Lobby_Player, Lobby_Crown, Lobby_Start, Lobby_Waiting, Login_Button;
+HBITMAP Name_Tag[8];
+
+//함수선언
+LRESULT CALLBACK	WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 void process_data()
 {
@@ -50,6 +65,35 @@ void process_data()
 				retval = 0;
 			}
 		}
+	}
+}
+
+void LoadBitMap() {
+	//로그인
+	Login_Image = (HBITMAP)LoadImage(NULL, L"resources/ui/main.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+	//대기실
+	Wait_Room_Image = (HBITMAP)LoadImage(NULL, L"resources/ui/main.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+	//캐릭터칸
+	Lobby_player_1 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_2 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_3 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_3.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_4 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_4.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_5 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_5.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_6 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_6.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_7 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_7.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_player_8 = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player_8.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+	//버튼및 UI
+	Login_Button = (HBITMAP)LoadImage(NULL, L"resources/ui/Login.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_Player = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_player.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_Crown = (HBITMAP)LoadImage(NULL, L"resources/ui/128_crown.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_Start = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_start.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	Lobby_Waiting = (HBITMAP)LoadImage(NULL, L"resources/ui/lobby_waiting.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+	for (int i = 0; i < MAX_USER; ++i) {
+		Name_Tag[i] = (HBITMAP)LoadImage(NULL, L"resources/ui/name_tag.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	}
 }
 
@@ -101,6 +145,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	RecvThread.join();
 	return 0;
 }
+
 
 CGameFramework_Client::CGameFramework_Client(HINSTANCE hInstance)
 	:CD3DApp(hInstance)
