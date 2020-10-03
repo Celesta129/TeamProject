@@ -17,23 +17,26 @@ void CWeapon::set_Player(CPlayer * pPlayer)
 		switch (m_type)
 		{
 		case WEAPON_SWORD:
-			pos = XMFLOAT3(32.f, -33.f, -11.f);
-			rotate = XMFLOAT3(90.f, 0.f, 0.f);
+			pos = XMFLOAT3(-36.f, -32.f, -24.f);
+			rotate = XMFLOAT3(63.f, -155.f, 90.f);
 			scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
 			break;
 		case WEAPON_HAMMER:
-			rotate = XMFLOAT3(0.f, -90.f, 90.f);
+			pos = XMFLOAT3(-29.f, -1.5f, -12.0f);
+			rotate = XMFLOAT3(-100.f, 200.f, 160.f);
 			scale = XMFLOAT3(1.f, 1.f, 1.f);
 			break;
 		case WEAPON_BLOCK:
 
 			break;
 		case WEAPON_SNACK:
+			pos = XMFLOAT3(-26.f, -9.f, -4.5f);
+			rotate = XMFLOAT3(0.f, 0.f, 260.f);
 			scale = XMFLOAT3(0.5f, 0.5f, 0.5f);
 			break;
 		case FLAG:
-			pos = XMFLOAT3(5.f, -33.f, -14.f);
-			rotate = XMFLOAT3(0.f, -90.f, 0.f);
+			pos = XMFLOAT3(0.f, 8.f, 0.f);
+			rotate = XMFLOAT3(3.f, 0.f, 30.f);
 			scale = XMFLOAT3(1.f, 1.f, 1.f);
 			break;
 		}
@@ -143,21 +146,66 @@ int CWeapon::Update(float fTimeElapsed)
 	if (m_bInvisible == true)
 		return 0;
 
-	switch (m_type)
-	{
-	default:
-		break;
-	}
+	
 	if (m_pPlayer)
 	{
 		//hand¸¦ Ã£ÀÚ
 		XMFLOAT4X4 hand = m_pPlayer->get_Hand();
+		XMFLOAT4X4 spine = m_pPlayer->get_Spine();
 		XMFLOAT4X4 playerWorld = m_pPlayer->Get_Transform()->Get_World();
-		m_matParent = Matrix4x4::Multiply(hand, playerWorld);
+
+		switch (m_type)
+		{
+		case FLAG:
+			m_matParent = Matrix4x4::Multiply(spine, playerWorld);
+			break;
+		default:
+			m_matParent = Matrix4x4::Multiply(hand, playerWorld);
+			break;
+		}
+		
 
 		m_pTransform->Set_Parent(&m_matParent);
 
 		XMFLOAT4X4 world = m_pTransform->Get_World();
+
+
+		float fPower = 30.f;
+		if(GetAsyncKeyState(VK_RETURN) & 0x8000)
+		{
+			cout << m_pTransform->Get_Rotate().x << ", " << m_pTransform->Get_Rotate().y<< ", " << m_pTransform->Get_Rotate().z << endl;
+			cout << m_pTransform->Get_Pos().x << ", " << m_pTransform->Get_Pos().y << ", " << m_pTransform->Get_Pos().z << endl;
+		}
+		XMFLOAT3 rotation = XMFLOAT3(fPower * fTimeElapsed, fPower * fTimeElapsed, fPower * fTimeElapsed);
+
+		if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+			rotation = XMFLOAT3(-fPower * fTimeElapsed, -fPower * fTimeElapsed, -fPower * fTimeElapsed);
+
+		if (GetAsyncKeyState('X') & 0x8000)
+		{
+			m_pTransform->Rotate(rotation.x, 0.f, 0.f);
+		}
+		if (GetAsyncKeyState('Y') & 0x8000)
+		{
+			m_pTransform->Rotate(0.f, rotation.y, 0.f);
+		}
+		if (GetAsyncKeyState('Z') & 0x8000)
+		{
+			m_pTransform->Rotate(0.f, 0.f, rotation.z);
+		}
+
+		if (GetAsyncKeyState('1') & 0x8000)
+		{
+			m_pTransform->MovePos(XMFLOAT3(rotation.x, 0.f, 0.f));
+		}
+		if (GetAsyncKeyState('2') & 0x8000)
+		{
+			m_pTransform->MovePos(XMFLOAT3(0.f, rotation.y, 0.f));
+		}
+		if (GetAsyncKeyState('3') & 0x8000)
+		{
+			m_pTransform->MovePos(XMFLOAT3(0.f, 0.f, rotation.z));
+		}
 		DirtyFrames();
 	}
 	else

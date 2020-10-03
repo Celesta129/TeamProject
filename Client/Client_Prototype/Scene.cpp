@@ -604,7 +604,9 @@ void CScene::BuildComponents(void)
 	pComponent = new CMaterial(L"resources/dds/hammer_diffuse.dds", L"Texture_Hammer_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Hammer_diffuse", pComponent);
 
-	pComponent = new LoadModel("resources/fbx/sword.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	//pComponent = new LoadModel("resources/fbx/sword.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	pComponent = new LoadModel("resources/fbx/sword_fix.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	
 	m_pComponent_Manager->Add_Component(L"Component_Model_Sword", pComponent);
 	pComponent = new CMaterial(L"resources/dds/sword_diffuse.dds", L"Texture_Sword_diffuse", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Sword_diffuse", pComponent);

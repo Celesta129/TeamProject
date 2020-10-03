@@ -190,6 +190,15 @@ void CPlayer::GetAnimation_index(int *animation_index)
 	*animation_index = m_animation_index;
 }
 
+XMFLOAT4X4 CPlayer::get_Spine(void)
+{
+	XMFLOAT4X4 result;
+	XMStoreFloat4x4(&result, XMMatrixTranspose(m_pModel[m_AnimIndex]->GetBone("Bip001 Spine1")->FinalTransformation));
+
+
+	return result;
+}
+
 XMFLOAT4X4 CPlayer::get_Hand(void)
 {
 	XMFLOAT4X4 result;
@@ -203,7 +212,7 @@ XMFLOAT4X4 CPlayer::get_Hand(void)
 
 bool CPlayer::set_hand(void)
 {
-	m_pmatHand = &(m_pModel[m_AnimIndex]->GetBone("Bip001 L Hand")->FinalTransformation);
+	m_pmatHand = &(m_pModel[m_AnimIndex]->GetBone("Bip001 R Hand")->FinalTransformation);
 	
 	if (!m_pmatHand)
 		return false;

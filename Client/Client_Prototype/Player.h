@@ -48,7 +48,7 @@ public:
 	void Set_status(char status) { m_status = status; }
 	void Set_guard(bool flag) { m_guard = flag;}
 
-	
+	XMFLOAT4X4 get_Spine(void);
 	XMFLOAT4X4 get_Hand(void);
 	int matIndex = 0;
 	bool m_connected;
