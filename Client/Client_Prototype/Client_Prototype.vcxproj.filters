@@ -113,6 +113,9 @@
     <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer">
       <UniqueIdentifier>{aa2dd04f-0c68-4a08-b38a-c170c1bc601e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02.Utility\03.Object\01.ModelObject\01.UIObject\06.TimerFont">
+      <UniqueIdentifier>{168c319b-b6cd-4b85-b7e1-fa3773e8b700}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -242,6 +245,9 @@
     <ClInclude Include="UI_Timer.h">
       <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer</Filter>
     </ClInclude>
+    <ClInclude Include="UI_TimerFont.h">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\06.TimerFont</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -352,6 +358,9 @@
     </ClCompile>
     <ClCompile Include="UI_Timer.cpp">
       <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\03.Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_TimerFont.cpp">
+      <Filter>02.Utility\03.Object\01.ModelObject\01.UIObject\06.TimerFont</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

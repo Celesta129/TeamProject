@@ -122,7 +122,7 @@ void CObject_TextureShader::CreateFrameResources(ID3D12Device * pd3dDevice)
 
 void CObject_TextureShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 {
-	UINT nNumDescriptor = 2;
+	UINT nNumDescriptor = 255;
 	//
 	// Create the SRV heap.
 	//
@@ -135,29 +135,39 @@ void CObject_TextureShader::CreateDescriptorHeaps(ID3D12Device * pd3dDevice)
 	// Fill out the heap with actual descriptors.
 	//
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_CbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_GPU_DESCRIPTOR_HANDLE hGPUDescriptor(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-	auto bricksTex = m_mapTexture["bricksTex"]->Resource;
+	map<const wstring, CComponent*>* pmapCom = m_pComponent_Manager->Get_Map();
+	map<const wstring, CComponent*>::iterator iter = pmapCom->begin();
+	for (UINT i = 0; i < pmapCom->size(); ++i)
+	{
+		if (iter == pmapCom->end())
+			break;
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = bricksTex->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = bricksTex->GetDesc().MipLevels;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	pd3dDevice->CreateShaderResourceView(bricksTex.Get(), &srvDesc, hDescriptor);
+		CMaterial* pMaterial = dynamic_cast<CMaterial*>(iter->second);
+		if (pMaterial == nullptr) {
+			iter++;
+			continue;
+		}
+		CPUSRVHANDLEMAP srviter = m_mapTextureCPUSrvHandle.find(pMaterial->Name);
+		if (srviter != m_mapTextureCPUSrvHandle.end()) {
+			iter++;
+			continue;
+		}
 
-	hDescriptor.Offset(1, g_CbvSrvUavDescriptorSize);
+		ID3D12Resource* pResource = pMaterial->m_pTexture->m_pd3dTextures.Get();
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = pMaterial->m_pTexture->m_srvDesc;
 
-	auto floorTex = m_mapTexture["floorTex"]->Resource;
-	
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = floorTex->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = floorTex->GetDesc().MipLevels;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	pd3dDevice->CreateShaderResourceView(floorTex.Get(), &srvDesc, hDescriptor);
+		pd3dDevice->CreateShaderResourceView(pResource, &srvDesc, hDescriptor);
+
+		m_mapTextureCPUSrvHandle.insert(make_pair(pMaterial->Name, hDescriptor));
+		m_mapTextureGPUSrvHandle.insert(make_pair(pMaterial->Name, hGPUDescriptor));
+
+		hDescriptor.Offset(g_CbvSrvUavDescriptorSize);
+		hGPUDescriptor.Offset(g_CbvSrvUavDescriptorSize);
+
+		iter++;
+	}
 }
 
 void CObject_TextureShader::CreateRootSignature(ID3D12Device * pd3dDevice)
@@ -262,7 +272,8 @@ void CObject_TextureShader::UpdateShaderVariables(const CTimer & timer, CCamera 
 			currObjectCB->CopyData(i, pObject->GetObjectConstants());
 			currSkinnedCB->CopyData(i, pObject->GetSkinnedConstants());
 			
-			CMaterial* material = pObject->GetMaterial();
+			
+			CMaterial* material = pObject->GetMaterial(((CPlayer*)pObject)->matIndex);
 			if (material == nullptr)
 				result = false;
 
@@ -369,7 +380,7 @@ void CObject_TextureShader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12D
 		pvObjects->push_back(pObject);		// 전체 오브젝트 관리 벡터에 넣는다.
 		Push_Object(pObject);
 
-		setMat(pObject, 0);
+		((CPlayer*)pObject)->matIndex = i;
 		
 		pTransform = GET_COMPONENT(CTransform*, pObject, L"Component_Transform");
 		pTransform->MovePos(XMFLOAT3(3000, 0.f, 3000));
@@ -413,18 +424,23 @@ void CObject_TextureShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, 
 		if (pObject == nullptr)
 			continue;
 
-		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(m_CbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		Material* pMaterial = pObject->getMat();
-		tex.Offset(pMaterial->DiffuseSrvHeapIndex, g_CbvSrvUavDescriptorSize);
+		int matindex = ((CPlayer*)pObject)->matIndex;
+		CMaterial* pMaterial = pObject->GetMaterial(matindex);
+		if (pMaterial == nullptr)
+			continue;
+		GPUSRVHANDLEMAP gpuHandle = m_mapTextureGPUSrvHandle.find(pMaterial->Name);
+		if (gpuHandle == m_mapTextureGPUSrvHandle.end())
+			continue;
+
 
 		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + index*objCBByteSize;
-		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + pMaterial->MatCBIndex*matCBByteSize;
+		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + index * matCBByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS skinnedCBAddress = skinnedCB->GetGPUVirtualAddress() + index * skinnedCBByteSize;
 		
 		pd3dCommandList->SetGraphicsRootConstantBufferView(1, objCBAddress);
 		pd3dCommandList->SetGraphicsRootConstantBufferView(2, matCBAddress);
 		pd3dCommandList->SetGraphicsRootConstantBufferView(3, skinnedCBAddress);
-		pd3dCommandList->SetGraphicsRootDescriptorTable(4, tex);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(4, gpuHandle->second);
 
 		pObject->Render(pd3dCommandList);
 	}

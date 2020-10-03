@@ -29,7 +29,7 @@ HRESULT CModelObject::Initialize(const wstring& modeltag, const wstring& texture
 	if (FAILED(hr = Insert_Component_ToMap(texturetag)))
 		return hr;
 	m_pModel.push_back((LoadModel*)Get_Component(modeltag));
-	pMaterial = (CMaterial*)Get_Component(texturetag);
+	pMaterial.push_back((CMaterial*)Get_Component(texturetag));
 
 	// m_ani = nullptr;
 	

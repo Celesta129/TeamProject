@@ -6,6 +6,7 @@
 #include "UI_ReadyStart.h"
 #include "UI_Timer.h"
 #include "UI_WinLose.h"
+#include "UI_TimerFont.h"
 
 CUI_Shader::CUI_Shader()
 {
@@ -497,8 +498,17 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 {
 	CUI_Object* pUIObject = nullptr;
 
+	// Flag Timer
 	pUIObject = new CUI_Timer;
 	pUIObject->Initialize();
+	pUIObject->SetPos(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.9f));
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_Timer);
+
+	// Limit Timer
+	pUIObject = new CUI_Timer;
+	pUIObject->Initialize();
+	pUIObject->SetPos(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.8f, FRAME_BUFFER_HEIGHT * 0.9f));
 	vObjects.push_back(pUIObject);
 	Push_Object(pUIObject, PSO_Timer);
 
@@ -536,9 +546,21 @@ void CUI_Shader::BuildObjects(vector<CGameObject*>& vObjects, ID3D12Device * pDe
 			Push_Object(pUIObject, PSO_HPBar);
 		}
 	}
-	
 
-	
+	pUIObject = new CUI_TimerFont;
+	pUIObject->Initialize();
+	pUIObject->SetMaterialIndex(0);
+	pUIObject->SetPos(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.9f));
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_Edge);
+
+	pUIObject = new CUI_TimerFont;
+	pUIObject->Initialize();
+	pUIObject->SetMaterialIndex(1);
+	pUIObject->SetPos(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.6f, FRAME_BUFFER_HEIGHT * 0.9f));
+	vObjects.push_back(pUIObject);
+	Push_Object(pUIObject, PSO_Edge);
+
 }
 
 void CUI_Shader::OnPrepareRender(ID3D12GraphicsCommandList * pd3dCommandList)

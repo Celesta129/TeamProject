@@ -9,5 +9,8 @@ public:
 public:
 
 	virtual HRESULT Initialize(void);
+	virtual int Update(float fTimerElapsed);
+private:
+	float m_fTimer = 5.f;
 };
 

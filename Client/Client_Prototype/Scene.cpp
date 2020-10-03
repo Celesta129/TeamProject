@@ -484,8 +484,23 @@ void CScene::BuildComponents(void)
 	pComponent = new LoadModel("resources/fbx/character_baby_pickup.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_pick_up", pComponent);
 
-	pComponent = new CMaterial(L"resources/character_test.dds", L"Texture_character", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
-	m_pComponent_Manager->Add_Component(L"Texture_character", pComponent);
+	pComponent = new CMaterial(L"resources/character_1.dds", L"Texture_character1", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character1", pComponent);
+	pComponent = new CMaterial(L"resources/character_2.dds", L"Texture_character2", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character2", pComponent);		
+	pComponent = new CMaterial(L"resources/character_3.dds", L"Texture_character3", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character3", pComponent);		
+	pComponent = new CMaterial(L"resources/character_4.dds", L"Texture_character4", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character4", pComponent);		
+	pComponent = new CMaterial(L"resources/character_5.dds", L"Texture_character5", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character5", pComponent);		
+	pComponent = new CMaterial(L"resources/character_6.dds", L"Texture_character6", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character6", pComponent);		
+	pComponent = new CMaterial(L"resources/character_7.dds", L"Texture_character7", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character7", pComponent);		
+	pComponent = new CMaterial(L"resources/character_8.dds", L"Texture_character8", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_character8", pComponent);
+
 	
 	pComponent = new LoadModel("resources/fbx/bench.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_bench",pComponent);
@@ -578,6 +593,11 @@ void CScene::BuildComponents(void)
 
 	pComponent = new CMaterial(L"resources/ui/you_win.dds", L"Texture_Win", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Texture_Win", pComponent);
+
+	pComponent = new CMaterial(L"resources/ui/flag_TIme.dds", L"Texture_FlagTImeFont", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_FlagTImeFont", pComponent);
+	pComponent = new CMaterial(L"resources/ui/limit_time.dds", L"Texture_LimitTImeFont", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
+	m_pComponent_Manager->Add_Component(L"Texture_LimitTImeFont", pComponent);
 
 	pComponent = new LoadModel("resources/fbx/hammer.FBX", m_d3dDevice.Get(), m_GraphicsCommandList.Get());
 	m_pComponent_Manager->Add_Component(L"Component_Model_Hammer", pComponent);

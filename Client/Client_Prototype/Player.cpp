@@ -25,7 +25,7 @@ CPlayer::~CPlayer()
 HRESULT CPlayer::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	HRESULT hr = E_FAIL;
-	hr = CModelObject::Initialize(L"Component_Model_idle", L"Texture_character", pd3dDevice, pd3dCommandList);
+	hr = CModelObject::Initialize(L"Component_Model_idle", L"Texture_character1", pd3dDevice, pd3dCommandList);
 	if (FAILED(hr))
 	{
 		_MSG_BOX("Player init Failed");
@@ -46,6 +46,13 @@ HRESULT CPlayer::Initialize(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 	AddModel(L"Component_Model_win");
 	AddModel(L"Component_Model_lose");
 
+	AddMaterial(L"Texture_character2");
+	AddMaterial(L"Texture_character3");
+	AddMaterial(L"Texture_character4");
+	AddMaterial(L"Texture_character5");
+	AddMaterial(L"Texture_character6");
+	AddMaterial(L"Texture_character7");
+	AddMaterial(L"Texture_character8");
 	set_hand();
 	return S_OK;
 }

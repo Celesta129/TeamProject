@@ -49,7 +49,7 @@ void Shader_Test::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * 
 
 		if (pObject == nullptr)
 			continue;
-
+		
 		CMaterial* pMaterial = pObject->GetMaterial();
 		if (pMaterial == nullptr)
 			continue;

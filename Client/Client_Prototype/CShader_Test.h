@@ -38,10 +38,7 @@ protected:
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList);
 
 private:
-	map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE> m_mapTextureCPUSrvHandle;
-	map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE> m_mapTextureGPUSrvHandle;
-	typedef map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE>::iterator CPUSRVHANDLEMAP;
-	typedef map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE>::iterator GPUSRVHANDLEMAP;
+	
 	enum PSO_INDEX {
 		PSO_OBJECT,
 		PSO_END

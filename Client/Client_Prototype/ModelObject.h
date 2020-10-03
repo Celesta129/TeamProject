@@ -18,9 +18,15 @@ public:
 public:
 	SkinnedConstants GetSkinnedConstants(void);
 
-	CMaterial* GetMaterial(void) {
-		return pMaterial;
+	CMaterial* GetMaterial(int index = 99999) {
+		if (index == 99999)
+			return pMaterial[m_AnimIndex];
+		return pMaterial[index];
 	};
+	void AddMaterial(const wstring& texturetag) {
+		Insert_Component_ToMap(texturetag);
+		pMaterial.push_back((CMaterial*)Get_Component(texturetag));
+	}
 public:
 	void ChangeAnim(const UINT& index);
 
@@ -59,6 +65,6 @@ protected:
 	vector<XMFLOAT4X4> m_Bones;
 	Material* m_pMaterial = nullptr;
 
-	CMaterial* pMaterial = nullptr;
+	vector<CMaterial*> pMaterial;
 };
 

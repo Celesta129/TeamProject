@@ -78,6 +78,11 @@ protected:
 	ComPtr<ID3D12RootSignature>* m_RootSignature = nullptr;
 	ComPtr<ID3D12DescriptorHeap> m_CbvSrvDescriptorHeap = nullptr;
 
+	map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE> m_mapTextureCPUSrvHandle;
+	map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE> m_mapTextureGPUSrvHandle;
+	typedef map<wstring, CD3DX12_CPU_DESCRIPTOR_HANDLE>::iterator CPUSRVHANDLEMAP;
+	typedef map<wstring, CD3DX12_GPU_DESCRIPTOR_HANDLE>::iterator GPUSRVHANDLEMAP;
+
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;		// CBV와 SRV는 같은 DescriptorHeap을 쓰지만 SRV가 있는 Descriptor 핸들로 점프하기위해 저장한다.
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 

@@ -90,7 +90,7 @@ void CWeapon::set_Type(UINT weapontype)
 	m_pTransform->Set_Scale(scale);
 
 	m_pModel[m_AnimIndex] = GET_COMPONENT(LoadModel*, this, modeltag);
-	pMaterial = GET_COMPONENT(CMaterial*, this, texturetag);
+	pMaterial[0] = GET_COMPONENT(CMaterial*, this, texturetag);
 	DirtyFrames();
 }
 

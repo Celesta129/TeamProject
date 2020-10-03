@@ -50,7 +50,7 @@ public:
 
 	
 	XMFLOAT4X4 get_Hand(void);
-
+	int matIndex = 0;
 	bool m_connected;
 private:
 	

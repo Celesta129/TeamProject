@@ -31,7 +31,7 @@ HBITMAP Lobby_Player, Lobby_Crown, Lobby_Start, Lobby_Waiting, Login_Button;
 HBITMAP Name_Tag[8];
 
 //함수선언
-LRESULT CALLBACK	WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+//LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
@@ -700,7 +700,7 @@ void CGameFramework_Client::processPacket(char* buf)
 		sc_packet_timer* p_timer = reinterpret_cast<sc_packet_timer*>(buf);
 		int timer = p_timer->timer;
 
-		CUI_Timer* pUI = (CUI_Timer*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 0);
+		CUI_Timer* pUI = (CUI_Timer*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 1);
 		pUI->Set_Time(timer);
 	}
 		break;
@@ -709,6 +709,9 @@ void CGameFramework_Client::processPacket(char* buf)
 		sc_packet_flag_timer* p_flag_timer = reinterpret_cast<sc_packet_flag_timer*>(buf);
 		int other_id = p_flag_timer->id;
 		int timer = p_flag_timer->timer;
+
+		CUI_Timer* pUI = (CUI_Timer*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 0);
+		pUI->Set_Time(timer);
 
 		cout << other_id+1 << "플레이어 깃발유지" << timer << "남음\n";
 	}
@@ -722,6 +725,12 @@ void CGameFramework_Client::processPacket(char* buf)
 		}
 		pFlag->set_Player(nullptr);
 		printf("게임 승리! \n");
+		{
+
+			CUI_Object* pUI = (CUI_Object*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 3);
+			pUI->SetMaterialIndex(0);
+			pUI->SetInvisible(false);
+		}
 		break;
 	case SC_LOSE:
 		//게임 패배
@@ -732,6 +741,13 @@ void CGameFramework_Client::processPacket(char* buf)
 		}
 		pFlag->set_Player(nullptr);
 		printf("게임 패배! \n");
+
+		{
+
+			CUI_Object* pUI = (CUI_Object*)CObject_Manager::GetInstance()->Get_Object(CObject_Manager::LAYER_UI, 3);
+			pUI->SetMaterialIndex(1);
+			pUI->SetInvisible(false);
+		}
 		break;
 	default:
 		printf("Unknown PACKET type [%d]\n", buf[1]);

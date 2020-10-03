@@ -1143,6 +1143,10 @@ void timer_process()
 				}
 			}
 			
+			while (!timer_queue.empty())
+			{
+				timer_queue.pop();
+			}
 			add_timer(0, OP_TIME, chrono::high_resolution_clock::now() + 1s);
 		}
 			break;

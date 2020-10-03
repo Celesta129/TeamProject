@@ -24,7 +24,7 @@ HRESULT CUI_Timer::Initialize(void)
 	float Width = 48.f * 4.f;
 	float Height = 48.f;
 
-	m_xmf2Pos = XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
+	m_xmf2Pos = XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.95f);
 	m_xmf2Size = XMFLOAT2(Width, Height);
 
 	return S_OK;
