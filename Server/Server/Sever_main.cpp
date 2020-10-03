@@ -854,7 +854,7 @@ int player_hit(int user_id) {
 		for (int j = 0; j < MAX_USER; ++j) {
 			if (clients[j].m_connected == true) {
 				if (clients[j].playerinfo->m_guard == true) {
-					if (clients[j].playerinfo->m_weapon_type != WEAPON_SWORD) {
+					if (clients[user_id].playerinfo->m_weapon_type != WEAPON_SWORD) {
 						gmtl::Vec3f trg_Look = clients[user_id].playerinfo->m_look;
 						
 						if ((trg_Look.mData[0] + Look.mData[0] == 0) && (trg_Look.mData[1] + Look.mData[1] == 0) && (trg_Look.mData[2] + Look.mData[2] == 0)) {
